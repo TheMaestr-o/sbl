@@ -17,6 +17,9 @@
 }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
+/* selecting text feels like running a highlighter over the booklet */
+::selection{background:#f7de84;color:#1c1c1c}
+::-moz-selection{background:#f7de84;color:#1c1c1c}
 
 /* control bar (screen only) — refined, document-like; hidden when printing */
 .bar{position:sticky;top:0;z-index:9;background:rgba(255,255,255,.82);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);color:#333;border-bottom:1px solid #ededed}
@@ -49,7 +52,8 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .sw{width:26px;height:26px;border-radius:7px;cursor:pointer;border:2px solid #fff;box-shadow:0 0 0 1px #dcdcdc;transition:transform .1s}
 .sw:hover{transform:scale(1.09)}
 .sw.active{box-shadow:0 0 0 2px #111}
-.sw.custom{display:flex;align-items:center;justify-content:center;font:700 15px var(--sans);color:#999;background:#fff}
+/* the colour wheel says "any colour you like" better than a plus sign */
+.sw.custom{background:conic-gradient(from .5turn,#e04b4b,#e0a33c,#d6cf3f,#4fb257,#3f9fd6,#5b57c9,#b950b0,#e04b4b)}
 .tintpop input[type=color]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
 
 /* the page (booklet) */
@@ -99,10 +103,12 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
 .vtext.lines{text-align:left;hyphens:none}
 /* the number starts the line — flush with the reference above it and with the
    question text — and the verse hangs off it */
-.vtext.lines .v{display:block;padding-left:24px;text-indent:-24px;break-inside:avoid}
+.vtext.lines .v{display:block;padding-left:17px;text-indent:-17px;break-inside:avoid}
 .vtext.lines .v + .v{margin-top:5px}
-.vtext.lines .vn{display:inline-block;width:20px;margin-right:4px;text-indent:0;
-  font-weight:700;font-size:11px;color:var(--gray-dk)}   /* flush left, so a one-digit verse sits in the same column as a two-digit one */
+/* min-width, not width: the verse follows the number as closely as it does in
+   running text, and a three-digit number simply takes the room it needs */
+.vtext.lines .vn{display:inline-block;min-width:13px;margin-right:4px;text-indent:0;
+  font-weight:700;font-size:11px;color:var(--gray-dk)}
 .vmiss{color:#bbb}
 .q{font-weight:700;font-size:18px;line-height:1.5;text-align:justify;hyphens:auto;margin:0 0 14px;padding-left:26px;text-indent:-26px}
 .note{font-family:var(--serif);font-size:18px;line-height:1.62;text-align:justify;hyphens:auto;margin:0 0 16px}
@@ -112,8 +118,18 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
    under the first word of the question rather than a few pixels off */
 .q .qm,.review .qm{display:inline-block;width:26px;text-indent:0}
 
-footer{max-width:820px;margin:0 auto;text-align:center;color:#bcbcbc;font-size:12px;padding:6px 22px 46px}
-footer a{color:#8a8a8a;text-decoration:none}
+/* colophon — takes its accent from whatever colour the bands are wearing */
+footer{max-width:820px;margin:0 auto;text-align:center;padding:20px 22px 58px}
+.fmark{display:flex;align-items:center;justify-content:center;gap:18px;margin-bottom:15px}
+.fmark::before,.fmark::after{content:"";flex:1;max-width:132px;height:1px;
+  background:linear-gradient(90deg,transparent,var(--gray-dk))}
+.fmark::after{background:linear-gradient(90deg,var(--gray-dk),transparent)}
+.fmark b{font-weight:700;font-size:13px;letter-spacing:6.5px;padding-left:6.5px;color:var(--gray-dk)}
+.fkind{font-size:10px;letter-spacing:2.6px;text-transform:uppercase;color:#b9b9b9;margin-bottom:15px}
+.fnote{font-size:12px;line-height:1.75;color:#9c9c9c}
+.fset{font-size:11px;letter-spacing:.4px;color:#c2c2c2;margin-top:9px}
+footer a{color:#7a7a7a;text-decoration:none;border-bottom:1px solid #e2e2e2;padding-bottom:1px;transition:color .15s,border-color .15s}
+footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
 
 /* screen-only: the phone. `screen` keeps the PDF (A4 ≈ 794px) out of these rules. */
 @media screen and (max-width:720px){
@@ -151,8 +167,6 @@ footer a{color:#8a8a8a;text-decoration:none}
 
   .vgroup{margin:8px 0 14px;padding-left:18px}   /* + 2px rule = the 20px question column */
   .vtext{font-size:15.5px}
-  .vtext.lines .v{padding-left:18px;text-indent:-18px}
-  .vtext.lines .vn{width:15px;margin-right:3px}
   .q{font-size:17px;padding-left:20px;text-indent:-20px}
   .note{font-size:16.5px}
   .review{font-size:17px;padding-left:20px;text-indent:-20px}
@@ -202,7 +216,13 @@ footer a{color:#8a8a8a;text-decoration:none}
 </div>
 
 <div class="page" id="page"><div class="msg">&hellip;</div></div>
-<footer>Content &copy; <a href="https://sdarm.org" target="_blank" rel="noopener">Seventh Day Adventist Reform Movement</a> &middot; original booklet layout &middot; by <a href="https://github.com/TheMaestr-o" target="_blank" rel="noopener">Sergio</a></footer>
+<footer>
+  <div class="fmark"><b>MANNA</b></div>
+  <div class="fkind">Sabbath Bible Lesson &middot; original booklet layout</div>
+  <div class="fnote">Content &copy; <a href="https://sdarm.org" target="_blank" rel="noopener">Seventh Day Adventist Reform Movement</a><br>
+    Bible text from SDARM editions &middot; Luther 1912 &middot; King James &middot; Синодальный</div>
+  <div class="fset">Set in PT Serif &amp; PT Sans &middot; built by <a href="https://github.com/TheMaestr-o" target="_blank" rel="noopener">Sergio</a></div>
+</footer>
 
 <script>
 if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catch(function(){}); }
@@ -411,7 +431,7 @@ const tpop=document.getElementById("tintpop");
 function buildPop(){
   let html="";
   THEMES.forEach(function(t,i){ html+='<span class="sw" data-i="'+i+'" title="'+["Grey","Cover","Wine","Forest","Gold"][i]+'" style="background:'+t.dk+'"></span>'; });
-  html+='<span class="sw custom" id="swcustom" title="Custom colour">+</span><input type="color" id="tintcolor" value="#3a6ea5">';
+  html+='<span class="sw custom" id="swcustom" title="Any colour you like"></span><input type="color" id="tintcolor" value="#3a6ea5">';
   tpop.innerHTML=html;
   tpop.querySelectorAll(".sw[data-i]").forEach(function(s){ s.onclick=function(){ const i=+s.dataset.i; setTint(THEMES[i]); localStorage.setItem("manna.print.tint",JSON.stringify({i:i})); tpop.hidden=true; }; });
   const ci=document.getElementById("tintcolor");
