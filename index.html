@@ -78,27 +78,31 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
 .quote i{font-style:italic}
 
 /* band shape from official vector: rectangle + dark tag (vertical left seam, right edge slanted 8.2deg) */
-.sec{position:relative;height:52px;margin:40px 0 22px}
+.sec{position:relative;height:40px;margin:40px 0 22px}   /* band hugs the text as in the printed booklet */
 .sec::before{content:"";position:absolute;inset:0;background:var(--gray);clip-path:polygon(0 0,100% 0,calc(100% - 7.5px) 100%,0 100%)}
 .sec .t{position:relative;height:100%;display:flex;align-items:center;padding-left:20px;font-weight:700;font-size:22px;text-transform:uppercase;letter-spacing:.2px}
 .sec .t .n{margin-right:.32em}   /* one space between "1." and the title */
 .sec .day{position:absolute;top:0;bottom:0;right:0;z-index:1;background:var(--gray-dk);color:#fff;display:flex;align-items:center;
   padding:0 26px;font-weight:700;font-size:18px;white-space:nowrap;clip-path:polygon(0 0,100% 0,calc(100% - 7.5px) 100%,0 100%)}
 
-.vgroup{margin:8px 0 16px;padding:3px 0 4px 20px;border-left:2px solid var(--gray-dk)}
+/* 24px + the 2px rule = 26px, the same column the question text starts in, so
+   reference, verse and question all hang on one vertical line */
+.vgroup{margin:8px 0 16px;padding:3px 0 4px 24px;border-left:2px solid var(--gray-dk)}
 .vitem{break-inside:avoid}
 .vitem + .vitem{margin-top:12px}
 .vref{font-weight:700;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray-dk);margin-bottom:4px}
 .vtext{font-family:var(--serif);font-size:16.5px;line-height:1.58;text-align:justify;hyphens:auto;color:#2b2b2b}
 /* the verse number keeps one look everywhere: same serif, same size, same
    colour — only a gentle raise, not a full superscript hop */
-.vtext .vnum{font-weight:700;font-size:11px;vertical-align:.42em;line-height:0;margin:0 4px 0 1px;color:var(--gray-dk)}
+.vtext .vnum{font-weight:700;font-size:11px;vertical-align:.42em;line-height:0;margin:0 4px 0 0;color:var(--gray-dk)}
 /* one verse per line — number hangs in the margin, wrapped lines align under the text */
 .vtext.lines{text-align:left;hyphens:none}
-.vtext.lines .v{display:block;padding-left:28px;text-indent:-28px;break-inside:avoid}
+/* the number starts the line — flush with the reference above it and with the
+   question text — and the verse hangs off it */
+.vtext.lines .v{display:block;padding-left:24px;text-indent:-24px;break-inside:avoid}
 .vtext.lines .v + .v{margin-top:5px}
-.vtext.lines .vn{display:inline-block;width:22px;margin-right:6px;text-indent:0;text-align:right;
-  font-weight:700;font-size:11px;color:var(--gray-dk)}
+.vtext.lines .vn{display:inline-block;width:20px;margin-right:4px;text-indent:0;
+  font-weight:700;font-size:11px;color:var(--gray-dk)}   /* flush left, so a one-digit verse sits in the same column as a two-digit one */
 .vmiss{color:#bbb}
 .q{font-weight:700;font-size:18px;line-height:1.5;text-align:justify;hyphens:auto;margin:0 0 14px;padding-left:26px;text-indent:-26px}
 .note{font-family:var(--serif);font-size:18px;line-height:1.62;text-align:justify;hyphens:auto;margin:0 0 16px}
@@ -140,13 +144,15 @@ footer a{color:#8a8a8a;text-decoration:none}
   .quote{font-size:17px;margin-bottom:26px}
 
   /* section band grows to fit; the title never runs under the day tag */
-  .sec{height:auto;min-height:42px;margin:30px 0 18px}
-  .sec .t{min-height:42px;font-size:15px;letter-spacing:0;line-height:1.25;padding:9px 104px 9px 12px}
+  .sec{height:auto;min-height:36px;margin:30px 0 18px}
+  .sec .t{min-height:36px;font-size:15px;letter-spacing:0;line-height:1.25;padding:8px 104px 8px 12px}
   .q .qm,.review .qm{width:20px}
   .sec .day{font-size:11.5px;padding:0 11px}
 
-  .vgroup{margin:8px 0 14px;padding-left:14px}
+  .vgroup{margin:8px 0 14px;padding-left:18px}   /* + 2px rule = the 20px question column */
   .vtext{font-size:15.5px}
+  .vtext.lines .v{padding-left:18px;text-indent:-18px}
+  .vtext.lines .vn{width:15px;margin-right:3px}
   .q{font-size:17px;padding-left:20px;text-indent:-20px}
   .note{font-size:16.5px}
   .review{font-size:17px;padding-left:20px;text-indent:-20px}
