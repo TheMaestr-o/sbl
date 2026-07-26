@@ -55,6 +55,14 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 /* the colour wheel says "any colour you like" better than a plus sign */
 .sw.custom{background:conic-gradient(from .5turn,#e04b4b,#e0a33c,#d6cf3f,#4fb257,#3f9fd6,#5b57c9,#b950b0,#e04b4b)}
 .tintpop input[type=color]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+/* what to save: this week, or the whole quarter in one file */
+.pdfpop{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#fff;
+  border:1px solid #e9e9e9;border-radius:12px;box-shadow:0 12px 36px rgba(0,0,0,.14);padding:6px;z-index:30;min-width:216px}
+.pdfpop[hidden]{display:none}
+.pdfpop .it{padding:9px 12px;border-radius:8px;cursor:pointer;text-align:left}
+.pdfpop .it:hover{background:#f4f4f4}
+.pdfpop .it b{display:block;font-size:13px;font-weight:700;color:#2b2b2b}
+.pdfpop .it small{display:block;font-size:11px;color:#9a9a9a;margin-top:2px}
 
 /* the page (booklet) */
 .page{position:relative;overflow:hidden;max-width:820px;margin:6px auto 44px;background:#fff;padding:56px 64px 72px}
@@ -193,8 +201,15 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   }
   .bar,footer{display:none} body{background:#fff}
   .page{box-shadow:none;margin:0;max-width:none;overflow:hidden;padding:4px 0 6px}
+  .page + .page{break-before:page}         /* each lesson opens its own page */
   .lesson{right:0}
-  .q,.vitem,.note,.sec,.review,.mem{break-inside:avoid} }
+  /* headings never end a page on their own … */
+  .sec,.q,.vref{break-after:avoid}
+  .sec,.q,.review,.mem{break-inside:avoid}
+  /* … but long passages flow on instead of leaving half a page empty */
+  .vgroup,.vitem,.note,.quote{break-inside:auto}
+  .note,.quote,.vtext,.mem{orphans:2;widows:2}
+  .vtext.lines .v{break-inside:avoid} }
 </style>
 </head>
 <body>
@@ -213,9 +228,10 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
     <div class="tintbtn" id="tintbtn" title="Colour the bands"><span class="tdot"></span></div>
   </div>
   <div class="tintpop" id="tintpop" hidden></div>
+  <div class="pdfpop" id="pdfpop" hidden></div>
 </div>
 
-<div class="page" id="page"><div class="msg">&hellip;</div></div>
+<div id="sheets"><div class="page"><div class="msg">&hellip;</div></div></div>
 <footer>
   <div class="fmark"><b>MANNA</b></div>
   <div class="fkind">Sabbath Bible Lesson &middot; original booklet layout</div>
@@ -339,8 +355,8 @@ function questionLine(sub){
   return parts.join(" ");
 }
 
+let vid=0;   /* runs across a whole quarter, so verse ids stay unique */
 function renderLesson(les,tasks){
-  let vid=0;
   let h='<div class="lesson">'+esc(strip(les.header||""))+'</div>'+
         '<div class="top"><div class="date">'+esc(strip(WORDsab()+", "+fmt(les.date,{month:"long",day:"numeric",year:"numeric"})))+'</div></div>';
   h+='<h1 class="title">'+esc(les.title||"")+'</h1>';
@@ -380,16 +396,31 @@ function renderLesson(les,tasks){
 function WORDsab(){return {de:"Sabbat",en:"Sabbath",ru:"Суббота"}[lang];}
 
 let token=0;
+let scope="week";                        /* "week" | "quarter" */
+function sheet(inner){ return '<div class="page">'+inner+'</div>'; }
+
 async function render(){
   const my=++token;
   buildSeg();
-  const page=document.getElementById("page"); page.innerHTML='<div class="msg">&hellip;</div>';
-  const les=await findLesson(current,lang);
-  if(my!==token) return;
-  if(!les){ page.innerHTML='<div class="msg">No lesson for this week.</div>'; document.getElementById("wk").innerHTML=""; return; }
-  document.getElementById("wk").innerHTML='<b>'+esc(strip(les.header||""))+'</b> · '+esc(fmt(les.date,{month:"short",day:"numeric"}));
-  const tasks=[];
-  page.innerHTML=renderLesson(les,tasks);
+  const sheets=document.getElementById("sheets"), wk=document.getElementById("wk");
+  sheets.innerHTML=sheet('<div class="msg">&hellip;</div>');
+  const tasks=[]; vid=0;
+
+  if(scope==="quarter"){
+    const data=await loadQuarter(lang,current.getFullYear(),qOf(current));
+    if(my!==token) return;
+    const lessons=(data&&data.lessons)||[];
+    if(!lessons.length){ sheets.innerHTML=sheet('<div class="msg">No lessons for this quarter.</div>'); wk.innerHTML=""; return; }
+    wk.innerHTML='<b>'+esc(strip(data.title||""))+'</b> · '+esc(strip(data.publicationDateLong||""));
+    sheets.innerHTML=lessons.map(function(les){ return sheet(renderLesson(les,tasks)); }).join("");
+  } else {
+    const les=await findLesson(current,lang);
+    if(my!==token) return;
+    if(!les){ sheets.innerHTML=sheet('<div class="msg">No lesson for this week.</div>'); wk.innerHTML=""; return; }
+    wk.innerHTML='<b>'+esc(strip(les.header||""))+'</b> · '+esc(fmt(les.date,{month:"short",day:"numeric"}));
+    sheets.innerHTML=sheet(renderLesson(les,tasks));
+  }
+
   if(versesOn && tasks.length){
     const bib=await loadBible(BIBLE[lang]);
     if(my!==token) return;
@@ -402,8 +433,13 @@ function buildSeg(){
   el.innerHTML=LANGS.map(x=>'<div class="o'+(x===lang?' active':'')+'" data-l="'+x+'">'+x.toUpperCase()+'</div>').join("");
   el.querySelectorAll(".o").forEach(o=>o.onclick=()=>{ if(o.dataset.l===lang)return; lang=o.dataset.l; localStorage.setItem("manna.print.lang",lang); render(); });
 }
-document.getElementById("prev").onclick=()=>{current=addDays(current,-7);render();};
-document.getElementById("next").onclick=()=>{current=addDays(current,7);render();};
+/* ‹ › step by week, or by quarter when the whole quarter is on screen */
+function step(dir){
+  if(scope==="quarter"){ const d=new Date(current.getTime()); d.setMonth(d.getMonth()+dir*3,15); return d; }
+  return addDays(current,dir*7);
+}
+document.getElementById("prev").onclick=()=>{current=step(-1);render();};
+document.getElementById("next").onclick=()=>{current=step(1);render();};
 document.getElementById("wk").onclick=()=>{current=new Date();render();};
 
 const tog=document.getElementById("tog"), vlines=document.getElementById("vlines");
@@ -420,10 +456,27 @@ function paintVerseBtns(){
 paintVerseBtns();
 tog.onclick=function(){ versesOn=!versesOn; localStorage.setItem("manna.print.verses",versesOn?"1":"0"); paintVerseBtns(); render(); };
 vlines.onclick=function(){ versesLines=!versesLines; localStorage.setItem("manna.print.verselines",versesLines?"1":"0"); paintVerseBtns(); render(); };
-document.getElementById("pdf").onclick=async function(){
-  const b=this,o=b.innerHTML; b.innerHTML="&hellip;";
+/* PDF: pick the week or the whole quarter — the choice also switches what the
+   page shows, so you can check it before saving */
+const pdfpop=document.getElementById("pdfpop");
+const PDFWORD={de:["Diese Woche","Ganzes Quartal"],en:["This week","Whole quarter"],ru:["Эта неделя","Весь квартал"]};
+function buildPdfPop(){
+  const w=PDFWORD[lang]||PDFWORD.en;
+  pdfpop.innerHTML=
+    '<div class="it" data-s="week"><b>'+esc(w[0])+'</b><small>'+(scope==="week"?"shown now":"one lesson")+'</small></div>'+
+    '<div class="it" data-s="quarter"><b>'+esc(w[1])+'</b><small>'+(scope==="quarter"?"shown now":"13 lessons in one file")+'</small></div>';
+  pdfpop.querySelectorAll(".it").forEach(function(it){ it.onclick=function(){ savePdf(it.dataset.s); }; });
+}
+async function savePdf(which){
+  pdfpop.hidden=true;
+  const b=document.getElementById("pdf"),o=b.innerHTML; b.innerHTML="&hellip;";
+  scope=which;
   try{ await render(); }catch(e){}
-  b.innerHTML=o; setTimeout(function(){ window.print(); },80);
+  b.innerHTML=o; setTimeout(function(){ window.print(); },120);
+}
+document.getElementById("pdf").onclick=function(e){
+  e.stopPropagation(); tintpop.hidden=true;
+  if(pdfpop.hidden){ buildPdfPop(); pdfpop.hidden=false; } else pdfpop.hidden=true;
 };
 
 // colour-the-bands popover
@@ -438,8 +491,11 @@ function buildPop(){
   document.getElementById("swcustom").onclick=function(){ ci.click(); };
   ci.oninput=function(){ setTint(customTint(ci.value)); localStorage.setItem("manna.print.tint",JSON.stringify({c:ci.value})); };
 }
-document.getElementById("tintbtn").onclick=function(e){ e.stopPropagation(); if(tpop.hidden){ buildPop(); tpop.hidden=false; } else tpop.hidden=true; };
-document.addEventListener("click",function(e){ if(!tpop.hidden && !tpop.contains(e.target) && e.target.id!=="tintbtn" && !e.target.classList.contains("tdot")) tpop.hidden=true; });
+document.getElementById("tintbtn").onclick=function(e){ e.stopPropagation(); pdfpop.hidden=true; if(tpop.hidden){ buildPop(); tpop.hidden=false; } else tpop.hidden=true; };
+document.addEventListener("click",function(e){
+  if(!tpop.hidden && !tpop.contains(e.target) && e.target.id!=="tintbtn" && !e.target.classList.contains("tdot")) tpop.hidden=true;
+  if(!pdfpop.hidden && !pdfpop.contains(e.target) && e.target.id!=="pdf") pdfpop.hidden=true;
+});
 
 render();
 </script>
