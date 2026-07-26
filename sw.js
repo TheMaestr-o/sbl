@@ -1,4 +1,4 @@
-/* MANNA print — cache once, then instant (and offline). */
+/* SBL Edition — cache once, then instant (and offline). */
 const SHELL = "mannaprint-shell-v1";
 const DATA  = "mannaprint-data-v1";
 const SHELL_FILES = ["index.html"];

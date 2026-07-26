@@ -1,8 +1,10 @@
 <div align="center">
 
-# M A N N A
+# S B L&nbsp;&nbsp;&nbsp;E D I T I O N
 
 **The weekly Sabbath Bible Lesson in its original booklet layout — ready to save as PDF.**
+
+<sub>An independent edition of the SDARM Sabbath Bible Lessons</sub>
 
 <sub>D e s i g n e d&nbsp;&nbsp;b y&nbsp;&nbsp;S e r g i o</sub>
 
@@ -17,7 +19,7 @@
 
 <br>
 
-<img src="screenshots/cover.png" alt="MANNA — the weekly Sabbath Bible Lesson of the Seventh Day Adventist Reform Movement in the original printed booklet layout, in German, English and Russian, ready to save as PDF">
+<img src="screenshots/cover.png" alt="SBL Edition — the weekly Sabbath Bible Lesson of the Seventh Day Adventist Reform Movement in the original printed booklet layout, in German, English and Russian, ready to save as PDF">
 
 <br><br>
 
@@ -120,13 +122,13 @@ No build step, no framework, no dependencies — one HTML file and a service wor
 
 <br>
 
-## The other MANNA
+## Three ways to the same lesson
 
 | | |
 |---|---|
+| **SBL Edition** — this one | **One** language, exact booklet layout, made for the **PDF** |
 | [**manna**](https://github.com/TheMaestr-o/manna) | The same lesson in **two languages side by side**, for reading and comparing translations |
 | [**MANNA-Photoshop-Lessons**](https://github.com/TheMaestr-o/MANNA-Photoshop-Lessons) | The daily lesson as a panel **inside Adobe Photoshop** |
-| **this one** | **One** language, exact booklet layout, made for the **PDF** |
 
 <br>
 
