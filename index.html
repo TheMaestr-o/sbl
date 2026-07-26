@@ -267,6 +267,18 @@ function verseHtml(books,sOsis,perLine){let out="";
   }
   return perLine?out:out.trim();
 }
+/* DE/RU carry the EGW source inside the quote itself ("…wecken.“ – Der Weg zu
+   Christus, S. 4."). Find the book title and italicise it, so all three
+   languages read the same as English — where the source arrives in `sop`.
+   Runs on already-escaped text; the page reference is what proves it's a
+   source and not just a dash in the sentence. */
+function inlineSource(t){
+  const m=t.match(/^([\s\S]*[»”“"'’″]\s*)([,.]?\s*[–—-]\s*)([\s\S]+)$/);
+  if(!m) return t;
+  const p=m[3].search(/\s*[,.]?\s*[–—-]?\s*(?:S\.|p\.|pp\.|С\.|с\.|стр\.)\s*\d/);
+  if(p<=0) return t;
+  return m[1]+m[2]+'<i>'+m[3].slice(0,p).trim()+'</i>'+m[3].slice(p);
+}
 /* Source of an EGW quote. English data keeps it apart in `sop`; DE/RU already
    have it inside the text, so this simply returns nothing there. */
 function sopHtml(sop,text){
@@ -295,7 +307,7 @@ function renderLesson(les,tasks){
   if(rd&&rd.reading&&rd.reading.length)
     h+='<div class="read"><b>'+esc(strip(rd.label||""))+'</b> <i>'+rd.reading.map(x=>esc(strip(x.label||""))).join("; ")+'</i></div>';
 
-  if(les.keyNote&&les.keyNote.text) h+='<div class="quote">'+esc(strip(les.keyNote.text))+sopHtml(les.keyNote.sop,les.keyNote.text)+'</div>';
+  if(les.keyNote&&les.keyNote.text) h+='<div class="quote">'+inlineSource(esc(strip(les.keyNote.text)))+sopHtml(les.keyNote.sop,les.keyNote.text)+'</div>';
 
   for(const day of les.dailyLessons||[]){
     const tag=fmt(day.date,{weekday:"short",month:"short",day:"numeric"});
@@ -314,7 +326,7 @@ function renderLesson(les,tasks){
             h+='<div class="vitem">'+(ref?'<div class="vref">'+esc(ref)+'</div>':'')+'<div class="vtext'+(versesLines?' lines':'')+'" id="'+id+'"></div></div>'; }
           h+='</div>'; }
       }
-      for(const n of sub.note||[]) if(n&&n.text&&!isJunk(n.text)) h+='<div class="note">'+esc(strip(n.text))+sopHtml(n.sop,n.text)+'</div>';
+      for(const n of sub.note||[]) if(n&&n.text&&!isJunk(n.text)) h+='<div class="note">'+inlineSource(esc(strip(n.text)))+sopHtml(n.sop,n.text)+'</div>';
     }
     for(const rq of day.reviewQuestions||[]) if(rq) h+='<div class="review">'+esc(strip(rq))+'</div>';
   }
