@@ -28,18 +28,17 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 /* the buttons line up with the text column, not with the edge of the sheet:
    same width and the same side margins as the page below */
 .bar-in{max-width:820px;margin:0 auto;padding:11px 64px;display:flex;align-items:center;justify-content:space-between;gap:12px}
-.wk{display:flex;align-items:center;gap:5px}
 .ar{width:34px;height:34px;display:flex;align-items:center;justify-content:center;border-radius:10px;border:1px solid #e6e6e6;background:#fff;color:#555;cursor:pointer;font-size:18px;line-height:1;user-select:none;transition:background .15s,color .15s,border-color .15s,transform .1s}
 .ar:hover{background:#2b2b2b;color:#fff;border-color:#2b2b2b}
 .ar:active{transform:translateY(1px)}
 /* the week label opens the month — it has to look like something you press */
-.wk .lbl{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.3px;color:#8c8c8c;min-width:104px;
+.lbl{cursor:pointer;font-size:12px;font-weight:600;letter-spacing:.3px;color:#8c8c8c;min-width:104px;
   height:34px;display:flex;align-items:center;justify-content:center;gap:6px;padding:0 10px;white-space:nowrap;
   border:1px solid #e6e6e6;border-radius:10px;background:#fff;transition:background .15s,border-color .15s}
-.wk .lbl:hover{border-color:#d3d3d3;background:#fafafa}
-.wk .lbl::after{content:"";flex:none;width:4.5px;height:4.5px;margin-top:-2px;
+.lbl:hover{border-color:#d3d3d3;background:#fafafa}
+.lbl::after{content:"";flex:none;width:4.5px;height:4.5px;margin-top:-2px;
   border-right:1.4px solid #bdbdbd;border-bottom:1.4px solid #bdbdbd;transform:rotate(45deg)}
-.wk .lbl:hover::after{border-color:#777}
+.lbl:hover::after{border-color:#777}
 /* text size — two square buttons cut like the rest of the toolbar */
 .zoom{flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
   border:1px solid #e6e6e6;border-radius:10px;background:#fff;color:#777;cursor:pointer;user-select:none;
@@ -47,8 +46,8 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .zoom:hover{border-color:#d3d3d3;color:#333}
 .zoom.off{opacity:.32;cursor:default;border-color:#ededed}
 .zoom.off:hover{color:#777;border-color:#ededed}
-.wk .lbl b{color:#222;font-weight:700}
-.wk .lbl:hover b{text-decoration:underline;text-underline-offset:3px}
+.lbl b{color:#222;font-weight:700}
+.lbl:hover b{text-decoration:underline;text-underline-offset:3px}
 .seg{display:inline-flex;background:#f0f0f0;border:1px solid #e7e7e7;border-radius:10px;padding:3px}
 .seg .o{padding:6px 14px;font-size:12px;font-weight:700;letter-spacing:.8px;color:#8a8a8a;cursor:pointer;border-radius:7px;transition:background .15s,color .15s}
 .seg .o:hover{color:#333}
@@ -100,6 +99,34 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .tog:hover{border-color:#d3d3d3;color:#333}
 .tog.active{background:#2b2b2b;color:#fff;border-color:#2b2b2b}
 .tog svg{display:block}
+
+/* a month at a glance, with the lesson standing beside its week */
+.calpop{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#fff;
+  border:1px solid #e9e9e9;border-radius:14px;box-shadow:0 16px 44px rgba(0,0,0,.16);padding:12px;z-index:31;
+  width:min(430px,calc(100vw - 24px));max-height:min(70vh,560px);overflow:auto}
+.calpop[hidden]{display:none}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calhead b{font-size:13.5px;font-weight:700;color:#2b2b2b;letter-spacing:.3px;text-transform:capitalize}
+.calnav{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;
+  border:1px solid #e6e6e6;color:#777;cursor:pointer;font-size:15px;user-select:none}
+.calnav:hover{background:#2b2b2b;color:#fff;border-color:#2b2b2b}
+.calrow{display:flex;align-items:center;gap:8px;padding:2px 0}
+.calrow.head .d{color:#b0b0b0;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;cursor:default}
+.calrow .days{display:flex;gap:2px;flex:none}
+.calrow .d{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:7px;
+  font-size:11.5px;color:#3a3a3a;cursor:pointer}
+.calrow .d.out{color:#c9c9c9}
+.calrow .d.today{font-weight:700;box-shadow:inset 0 0 0 1px var(--gray-dk)}
+.calrow .les{flex:1;min-width:0;font-size:11.5px;line-height:1.25;color:#8a8a8a;cursor:pointer;
+  padding:4px 7px;border-radius:8px;overflow:hidden}
+.calrow .les b{display:block;color:#2b2b2b;font-weight:700;font-size:11px;letter-spacing:.3px}
+.calrow .les span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calrow.pick:hover .d:not(.head),.calrow.pick:hover .les{background:#f4f4f4}
+.calrow.on .les{background:var(--box)}
+.calrow.on .les b{color:var(--gray-dk)}
+.calfoot{margin-top:9px;padding-top:9px;border-top:1px solid #eee;display:flex;justify-content:center}
+.calfoot .it{font-size:12px;font-weight:700;color:#2b2b2b;cursor:pointer;padding:7px 14px;border-radius:8px}
+.calfoot .it:hover{background:#f4f4f4}
 
 /* the page (booklet)
    --z scales the whole sheet at once — type, bands, tags, rules, margins — so
@@ -188,7 +215,7 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
    to give up a little padding to stay on one line inside it */
 @media screen and (min-width:721px) and (max-width:900px){
   .bar-in{gap:10px 6px}
-  .wk .lbl{min-width:98px;padding:0 7px;gap:5px}
+  .lbl{min-width:98px;padding:0 7px;gap:5px}
   .seg .o{padding:6px 9px}
 }
 /* screen-only: the phone. `screen` keeps the PDF (A4 ≈ 794px) out of these rules. */
@@ -198,7 +225,7 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   /* control bar: week row on top, then everything else on one line */
   .bar-in{padding:9px 22px;gap:8px;justify-content:center}
   .wk{flex:0 0 100%;justify-content:space-between;gap:6px}
-  .wk .lbl{flex:1;min-width:0;padding:0;overflow:hidden;text-overflow:ellipsis}
+  .lbl{min-width:0;max-width:calc(100% - 46px);overflow:hidden;text-overflow:ellipsis;padding:0 10px}
   .ar,.tintbtn{flex:none;width:34px;height:34px;font-size:17px}
   .seg .o{padding:6px 11px}
   .tog{padding:7px 12px}
