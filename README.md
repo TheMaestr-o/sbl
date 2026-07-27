@@ -156,9 +156,11 @@ Free to download and use. **© 2026 Sergio (Maestro).**
 <div align="center">
 <sub>
 
-Sabbath School · Sabbath Bible Lessons · SDARM · Seventh Day Adventist Reform Movement · Adventist · church · Christian · Bible study · Scripture · devotional · quarterly<br><br>**АСДРД** · Адвентисты Седьмого Дня Реформационного Движения · урок субботней школы · субботняя школа · Библия · церковь · пособие по изучению Библии · квартальник<br><br>STA Reformationsbewegung · Sabbatschule · Sabbatschullektion · Bibelstudium · Gemeinde · Siebenten-Tags-Adventisten Reformationsbewegung
+**EN** — Sabbath School · Sabbath Bible Lessons · SDARM · Seventh Day Adventist Reform Movement · Bible study · church · devotional · quarterly
 
-`#church` `#bible` `#biblestudy` `#sabbath` `#sabbathschool` `#adventist` `#sdarm` `#scripture` `#devotional` `#christian` `#pdf` `#printcss` `#booklet` `#typography` `#githubpages` `#offlinefirst` `#multilingual`
+**RU** — АСДРД · Адвентисты Седьмого Дня Реформационного Движения · урок субботней школы · субботняя школа · Библия · церковь · квартальник
+
+**DE** — STA Reformationsbewegung · Sabbatschule · Sabbatschullektion · Bibelstudium · Gemeinde
 
 </sub>
 </div>
