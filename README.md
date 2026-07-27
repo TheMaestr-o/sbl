@@ -6,7 +6,7 @@
 
 <sub>An independent edition of the SDARM Sabbath Bible Lessons</sub>
 
-<sub>D e s i g n e d&nbsp;&nbsp;b y&nbsp;&nbsp;S e r g i o</sub>
+
 
 <br>
 
