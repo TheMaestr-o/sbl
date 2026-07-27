@@ -1,6 +1,6 @@
 /* SBL Edition — cache once, then instant (and offline). */
-const SHELL = "mannaprint-shell-v1";
-const DATA  = "mannaprint-data-v1";
+const SHELL = "sbl-shell-v1";
+const DATA  = "sbl-data-v1";
 const SHELL_FILES = ["index.html"];
 
 self.addEventListener("install", (e) => {
