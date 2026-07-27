@@ -205,24 +205,31 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
 }
 @media print{
   @page{
-    margin:15mm 15mm 13mm 15mm;
+    margin:15mm;                 /* the same air on all four sides */
     @top-left{ content:"" } @top-center{ content:"" } @top-right{ content:"" }
     @bottom-center{ content:"" }
     @bottom-left{ content:"themaestr-o.github.io/manna-print/"; font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.2px; color:#9a9a9a; }
     @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.4px; color:#9a9a9a; }
   }
   .bar,footer{display:none} body{background:#fff}
-  /* whatever size the reader chose on screen, the sheet prints at 100% */
-  .page{box-shadow:none;margin:0;max-width:none;overflow:hidden;padding:4px 0 6px;zoom:1}
+  /* whatever size the reader chose on screen, the sheet prints at 100%.
+     No padding of its own: the top and bottom air comes from @page alone, so
+     it matches the left and right margins exactly. */
+  .page{box-shadow:none;margin:0;max-width:none;overflow:hidden;padding:0;zoom:1}
   .page + .page{break-before:page}         /* each lesson opens its own page */
   .lesson{right:0}
-  /* headings never end a page on their own … */
+  /* a day never starts at the foot of a page: the band and the question that
+     opens the day are one unbreakable block, so they travel over together */
+  .daystart{break-inside:avoid}
   .sec,.q,.vref{break-after:avoid}
   .sec,.q,.review,.mem{break-inside:avoid}
-  /* … but long passages flow on instead of leaving half a page empty */
+  /* long passages flow on instead of leaving half a page empty … */
   .vgroup,.vitem,.note,.quote{break-inside:auto}
-  .note,.quote,.vtext,.mem{orphans:2;widows:2}
-  .vtext.lines .v{break-inside:avoid} }
+  /* … but a verse set on its own line is never cut in half, and running text
+     never strands fewer than three lines either side of a break */
+  .vtext.lines .v{break-inside:avoid}
+  .note,.quote,.mem{orphans:2;widows:2}
+  .vtext{orphans:3;widows:3} }
 </style>
 </head>
 <body>
@@ -390,9 +397,15 @@ function renderLesson(les,tasks){
     const st=strip(day.sectionTitle||"").trim();
     const mm=st.match(/^(\d+[.)]?)\s+(.*)$/);
     const secInner=mm?'<span class="n">'+esc(mm[1])+'</span><span class="ttl">'+esc(mm[2])+'</span>':'<span class="ttl">'+esc(st)+'</span>';
-    h+='<div class="sec"><div class="t">'+secInner+'</div><div class="day">'+esc(tag)+'</div></div>';
-    for(const sub of day.subsections||[]){
-      const q=questionLine(sub);
+    /* the band and the first question of the day are emitted as one block, so
+       the page breaker can never leave the heading behind on its own */
+    const subs=day.subsections||[];
+    const firstQ=subs.length?questionLine(subs[0]):"";
+    h+='<div class="daystart"><div class="sec"><div class="t">'+secInner+'</div><div class="day">'+esc(tag)+'</div></div>'
+      +(firstQ?markedHtml("q",firstQ):"")+'</div>';
+    for(let si=0;si<subs.length;si++){
+      const sub=subs[si];
+      const q=si===0?"":questionLine(sub);
       if(q) h+=markedHtml("q",q);
       if(versesOn){
         const refs=(sub.q||[]).filter(it=>it&&it.sOsis);
