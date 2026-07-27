@@ -72,6 +72,33 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .pdfpop .it:hover{background:#f4f4f4}
 .pdfpop .it b{display:block;font-size:13px;font-weight:700;color:#2b2b2b}
 .pdfpop .it small{display:block;font-size:11px;color:#9a9a9a;margin-top:2px}
+/* a month at a glance, with the lesson standing beside its week */
+.calpop{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#fff;
+  border:1px solid #e9e9e9;border-radius:14px;box-shadow:0 16px 44px rgba(0,0,0,.16);padding:12px;z-index:31;
+  width:min(430px,calc(100vw - 24px));max-height:min(70vh,560px);overflow:auto}
+.calpop[hidden]{display:none}
+.calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
+.calhead b{font-size:13.5px;font-weight:700;color:#2b2b2b;letter-spacing:.3px;text-transform:capitalize}
+.calnav{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;
+  border:1px solid #e6e6e6;color:#777;cursor:pointer;font-size:15px;user-select:none}
+.calnav:hover{background:#2b2b2b;color:#fff;border-color:#2b2b2b}
+.calrow{display:flex;align-items:center;gap:8px;padding:2px 0}
+.calrow.head .d{color:#b0b0b0;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;cursor:default}
+.calrow .days{display:flex;gap:2px;flex:none}
+.calrow .d{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:7px;
+  font-size:11.5px;color:#3a3a3a;cursor:pointer}
+.calrow .d.out{color:#c9c9c9}
+.calrow .d.today{font-weight:700;box-shadow:inset 0 0 0 1px var(--gray-dk)}
+.calrow .les{flex:1;min-width:0;font-size:11.5px;line-height:1.25;color:#8a8a8a;cursor:pointer;
+  padding:4px 7px;border-radius:8px;overflow:hidden}
+.calrow .les b{display:block;color:#2b2b2b;font-weight:700;font-size:11px;letter-spacing:.3px}
+.calrow .les span{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.calrow.pick:hover .d:not(.head),.calrow.pick:hover .les{background:#f4f4f4}
+.calrow.on .les{background:var(--box)}
+.calrow.on .les b{color:var(--gray-dk)}
+.calfoot{margin-top:9px;padding-top:9px;border-top:1px solid #eee;display:flex;justify-content:center}
+.calfoot .it{font-size:12px;font-weight:700;color:#2b2b2b;cursor:pointer;padding:7px 14px;border-radius:8px}
+.calfoot .it:hover{background:#f4f4f4}
 
 /* the page (booklet)
    --z scales the whole sheet at once — type, bands, tags, rules, margins — so
@@ -79,7 +106,7 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
    820px of measure and simply grows with the text; it only gives width back
    when the window itself has none left, so the column never narrows on a
    screen that had room for it. */
-.page{position:relative;overflow:hidden;max-width:min(820px, calc((100vw - 40px) / var(--z)));
+.page{position:relative;overflow:hidden;max-width:min(820px,100%);
   margin:6px auto 44px;background:#fff;padding:56px 64px 72px;zoom:var(--z)}
 .msg{text-align:center;color:#999;padding:80px 0;font-family:var(--serif);font-style:italic;font-size:19px}
 
@@ -244,19 +271,20 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   <div class="bar-in">
     <div class="wk">
       <div class="ar" id="prev" title="Previous week">&lsaquo;</div>
-      <div class="lbl" id="wk" title="This week">&mdash;</div>
+      <div class="lbl" id="wk" title="Pick a lesson">&mdash;</div>
       <div class="ar" id="next" title="Next week">&rsaquo;</div>
       <div class="zoom" id="zoomout" title="Smaller text">A&#8722;</div>
       <div class="zoom" id="zoomin" title="Larger text">A+</div>
     </div>
     <div class="seg" id="seg"></div>
-    <div class="tog" id="tog" title="Show the full Bible verse text under each reference">Verses</div>
+    <div class="tog ic" id="tog" title="Show the full Bible verse text under each reference"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><path d="M8 3.4C6.8 2.3 4.9 2 2.4 2.2a.7.7 0 0 0-.65.7v8.3c0 .4.33.72.73.7C4.9 11.8 6.9 12.1 8 13.1c1.1-1 3.1-1.3 5.5-1.2.4.02.75-.3.75-.7V2.9a.7.7 0 0 0-.65-.7C11.1 2 9.2 2.3 8 3.4Z"/><path d="M8 3.4v9.7"/></svg></div>
     <div class="tog vlines" id="vlines" title="One verse per line" hidden></div>
-    <div class="pdf" id="pdf" title="Save as PDF (uses the selected language)">&#8595; PDF</div>
+    <div class="pdf ic" id="pdf" title="Save as PDF (uses the selected language)"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M8 1.6v8.2M4.6 6.6 8 10l3.4-3.4M2.4 12.4h11.2"/></svg></div>
     <div class="tintbtn" id="tintbtn" title="Colour the bands"><span class="tdot"></span></div>
   </div>
   <div class="tintpop" id="tintpop" hidden></div>
   <div class="pdfpop" id="pdfpop" hidden></div>
+  <div class="calpop" id="calpop" hidden></div>
 </div>
 
 <div id="sheets"><div class="page"><div class="msg">&hellip;</div></div></div>
@@ -520,7 +548,61 @@ zin.onclick=function(){setZoom(1);};
 
 document.getElementById("prev").onclick=()=>{current=step(-1);render();};
 document.getElementById("next").onclick=()=>{current=step(1);render();};
-document.getElementById("wk").onclick=()=>{current=new Date();render();};
+/* the month, with every week carrying the lesson that ends on its Sabbath */
+const calpop=document.getElementById("calpop");
+let calMonth=null;
+async function buildCal(){
+  const y=calMonth.getFullYear(), m=calMonth.getMonth();
+  const byDate={};
+  for(const [yy,qq] of neigh(y,Math.floor(m/3)+1)){
+    const d=await loadQuarter(lang,yy,qq);
+    if(d&&d.lessons) for(const l of d.lessons) byDate[l.date]=l;
+  }
+  const first=new Date(y,m,1);
+  const cur=new Date(first.getTime()); cur.setDate(1-first.getDay());     /* back to Sunday */
+  const today=new Date(), tKey=ymd(today), cKey=ymd(current);
+  const dayNames=[];
+  for(let i=0;i<7;i++){ const d=new Date(2026,1,1+i);
+    dayNames.push(esc(new Intl.DateTimeFormat(LOCALE[lang],{weekday:"short"}).format(d)).slice(0,2)); }
+
+  let h='<div class="calhead"><span class="calnav" data-m="-1">&lsaquo;</span><b>'
+      + esc(new Intl.DateTimeFormat(LOCALE[lang],{month:"long",year:"numeric"}).format(first))
+      + '</b><span class="calnav" data-m="1">&rsaquo;</span></div>'
+      + '<div class="calrow head"><div class="days">'+dayNames.map(n=>'<div class="d">'+n+'</div>').join("")+'</div><div class="les"></div></div>';
+
+  for(let w=0;w<6;w++){
+    const sat=new Date(cur.getTime()); sat.setDate(cur.getDate()+6);
+    if(w>0&&cur.getMonth()!==m&&sat.getMonth()!==m) break;
+    const les=byDate[ymd(sat)];
+    let days="",inWeek=false;
+    for(let i=0;i<7;i++){
+      const d=new Date(cur.getTime()); d.setDate(cur.getDate()+i);
+      const k=ymd(d);
+      if(k===cKey) inWeek=true;
+      days+='<div class="d'+(d.getMonth()!==m?" out":"")+(k===tKey?" today":"")+'" data-d="'+k+'">'+d.getDate()+'</div>';
+    }
+    h+='<div class="calrow'+(les?" pick":"")+(inWeek&&les?" on":"")+'"'+(les?' data-d="'+les.date+'"':'')+'>'
+      +'<div class="days">'+days+'</div><div class="les">'
+      +(les?'<b>'+esc(strip(les.header||""))+'</b><span>'+esc(strip(les.title||""))+'</span>':'')
+      +'</div></div>';
+    cur.setDate(cur.getDate()+7);
+  }
+  h+='<div class="calfoot"><div class="it" data-today="1">'+esc(WORDtoday())+'</div></div>';
+  calpop.innerHTML=h;
+
+  calpop.querySelectorAll(".calnav").forEach(function(n){ n.onclick=function(e){
+    e.stopPropagation(); calMonth.setMonth(calMonth.getMonth()+ +n.dataset.m,1); buildCal(); }; });
+  calpop.querySelectorAll("[data-d]").forEach(function(el){ el.onclick=function(e){
+    e.stopPropagation(); calpop.hidden=true;
+    current=ymdToDate(el.dataset.d); render(); }; });
+  calpop.querySelector("[data-today]").onclick=function(){ calpop.hidden=true; current=new Date(); render(); };
+}
+function WORDtoday(){ return {de:"Diese Woche",en:"This week",ru:"Эта неделя"}[lang]; }
+document.getElementById("wk").onclick=function(e){
+  e.stopPropagation(); tpop.hidden=true; pdfpop.hidden=true;
+  if(calpop.hidden){ calMonth=new Date(current.getFullYear(),current.getMonth(),1); buildCal(); calpop.hidden=false; }
+  else calpop.hidden=true;
+};
 
 const tog=document.getElementById("tog"), vlines=document.getElementById("vlines");
 /* the icon shows the layout you are in: solid block of text, or a numbered list */
@@ -555,7 +637,7 @@ async function savePdf(which){
   b.innerHTML=o; setTimeout(function(){ window.print(); },120);
 }
 document.getElementById("pdf").onclick=function(e){
-  e.stopPropagation(); tintpop.hidden=true;
+  e.stopPropagation(); tintpop.hidden=true; calpop.hidden=true;
   if(pdfpop.hidden){ buildPdfPop(); pdfpop.hidden=false; } else pdfpop.hidden=true;
 };
 
@@ -571,10 +653,11 @@ function buildPop(){
   document.getElementById("swcustom").onclick=function(){ ci.click(); };
   ci.oninput=function(){ setTint(customTint(ci.value)); localStorage.setItem("sbl.tint",JSON.stringify({c:ci.value})); };
 }
-document.getElementById("tintbtn").onclick=function(e){ e.stopPropagation(); pdfpop.hidden=true; if(tpop.hidden){ buildPop(); tpop.hidden=false; } else tpop.hidden=true; };
+document.getElementById("tintbtn").onclick=function(e){ e.stopPropagation(); pdfpop.hidden=true; calpop.hidden=true; if(tpop.hidden){ buildPop(); tpop.hidden=false; } else tpop.hidden=true; };
 document.addEventListener("click",function(e){
   if(!tpop.hidden && !tpop.contains(e.target) && e.target.id!=="tintbtn" && !e.target.classList.contains("tdot")) tpop.hidden=true;
   if(!pdfpop.hidden && !pdfpop.contains(e.target) && e.target.id!=="pdf") pdfpop.hidden=true;
+  if(!calpop.hidden && !calpop.contains(e.target) && e.target.id!=="wk") calpop.hidden=true;
 });
 
 render();
