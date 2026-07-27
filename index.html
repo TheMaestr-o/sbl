@@ -208,7 +208,7 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
     margin:15mm;                 /* the same air on all four sides */
     @top-left{ content:"" } @top-center{ content:"" } @top-right{ content:"" }
     @bottom-center{ content:"" }
-    @bottom-left{ content:"themaestr-o.github.io/manna-print/"; font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.2px; color:#9a9a9a; }
+    @bottom-left{ content:"themaestr-o.github.io/sbl/"; font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.2px; color:#9a9a9a; }
     @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.4px; color:#9a9a9a; }
   }
   .bar,footer{display:none} body{background:#fff}
@@ -259,7 +259,7 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   <div class="fnote">Content &copy; <a href="https://sdarm.org" target="_blank" rel="noopener">Seventh Day Adventist Reform Movement</a><br>
     Bible text from SDARM editions &middot; Luther 1912 &middot; King James &middot; Синодальный</div>
   <div class="fset">Set in PT Serif &amp; PT Sans &middot; built by <a href="https://github.com/TheMaestr-o" target="_blank" rel="noopener">Sergio</a>
-    &middot; <a href="https://github.com/TheMaestr-o/manna-print" target="_blank" rel="noopener">source on GitHub</a></div>
+    &middot; <a href="https://github.com/TheMaestr-o/sbl" target="_blank" rel="noopener">source on GitHub</a></div>
 </footer>
 
 <script>
@@ -268,14 +268,14 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catc
 const LANGS=["de","en","ru"];
 const LOCALE={de:"de-DE",en:"en-US",ru:"ru-RU"};
 const MEMLABEL={de:"Merktext",en:"Memory verse",ru:"Памятный стих"};
-let lang=localStorage.getItem("manna.print.lang")||localStorage.getItem("manna.web.left")||"en";
+let lang=localStorage.getItem("sbl.lang")||localStorage.getItem("sbl.left")||"en";
 if(LANGS.indexOf(lang)===-1) lang="en";
 let current=new Date();
 const quarters={};
 const BIBLE={de:"de-lut",en:"en-kjv",ru:"ru-rst"};
 const bibles={};
-let versesOn=localStorage.getItem("manna.print.verses")==="1";
-let versesLines=localStorage.getItem("manna.print.verselines")==="1";   /* one verse per line */
+let versesOn=localStorage.getItem("sbl.verses")==="1";
+let versesLines=localStorage.getItem("sbl.verselines")==="1";   /* one verse per line */
 
 /* band colour themes — first colour matches the quarterly cover (navy + light) */
 const THEMES=[
@@ -288,7 +288,7 @@ const THEMES=[
 function setTint(t){const R=document.documentElement.style;R.setProperty("--gray-dk",t.dk);R.setProperty("--gray",t.lt);R.setProperty("--box",t.bx);}
 function hexHsl(h){h=h.replace("#","");const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let hh,s,l=(mx+mn)/2;if(mx===mn){hh=s=0;}else{const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);hh=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;hh/=6;}return[Math.round(hh*360),Math.round(s*100)];}
 function customTint(hex){const a=hexHsl(hex),h=a[0],sd=Math.min(a[1],46),sl=Math.min(a[1],30);return{dk:"hsl("+h+","+sd+"%,38%)",lt:"hsl("+h+","+sl+"%,84%)",bx:"hsl("+h+","+Math.round(sl*0.7)+"%,90%)"};}
-(function(){try{const s=JSON.parse(localStorage.getItem("manna.print.tint")||"null");if(s){if(s.c)setTint(customTint(s.c));else if(s.i!=null&&THEMES[s.i])setTint(THEMES[s.i]);}}catch(e){}})();
+(function(){try{const s=JSON.parse(localStorage.getItem("sbl.tint")||"null");if(s){if(s.c)setTint(customTint(s.c));else if(s.i!=null&&THEMES[s.i])setTint(THEMES[s.i]);}}catch(e){}})();
 
 function ymd(d){return d.getFullYear()+("0"+(d.getMonth()+1)).slice(-2)+("0"+d.getDate()).slice(-2);}
 function qOf(d){return Math.floor(d.getMonth()/3)+1;}
@@ -477,7 +477,7 @@ async function render(){
 function buildSeg(){
   const el=document.getElementById("seg");
   el.innerHTML=LANGS.map(x=>'<div class="o'+(x===lang?' active':'')+'" data-l="'+x+'">'+x.toUpperCase()+'</div>').join("");
-  el.querySelectorAll(".o").forEach(o=>o.onclick=()=>{ if(o.dataset.l===lang)return; lang=o.dataset.l; localStorage.setItem("manna.print.lang",lang); render(); });
+  el.querySelectorAll(".o").forEach(o=>o.onclick=()=>{ if(o.dataset.l===lang)return; lang=o.dataset.l; localStorage.setItem("sbl.lang",lang); render(); });
 }
 /* ‹ › step by week, or by quarter when the whole quarter is on screen */
 function step(dir){
@@ -487,7 +487,7 @@ function step(dir){
 /* text size — the whole sheet grows, so every proportion of the booklet holds.
    Three steps, 130% being as far as a phone line can usefully stretch. */
 const ZOOMS=[1,1.15,1.3];
-let zi=+(localStorage.getItem("manna.print.zoom")||0);
+let zi=+(localStorage.getItem("sbl.zoom")||0);
 if(!(zi===1||zi===2)) zi=0;
 const zbtn=document.getElementById("zoom");
 function paintZoom(){
@@ -497,7 +497,7 @@ function paintZoom(){
   zbtn.title="Text size — "+Math.round(ZOOMS[zi]*100)+"%";
 }
 paintZoom();
-zbtn.onclick=function(){ zi=(zi+1)%ZOOMS.length; localStorage.setItem("manna.print.zoom",String(zi)); paintZoom(); };
+zbtn.onclick=function(){ zi=(zi+1)%ZOOMS.length; localStorage.setItem("sbl.zoom",String(zi)); paintZoom(); };
 
 document.getElementById("prev").onclick=()=>{current=step(-1);render();};
 document.getElementById("next").onclick=()=>{current=step(1);render();};
@@ -515,8 +515,8 @@ function paintVerseBtns(){
   vlines.title=versesLines?"One verse per line — click for running text":"Running text — click for one verse per line";
 }
 paintVerseBtns();
-tog.onclick=function(){ versesOn=!versesOn; localStorage.setItem("manna.print.verses",versesOn?"1":"0"); paintVerseBtns(); render(); };
-vlines.onclick=function(){ versesLines=!versesLines; localStorage.setItem("manna.print.verselines",versesLines?"1":"0"); paintVerseBtns(); render(); };
+tog.onclick=function(){ versesOn=!versesOn; localStorage.setItem("sbl.verses",versesOn?"1":"0"); paintVerseBtns(); render(); };
+vlines.onclick=function(){ versesLines=!versesLines; localStorage.setItem("sbl.verselines",versesLines?"1":"0"); paintVerseBtns(); render(); };
 /* PDF: pick the week or the whole quarter — the choice also switches what the
    page shows, so you can check it before saving */
 const pdfpop=document.getElementById("pdfpop");
@@ -547,10 +547,10 @@ function buildPop(){
   THEMES.forEach(function(t,i){ html+='<span class="sw" data-i="'+i+'" title="'+["Grey","Cover","Wine","Forest","Gold"][i]+'" style="background:'+t.dk+'"></span>'; });
   html+='<span class="sw custom" id="swcustom" title="Any colour you like"></span><input type="color" id="tintcolor" value="#3a6ea5">';
   tpop.innerHTML=html;
-  tpop.querySelectorAll(".sw[data-i]").forEach(function(s){ s.onclick=function(){ const i=+s.dataset.i; setTint(THEMES[i]); localStorage.setItem("manna.print.tint",JSON.stringify({i:i})); tpop.hidden=true; }; });
+  tpop.querySelectorAll(".sw[data-i]").forEach(function(s){ s.onclick=function(){ const i=+s.dataset.i; setTint(THEMES[i]); localStorage.setItem("sbl.tint",JSON.stringify({i:i})); tpop.hidden=true; }; });
   const ci=document.getElementById("tintcolor");
   document.getElementById("swcustom").onclick=function(){ ci.click(); };
-  ci.oninput=function(){ setTint(customTint(ci.value)); localStorage.setItem("manna.print.tint",JSON.stringify({c:ci.value})); };
+  ci.oninput=function(){ setTint(customTint(ci.value)); localStorage.setItem("sbl.tint",JSON.stringify({c:ci.value})); };
 }
 document.getElementById("tintbtn").onclick=function(e){ e.stopPropagation(); pdfpop.hidden=true; if(tpop.hidden){ buildPop(); tpop.hidden=false; } else tpop.hidden=true; };
 document.addEventListener("click",function(e){
