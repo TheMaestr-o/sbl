@@ -22,8 +22,8 @@
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
 /* selecting text feels like running a highlighter over the booklet */
-::selection{background:#f7de84;color:#1c1c1c}
-::-moz-selection{background:#f7de84;color:#1c1c1c}
+::selection{background:var(--selc,#f7de84);color:#1c1c1c}
+::-moz-selection{background:var(--selc,#f7de84);color:#1c1c1c}
 
 /* control bar (screen only) — refined, document-like; hidden when printing */
 .bar{position:sticky;top:0;z-index:9;background:rgba(255,255,255,.82);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);color:#333;border-bottom:1px solid #ededed}
@@ -72,15 +72,27 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .setpop[hidden]{display:none}
 .srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:9px}
 .srow + .srow{border-top:1px solid #f1f1f1}
-/* the version line opens what this release brought */
-.srow.ver{padding:6px 10px}
-.srow.ver .slab{font-size:11px;color:#a8a8ac;cursor:pointer;letter-spacing:.3px}
-.srow.ver .slab:hover{color:#2b2b2b}
+/* one quiet line closes the sheet: which version this is, and where the keys
+   are written down */
+.sfoot{display:flex;align-items:center;justify-content:space-between;gap:12px;
+  padding:9px 10px 4px;margin-top:2px;border-top:1px solid #f1f1f1}
+.sfoot span{font-size:10.5px;letter-spacing:.2px;color:#b0b0b4;cursor:pointer;transition:color .15s}
+.sfoot span:hover{color:#2b2b2b}
 .slab{font-size:12.5px;font-weight:600;color:#6f6f6f;white-space:nowrap}
 .sctl{display:flex;gap:6px;flex:none}
 .sbtn{padding:7px 11px;font-size:12px;font-weight:700;color:#2b2b2b;background:#f4f4f4;border-radius:8px;
   cursor:pointer;user-select:none;white-space:nowrap;transition:background .15s,color .15s}
 .sbtn:hover{background:#2b2b2b;color:#fff}
+/* a switch reads at a glance: the tools are either out or away */
+.sw2{position:relative;width:42px;height:25px;border-radius:13px;background:rgba(120,120,128,.3);
+  cursor:pointer;flex:none;transition:background .2s}
+.sw2 i{position:absolute;top:2px;left:2px;width:21px;height:21px;border-radius:50%;background:#fff;
+  box-shadow:0 1px 3px rgba(0,0,0,.28);transition:transform .22s cubic-bezier(.3,1.3,.4,1)}
+.sw2.on{background:#34c759}
+.sw2.on i{transform:translateX(17px)}
+/* the PDF row is the one that does something: its first button says so */
+.sbtn.pri{background:#2b2b2b;color:#fff}
+.sbtn.pri:hover{background:#000}
 .langseg{display:inline-flex;background:#f0f0f0;border:1px solid #e7e7e7;border-radius:10px;padding:3px}
 .langseg .o{padding:6px 11px;font-size:12px;font-weight:700;letter-spacing:.6px;color:#8a8a8a;cursor:pointer;
   border-radius:7px;transition:background .15s,color .15s}
@@ -285,16 +297,19 @@ mark{background:none;color:inherit;background-repeat:no-repeat;background-size:1
   mix-blend-mode:multiply;-webkit-box-decoration-break:clone;box-decoration-break:clone;
   cursor:pointer;transition:filter .15s}
 mark:hover{filter:saturate(1.22)}
-mark.fill{padding:0;margin:0;background-size:100% 1.04em;background-position:0 .16em}
+/* the stroke that was tapped: the rail's colours and strokes now act on it */
+mark.sel{outline:1.5px dashed rgba(0,0,0,.4);outline-offset:1px;border-radius:2px}
+@media (prefers-color-scheme:dark){ mark.sel{outline-color:rgba(0,0,0,.55)} }
+mark.fill{padding:0;margin:0;background-repeat:no-repeat}
 mark.tex{padding:.1em 0 .12em;margin:0;background-size:100% 1.15em;background-position:0 .06em}
 /* the ink reaches past the letters only at the true ends of the selection —
    otherwise neighbouring pieces overlap and a dirty seam shows in the middle */
 mark.ps{padding-left:.3em;margin-left:-.3em}
 mark.pe{padding-right:.3em;margin-right:-.3em}
-/* внутренние стыки перекрываются на волос: иначе между двумя кусками одного
-   мазка просвечивает белая щель в полпикселя */
-mark.fill:not(.ps),mark.tex:not(.ps){margin-left:-.03em;padding-left:.03em}
-mark.fill:not(.pe),mark.tex:not(.pe){margin-right:-.03em;padding-right:.03em}
+/* куски одного мазка встают встык: перекрытие давало бы тёмную зарубку на
+   стыке, а разрыв — белую щель. Обычно куска и вовсе один — см. mkWhole() */
+mark.fill:not(.ps),mark.tex:not(.ps){margin-left:0;padding-left:0}
+mark.fill:not(.pe),mark.tex:not(.pe){margin-right:0;padding-right:0}
 mark.line,mark.wave{mix-blend-mode:normal;padding:0 .05em .26em;margin:0;background-position:0 100%}
 mark.line{background-size:100% .48em}
 mark.wave{background-size:auto .42em;background-repeat:repeat-x}
@@ -323,65 +338,66 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
 .mynote .del:hover{opacity:1;background:rgba(47,91,208,.12)}
 .legend{display:none}
 
-/* ——— the panel that comes up at the selection ——— */
-.pop{position:absolute;z-index:60;display:flex;flex-direction:column;gap:5px;padding:6px;
+/* ——— THE RAIL ———
+   The tools stand beside the sheet and stay there. What is in hand is visible
+   at a glance, nothing has to pop up to be found, and nothing closes after a
+   click: take a marker, run through the lesson, put it back. */
+.rail{position:fixed;left:16px;top:50%;transform:translateY(-50%);z-index:60;
+  display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 7px;
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px);
-  border-radius:15px;box-shadow:0 0 0 .5px var(--hair),0 12px 32px rgba(0,0,0,.17),0 2px 6px rgba(0,0,0,.05);
-  opacity:0;transform:scale(.9) translateY(3px);pointer-events:none;transform-origin:50% 100%;
-  transition:opacity .15s ease,transform .24s cubic-bezier(.2,1.4,.4,1)}
-.pop.on{opacity:1;transform:none;pointer-events:auto}
-.pop.below{transform-origin:50% 0}
-.row{display:flex;align-items:center;justify-content:center;gap:5px}
-.row+.row{border-top:.5px solid var(--hair);padding-top:6px}
-.mseg{position:relative;display:flex;background:rgba(120,120,128,.12);border-radius:9px;padding:2px}
-.mseg .o{position:relative;z-index:1;width:30px;height:26px;display:flex;align-items:center;justify-content:center;
-  color:#6c6c70;cursor:pointer;transition:color .18s}
-.mseg .o.on{color:#1c1c1e}
-.mseg .pill{position:absolute;top:2px;left:2px;width:30px;height:26px;background:#fff;border-radius:7px;
-  box-shadow:0 0 0 .5px rgba(0,0,0,.04),0 1px 3px rgba(0,0,0,.14);
-  transition:transform .28s cubic-bezier(.3,1.3,.4,1)}
-/* the ink in hand is simply the big one; the rest stand back a size. No ring
-   drawn round a circle. */
-.inks{display:flex;align-items:center;gap:5px}
-.ink{position:relative;width:21px;height:21px;border-radius:50%;cursor:pointer;flex:none;
+  border-radius:19px;box-shadow:0 0 0 .5px var(--hair),0 14px 36px rgba(0,0,0,.15);
+  transition:opacity .2s}
+.rail .sep{width:24px;height:.5px;background:var(--hair);margin:2px 0}
+.rail .two{display:grid;grid-template-columns:repeat(2,30px);gap:4px}
+.rbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px;
+  color:#5b5b60;cursor:pointer;transition:background .16s,color .16s,transform .12s}
+.rbtn:hover{background:rgba(120,120,128,.16);color:#1c1c1e}
+.rbtn:active{transform:scale(.92)}
+.rbtn.on{background:#2b2b2b;color:#fff}
+.rbtn.own.on{background:var(--mine);color:#fff}
+.rbtn svg{display:block}
+.inks{display:grid;grid-template-columns:repeat(2,22px);gap:6px;justify-content:center}
+.ink{position:relative;width:22px;height:22px;border-radius:50%;cursor:pointer;flex:none;
   box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),inset 0 -3px 5px rgba(0,0,0,.06),inset 0 3px 4px rgba(255,255,255,.5);
-  transition:width .2s cubic-bezier(.3,1.4,.4,1),height .2s cubic-bezier(.3,1.4,.4,1),transform .15s}
-.ink:hover{transform:scale(1.12)} .ink:active{transform:scale(.94)}
-.ink.on{width:28px;height:28px}
-.ink.more{width:24px;height:24px;
-  background:conic-gradient(from .5turn,#ff6b6b,#ffb35c,#ffe066,#8fe08f,#7fc8f8,#b39ddb,#f48fb1,#ff6b6b);
-  box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14)}
-.ink.more.on{width:28px;height:28px}
+  transition:transform .16s cubic-bezier(.3,1.4,.4,1),box-shadow .16s}
+.ink:hover{transform:scale(1.14)} .ink:active{transform:scale(.94)}
+.ink.on{box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 0 0 2px #2b2b2b}
+.ink.more{background:conic-gradient(from .5turn,#ff6b6b,#ffb35c,#ffe066,#8fe08f,#7fc8f8,#b39ddb,#f48fb1,#ff6b6b)}
+/* the saved mark: how many, and that they are kept at all */
+.chip{font-size:9.5px;font-weight:700;letter-spacing:.2px;color:#9a9a9e;cursor:pointer;
+  padding:3px 6px;border-radius:7px;white-space:nowrap;transition:color .2s,background .2s}
+.chip:hover{color:#2b2b2b;background:rgba(120,120,128,.14)}
+.chip.flash{color:#2f9e56}
 
-/* picking a colour happens inside the same panel — no second window, no
-   system dialog: the field is the gamut, the strip below it the hue */
-.pick{flex-direction:column;gap:7px}
-.pick[hidden]{display:none}
-.area{position:relative;width:214px;height:80px;border-radius:9px;cursor:crosshair;
+/* the gamut opens beside the rail, in the same block — never as a window */
+.rpick{position:absolute;left:calc(100% + 9px);top:50%;transform:translateY(-50%);
+  display:flex;flex-direction:column;gap:7px;padding:9px;
+  background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px);
+  border-radius:14px;box-shadow:0 0 0 .5px var(--hair),0 12px 30px rgba(0,0,0,.16)}
+.rpick[hidden]{display:none}
+.area{position:relative;width:190px;height:110px;border-radius:9px;cursor:crosshair;
   box-shadow:inset 0 0 0 .5px rgba(0,0,0,.18)}
-.hue{position:relative;width:214px;height:13px;border-radius:7px;cursor:pointer;
+.hue{position:relative;width:190px;height:14px;border-radius:7px;cursor:pointer;
   background:linear-gradient(to right,#f00,#ff0,#0f0,#0ff,#00f,#f0f,#f00);
   box-shadow:inset 0 0 0 .5px rgba(0,0,0,.18)}
 .area .dot,.hue .dot{position:absolute;width:13px;height:13px;border-radius:50%;border:2px solid #fff;
   box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none}
 .hue .dot{top:50%}
-.mhair{width:.5px;height:22px;background:var(--hair);margin:0 3px}
+
+/* ——— the bubble on a stroke already laid down ——— */
+.bub{position:absolute;z-index:62;display:flex;align-items:center;gap:5px;padding:5px 6px;
+  background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px);
+  border-radius:13px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.18);
+  opacity:0;transform:scale(.92) translateY(3px);pointer-events:none;transform-origin:50% 0;
+  transition:opacity .14s,transform .2s cubic-bezier(.2,1.4,.4,1)}
+.bub.on{opacity:1;transform:none;pointer-events:auto}
+.bub .mhair{width:.5px;height:20px;background:var(--hair);margin:0 2px}
 .mtool{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;
   color:#5b5b60;cursor:pointer;transition:background .16s,color .16s,transform .12s}
-.mtool:hover{background:rgba(120,120,128,.14);color:#1c1c1e}
+.mtool:hover{background:rgba(120,120,128,.16);color:#1c1c1e}
 .mtool:active{transform:scale(.92)}
 .mtool.own{color:var(--mine)}
-/* where the reader's own words will go: a caret standing exactly in the gap,
-   with the button sitting on top of it — no floating plus a line away */
-.caretbar{position:absolute;z-index:57;width:2px;border-radius:1px;background:var(--mine);display:none;
-  animation:mkblink 1.1s steps(2,start) infinite}
-.caretbar.on{display:block}
-@keyframes mkblink{50%{opacity:.25}}
-.caretbtn{position:absolute;z-index:58;width:20px;height:20px;border-radius:50%;display:none;
-  align-items:center;justify-content:center;cursor:pointer;color:var(--mine);background:rgba(47,91,208,.12);
-  font-size:15px;line-height:1;opacity:0;transition:opacity .18s,background .15s,color .15s}
-.caretbtn.on{display:flex;opacity:.55}
-.caretbtn.on:hover{opacity:1;background:var(--mine);color:#fff}
+
 .mtoast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);opacity:0;z-index:70;
   background:rgba(28,28,30,.92);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:12px;pointer-events:none;
   transition:opacity .2s,transform .3s cubic-bezier(.2,1.3,.4,1)}
@@ -409,39 +425,56 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
   .keyspop h4{color:#fff} .krow kbd{color:#e5e5ea;background:rgba(120,120,128,.3)} .krow span{color:#c7c7cc}
 }
 /* ——— a finger, not a mouse ———
-   On a tablet the lesson is read at arm's length and marked with the thumb:
-   every target grows to something you can actually hit, and the panel stops
-   pretending to be a desktop menu. The system's own selection callout is
-   suppressed — we take the selection over the moment it is made. */
+   On a tablet the lesson is read at arm's length and marked with the thumb, so
+   every target grows. Where the sheet leaves no gutter — a phone — the rail
+   lies down along the bottom edge instead of standing beside the page. */
 @media (pointer:coarse){
   .page{-webkit-touch-callout:none}
-  .pop{padding:9px;gap:8px;border-radius:19px}
-  .row+.row{padding-top:9px}
-  .inks{gap:7px}
-  .ink{width:28px;height:28px} .ink.on{width:38px;height:38px} .ink.more{width:32px;height:32px}
-  .ink.more.on{width:38px;height:38px}
+  .rail{left:10px;padding:9px 8px;gap:6px;border-radius:22px}
+  .rail .two{grid-template-columns:repeat(2,38px);gap:5px}
+  .rbtn{width:38px;height:38px;border-radius:11px}
+  .hand{width:42px;height:42px}
+  .inks{grid-template-columns:repeat(2,28px);gap:7px}
+  .ink{width:28px;height:28px}
   .mtool{width:38px;height:38px;border-radius:11px}
-  .mseg{border-radius:12px} .mseg .o{width:40px;height:34px} .mseg .pill{width:40px;height:34px;border-radius:9px}
-  .area{width:min(300px,72vw);height:110px} .hue{width:min(300px,72vw);height:20px}
+  .area{width:min(260px,66vw);height:130px} .hue{width:min(260px,66vw);height:20px}
   .area .dot,.hue .dot{width:17px;height:17px}
-  .caretbtn{width:30px;height:30px;font-size:19px}
-  .caretbar{width:2.5px}
   .mynote .del{display:flex;width:26px;height:26px}
 }
-@media (pointer:coarse) and (max-width:820px){
-  .pop{left:8px!important;right:8px!important;width:auto;max-width:none}
-  .row{flex-wrap:wrap}
+/* no room to the side: the rail lies down at the foot of the screen */
+@media (max-width:980px){
+  .rail{left:50%;top:auto;bottom:max(10px,env(safe-area-inset-bottom));transform:translateX(-50%);
+    flex-direction:row;align-items:center;gap:6px;padding:7px 9px;border-radius:17px;
+    max-width:calc(100vw - 20px);overflow-x:auto;overflow-y:hidden}
+  .rail .sep{width:.5px;height:24px;margin:0 2px}
+  .rail .two,.inks{display:flex;gap:5px}
+  .rpick{left:50%;right:auto;top:auto;bottom:calc(100% + 10px);transform:translateX(-50%)}
+}
+@media (max-width:980px) and (pointer:coarse){
+  .rail{gap:7px;padding:8px 10px}
+}
+/* a phone has no room for one long row: the bar wraps instead of scrolling
+   away, so every tool stays reachable with a thumb */
+@media (max-width:700px){
+  .rail{flex-wrap:wrap;justify-content:center;overflow:visible;row-gap:8px;column-gap:10px;
+    width:calc(100vw - 16px);max-width:none;padding:9px 8px}
+  .rail .sep{display:none}
+  .rail .two{order:1;display:flex;gap:6px}        /* штрихи и инструменты — верхний ряд */
+  .inks{order:2;flex-basis:100%;display:flex;justify-content:center;gap:7px}   /* цвета — нижний */
+  .ink{width:26px;height:26px}
+  .chip{order:3}
 }
 
 @media (prefers-color-scheme:dark){
-  .pop{--mat:rgba(44,44,46,.82);--hair:rgba(255,255,255,.12)}
-  .mseg{background:rgba(120,120,128,.24)} .mseg .o{color:#98989d} .mseg .o.on{color:#fff}
-  .mseg .pill{background:rgba(120,120,128,.5)}
+  .rail,.rpick,.bub{--mat:rgba(44,44,46,.86);--hair:rgba(255,255,255,.12)}
+  .rbtn{color:#c7c7cc} .rbtn:hover{background:rgba(120,120,128,.28);color:#fff}
+  .rbtn.on{background:#f2f2f7;color:#1c1c1e}
+  .hand{background:rgba(120,120,128,.28);color:#c7c7cc}
+  .hand.on{box-shadow:0 0 0 2px rgba(255,255,255,.5),0 2px 6px rgba(0,0,0,.4)}
+  .ink.on{box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 0 0 2px #fff}
+  .chip{color:#8e8e93} .chip:hover{color:#fff;background:rgba(120,120,128,.28)}
   .mtool{color:#c7c7cc} .mtool:hover{background:rgba(120,120,128,.28);color:#fff}
-  /* the deep blue of the reader's own marks disappears on a dark panel —
-     the two buttons that add his own text get a lighter tone of it */
   .mtool.own{color:#83a9ff}
-  .ink.on::after{box-shadow:0 0 0 1.5px #fff}
 }
 
 @media print{
@@ -480,7 +513,7 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
   .note,.quote,.mem{orphans:2;widows:2}
   .vtext{orphans:3;widows:3}
   /* the pencil work prints with the lesson; the tools themselves never do */
-  .pop,.caretbar,.caretbtn,.mtoast,.mynote .del,.myins .del{display:none!important}
+  .rail,.rpick,.bub,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del{display:none!important}
   .mynote,.myins{break-inside:avoid;page-break-inside:avoid}
   /* whoever picks up the sheet must see at a glance which lines are not
      the lesson's own */
@@ -507,44 +540,47 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
     <div class="srow"><span class="slab" id="lab-size"></span>
       <div class="sctl"><div class="zoom" id="zoomout">A&#8722;</div><div class="zoom" id="zoomin">A+</div></div></div>
     <div class="srow"><span class="slab" id="lab-colour"></span><div class="swatches" id="tintpop"></div></div>
-    <div class="srow ver"><span class="slab" id="mk-ver"></span></div>
-    <div class="srow"><span class="slab" id="lab-keys"></span>
-      <div class="sctl"><div class="sbtn" id="mk-keys">?</div></div></div>
-    <div class="srow"><span class="slab" id="lab-marks"></span>
-      <div class="sctl"><div class="sbtn" id="mk-on"></div><div class="sbtn" id="mk-instant"></div></div></div>
+    <div class="srow"><span class="slab" id="lab-mark"></span>
+      <div class="sctl"><div class="sw2" id="mk-rail"><i></i></div></div></div>
     <div class="srow"><span class="slab" id="lab-pdf"></span>
-      <div class="sctl"><div class="sbtn" id="pdf-week"></div><div class="sbtn" id="pdf-quarter"></div></div></div>
+      <div class="sctl"><div class="sbtn pri" id="pdf-week"></div><div class="sbtn" id="pdf-quarter"></div></div></div>
+    <div class="sfoot"><span id="mk-ver"></span><span id="mk-keys"></span></div>
   </div>
 </div>
 
 <div id="sheets"><div class="page"><div class="msg">&hellip;</div></div></div>
 
-<div class="caretbtn" id="caretbtn">+</div>
 <div class="mtoast" id="mtoast"></div>
 <div class="keysback" id="keysback" hidden></div>
 <div class="keyspop" id="keyspop" hidden></div>
-<div class="pop" id="pop">
-  <div class="row"><div class="inks" id="inks"></div><span class="ink more" id="more"></span></div>
-  <div class="row">
-    <div class="mseg" id="mseg">
-      <div class="pill" id="mpill"></div>
-      <div class="o" data-s="fill"><svg width="17" height="14" viewBox="0 0 17 14"><rect x="1.5" y="4" width="14" height="6.4" rx="1.4" fill="currentColor" opacity=".85"/></svg></div>
-      <div class="o" data-s="tex"><svg width="17" height="14" viewBox="0 0 17 14"><path d="M1.6 5.2c3-.8 10-1.1 13.8-.4.5.1.7.5.6 1.2-.2 1.3-.5 2.6-.9 3.2-.3.4-1.2.5-2.6.6-4 .3-8.6.4-11 .1-.9-.1-1.3-.4-1.4-.9-.2-.9-.2-2.4 0-3.1.1-.4.3-.6.5-.7z" fill="currentColor" opacity=".85"/></svg></div>
-      <div class="o" data-s="line"><svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 10.5c4-1.4 9-1.4 13 0"/><path d="M4 4.6h9" opacity=".35"/></svg></div>
-      <div class="o" data-s="wave"><svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 9.4c1.6-2.2 3.2-2.2 4.8 0s3.2 2.2 4.8 0 3.2-2.2 4.4-.6"/><path d="M4 4.6h9" opacity=".35"/></svg></div>
-    </div>
-    <div class="mhair"></div>
-    <span class="mtool own" data-a="ins"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round"><path d="M7.5 2.6v9.8M2.6 7.5h9.8"/></svg></span>
-    <span class="mtool own" data-a="note"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.4 3.4h10.2M2.4 7h10.2M2.4 10.6h6"/></svg></span>
-    <span class="mtool" data-a="copy"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4.6" y="4.6" width="8.8" height="8.8" rx="1.7"/><path d="M10.4 2.6h-8v8"/></svg></span>
-    <span class="mtool" data-a="erase"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.2h9.5M4.6 9.9 9.2 5.3l3.1 3.1-4.6 4.6H5.9z"/></svg></span>
+
+<div class="rail" id="rail">
+  <div class="two">
+    <div class="rbtn" data-s="fill"><svg width="17" height="14" viewBox="0 0 17 14"><rect x="1.5" y="4" width="14" height="6.4" rx="1.4" fill="currentColor" opacity=".85"/></svg></div>
+    <div class="rbtn" data-s="tex"><svg width="17" height="14" viewBox="0 0 17 14"><path d="M1.6 5.2c3-.8 10-1.1 13.8-.4.5.1.7.5.6 1.2-.2 1.3-.5 2.6-.9 3.2-.3.4-1.2.5-2.6.6-4 .3-8.6.4-11 .1-.9-.1-1.3-.4-1.4-.9-.2-.9-.2-2.4 0-3.1.1-.4.3-.6.5-.7z" fill="currentColor" opacity=".85"/></svg></div>
+    <div class="rbtn" data-s="line"><svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 10.5c4-1.4 9-1.4 13 0"/><path d="M4 4.6h9" opacity=".35"/></svg></div>
+    <div class="rbtn" data-s="wave"><svg width="17" height="14" viewBox="0 0 17 14" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M2 9.4c1.6-2.2 3.2-2.2 4.8 0s3.2 2.2 4.8 0 3.2-2.2 4.4-.6"/><path d="M4 4.6h9" opacity=".35"/></svg></div>
   </div>
-  <div class="row pick" id="mpick" hidden>
+  <div class="sep"></div>
+  <div class="inks" id="inks"></div>
+  <div class="sep"></div>
+  <div class="two">
+    <div class="rbtn own" data-mode="ins"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><path d="M7.5 2.6v9.8M2.6 7.5h9.8"/></svg></div>
+    <div class="rbtn own" data-mode="note"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M2.4 3.4h10.2M2.4 7h10.2M2.4 10.6h6"/></svg></div>
+    <div class="rbtn" data-mode="erase"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.2h9.5M4.6 9.9 9.2 5.3l3.1 3.1-4.6 4.6H5.9z"/></svg></div>
+    <div class="rbtn" data-mode="copy"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4.6" y="4.6" width="8.8" height="8.8" rx="1.7"/><path d="M10.4 2.6h-8v8"/></svg></div>
+  </div>
+  <div class="sep"></div>
+  <div class="chip" id="mkchip">✓ 0</div>
+  <div class="rpick" id="rpick" hidden>
     <div class="area" id="mkarea"><i class="dot"></i></div>
     <div class="hue" id="mkhue"><i class="dot"></i></div>
   </div>
 </div>
-<div class="caretbar" id="caretbar"></div>
+
+<div class="bub" id="bub">
+  <span class="mtool" data-a="erase"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.2h9.5M4.6 9.9 9.2 5.3l3.1 3.1-4.6 4.6H5.9z"/></svg></span>
+</div>
 <footer>
   <div class="frule"></div>
   <div class="fkind">SBL Edition &middot; Sabbath Bible Lesson &middot; original booklet layout</div>
@@ -938,7 +974,7 @@ vlines.onclick=function(){
 /* PDF: pick the week or the whole quarter — the choice also switches what the
    page shows, so you can check it before saving */
 
-const PDFWORD={de:["Diese Woche","Ganzes Quartal"],en:["This week","Whole quarter"],ru:["Эта неделя","Весь квартал"]};
+const PDFWORD={de:["↓ Diese Woche","↓ Ganzes Quartal"],en:["↓ This week","↓ Whole quarter"],ru:["↓ Эта неделя","↓ Весь квартал"]};
 /* every word in the settings sheet, in the language being read */
 const UI={
   settings:{de:"Einstellungen",en:"Settings",ru:"Настройки"},
@@ -947,7 +983,7 @@ const UI={
   verses:  {de:"Bibeltext",en:"Bible text",ru:"Текст Библии"},
   size:    {de:"Schriftgröße",en:"Text size",ru:"Размер текста"},
   colour:  {de:"Farbe",en:"Colour",ru:"Цвет"},
-  pdf:     {de:"Als PDF",en:"Save as PDF",ru:"Сохранить PDF"},
+  pdf:     {de:"Als PDF sichern",en:"Save as PDF",ru:"Сохранить в PDF"},
   show:    {de:"Bibeltext anzeigen",en:"Show the Bible text",ru:"Показывать текст Библии"},
   perline: {de:"Ein Vers pro Zeile",en:"One verse per line",ru:"Каждый стих строкой"}
 };
@@ -965,7 +1001,12 @@ function paintUI(){
   document.getElementById("pdf-week").textContent=w[0];
   document.getElementById("pdf-quarter").textContent=w[1];
   /* the pencil speaks the language of the lesson too */
-  mkPaintUI(); mkPaintMarksRow();
+  document.getElementById("lab-mark").textContent=T("marking");
+  document.getElementById("mk-keys").textContent=T("keys");
+  document.getElementById("mk-ver").textContent=APP_VERSION+" · "+
+    ({de:"Was ist neu",en:"What's new",ru:"Что нового"}[lang]||"What's new");
+  document.getElementById("mk-rail").classList.toggle("on",mkRailOn);
+  mkPaintMode(); mkChipPaint();
 }
 
 /* what to put back once the print dialog is gone */
@@ -1041,6 +1082,21 @@ const MKW={
   copied:{de:"Kopiert",en:"Copied",ru:"Скопировано"},
   marks:{de:"Markierungen",en:"Marks",ru:"Пометки"},
   keys:{de:"Kurzbefehle",en:"Shortcuts",ru:"Подсказки"},
+  marking:{de:"Marker und Notizen",en:"Marker and notes",ru:"Маркер и заметки"},
+  railon:{de:"An",en:"On",ru:"Вкл"},
+  railoff:{de:"Aus",en:"Off",ru:"Выкл"},
+  railshown:{de:"Das Etui steht links",en:"The rail stands on the left",ru:"Пенал стоит слева"},
+  railhid:{de:"Etui weg — nur lesen",en:"Rail away — just reading",ru:"Пенал убран — просто чтение"},
+  up:{de:"Marker nehmen",en:"Take the marker",ru:"Взять маркер"},
+  down:{de:"Werkzeug weglegen",en:"Put the tool down",ru:"Положить инструмент"},
+  kept:{de:"In diesem Browser gespeichert",en:"Kept in this browser",ru:"Сохранено в этом браузере"},
+  wipe:{de:"Lektion leeren",en:"Clear this lesson",ru:"Стереть урок"},
+  wipehint:{de:"Alle Striche, Einfügungen und Notizen dieser Lektion. Danach lässt es sich zurückholen.",
+            en:"Every stroke, insertion and note of this lesson. It can be taken back right after.",
+            ru:"Все мазки, вставки и заметки этого урока. Сразу после можно вернуть."},
+  sure:{de:"Sicher?",en:"Sure?",ru:"Точно?"},
+  undo:{de:"Zurückholen",en:"Undo",ru:"Вернуть"},
+  cleared:{de:"Lektion geleert",en:"Lesson cleared",ru:"Урок очищен"},
   marker:{de:"Marker",en:"Marker",ru:"Маркер"},
   mkoff:{de:"Marker aus — Text lässt sich normal markieren",en:"Marker off — the text selects normally",ru:"Маркер выключен — текст выделяется как обычно"},
   mkon:{de:"Marker an",en:"Marker on",ru:"Маркер включён"},
@@ -1051,61 +1107,85 @@ const MKW={
   wave:{de:"Welle",en:"Wave",ru:"Волна"}
 };
 function T(k){ const w=MKW[k]||{}; return w[lang]||w.en||""; }
-const APP_VERSION="2.0";
+const APP_VERSION="2.1";
 /* what this release brought, in the language of the lesson */
 const MK_NEW=[
-  ["title",{de:"Neu in 2.0",en:"New in 2.0",ru:"Что нового в 2.0"}],
-  ["cap",{de:"Mit der Hand am Blatt",en:"A hand on the sheet",ru:"Рука на листе"}],
-  ["✱",{de:"Marker, Strich, Linie und Welle in jeder Farbe — der Strich liegt sofort, sobald der Text markiert ist",
-        en:"Highlighter, stroke, line and wave in any colour — the ink goes down the moment the text is selected",
-        ru:"Маркер, штрих, линия и волна любого цвета — мазок ложится сразу, как отпустишь выделение"}],
-  ["✱ ",{de:"Zweite Farbe über der ersten wird dunkler, wie echte Tinte",
-         en:"A second colour over the first goes darker, as real ink does",
-         ru:"Второй цвет поверх первого темнеет, как настоящая краска"}],
-  ["✱  ",{de:"Eigene Notiz nach jedem Absatz und eigener Text mitten in die Zeile — blau, in anderer Schrift, mit Datum",
-          en:"Your own note after any paragraph and your own words inside the line — blue, in another face, dated",
-          ru:"Своя заметка после любого абзаца и свой текст прямо в строке — синим, другой гарнитурой, с датой"}],
-  ["✱   ",{de:"Alles bleibt im Browser, für jede Lektion und jede Sprache getrennt",
-           en:"Everything stays in the browser, kept apart for each lesson and each language",
-           ru:"Всё хранится в браузере, отдельно по каждому уроку и языку"}],
-  ["✱    ",{de:"Alles Gemalte kommt ins PDF; unten steht, dass Blaues nicht zur Lektion gehört",
-            en:"All of it prints into the PDF, with a line saying the blue is not part of the lesson",
-            ru:"Всё уходит в PDF, а внизу печатается строка, что синее — не текст урока"}],
-  ["cap2",{de:"Am PDF selbst",en:"The PDF itself",ru:"Сам PDF"}],
-  ["✱     ",{de:"Silbentrennung nach der Sprache der Lektion — kein Flattersatz mehr im Russischen und Deutschen",
-             en:"Hyphenation follows the language of the lesson — no more rivers in Russian and German",
-             ru:"Переносы по языку урока — в русском и немецком больше нет дыр в выключке"}],
-  ["✱      ",{de:"Eine Tagesüberschrift bleibt nie allein am Seitenfuß",
-              en:"A day heading is never left alone at the foot of a page",
-              ru:"Заголовок дня больше не остаётся один в конце страницы"}],
-  ["✱       ",{de:"A4, sauberer Rand, Dateiname nach der Lektion",
-               en:"A4, a clean margin, the file named after the lesson",
-               ru:"A4, ровные поля, имя файла по уроку"}]
+  ["title",{de:"Neu in 2.1",en:"New in 2.1",ru:"Что нового в 2.1"}],
+  ["cap",{de:"Werkzeug zuerst",en:"The tool comes first",ru:"Сначала инструмент"}],
+  ["✱",{de:"Links steht das Etui: Strichart und Farbe werden genommen, bevor markiert wird — danach färbt jede Markierung, ohne dass etwas aufklappt",
+        en:"The rail stands on the left: a stroke and a colour are taken before marking — after that every selection is painted and nothing pops up",
+        ru:"Слева стоит пенал: тип штриха и цвет берутся до разметки — дальше каждое выделение красится, и ничего не всплывает"}],
+  ["✱ ",{de:"Nichts in der Hand heißt: der Text lässt sich ganz normal markieren und kopieren",
+         en:"Nothing in hand means the text selects and copies like anywhere else",
+         ru:"Ничего в руке — текст выделяется и копируется как везде"}],
+  ["✱  ",{de:"Cursor, Auswahlfarbe und die leuchtende Taste zeigen dasselbe: was gerade in der Hand ist",
+          en:"The cursor, the selection colour and the lit button all say the same thing: what is in hand",
+          ru:"Курсор, цвет выделения и горящая кнопка говорят одно: что сейчас в руке"}],
+  ["✱   ",{de:"Eigener Text und eigene Notiz: Werkzeug nehmen, einmal tippen, fertig",
+           en:"Your own words and your own note: take the tool, click once, done",
+           ru:"Свой текст и своя заметка: взял инструмент, один клик — готово"}],
+  ["✱    ",{de:"Kopieren mit Bibelstelle als eigenes Werkzeug",en:"Copying with the reference is a tool of its own",ru:"Копирование со ссылкой — отдельный инструмент"}],
+  ["✱     ",{de:"Der Strich endet rund wie ein Filzstift und hängt an ganzen Wörtern — kein halbes Wort, keine Naht in der Mitte",
+             en:"The stroke ends round like a felt pen and holds to whole words — no half word, no seam in the middle",
+             ru:"Мазок кончается круглым носом, как фломастер, и держится целых слов — ни половины слова, ни шва посередине"}],
+  ["cap2",{de:"Und außerdem",en:"And besides",ru:"И ещё"}],
+  ["✱     ",{de:"Auf einen Strich tippen: die Blase bleibt offen, solange Farben durchprobiert werden",
+             en:"Tap a stroke: the bubble stays open while the colours are tried",
+             ru:"Нажал на мазок — пузырь не закрывается, пока перебираешь цвета"}],
+  ["✱      ",{de:"Der Zähler unten am Etui sagt, wie viel gespeichert ist und wo",
+              en:"The counter at the foot of the rail says how much is kept, and where",
+              ru:"Счётчик внизу пенала говорит, сколько сохранено и где"}],
+  ["✱       ",{de:"Am Tablet und am Telefon legt sich das Etui an den unteren Rand",
+               en:"On a tablet and a phone the rail lies down along the bottom edge",
+               ru:"На планшете и телефоне пенал ложится вдоль нижнего края"}]
 ];
 /* the whole cheat sheet in one place, in the language of the lesson */
 const MK_KEYS=[
   ["title",{de:"Tasten und Gesten",en:"Keys and gestures",ru:"Клавиши и жесты"}],
-  ["cap",{de:"Tasten",en:"Keys",ru:"Клавиши"}],
-  ["M",{de:"Marker in die Hand nehmen oder weglegen (Gemaltes bleibt anklickbar)",en:"Pick the marker up or put it down (what is drawn stays clickable)",ru:"Взять маркер или положить (готовые мазки остаются кликабельны)"}],
-  ["1 – 4",{de:"Marker · Strich · Linie · Welle",en:"Highlighter · stroke · line · wave",ru:"Маркер · штрих · линия · волна"}],
-  ["H",{de:"Mit demselben Marker wie zuletzt",en:"With the same marker as last time",ru:"Тем же маркером, что и в прошлый раз"}],
-  ["E",{de:"Alles vom gewählten Text nehmen",en:"Take everything off the chosen text",ru:"Снять всё с выбранного текста"}],
-  ["N",{de:"Eigene Notiz nach dem Absatz",en:"Own note after the paragraph",ru:"Своя заметка после абзаца"}],
-  ["I",{de:"Eigenen Text in die Zeile schreiben",en:"Write your own text into the line",ru:"Вписать своё прямо в строку"}],
-  ["Esc",{de:"Panel schließen, Auswahl aufheben",en:"Close the panel, drop the selection",ru:"Закрыть панель, снять выделение"}],
-  ["← →",{de:"Vorige oder nächste Woche",en:"The week before or after",ru:"Соседняя неделя"}],
-  ["cap2",{de:"Maus und Finger",en:"Mouse and finger",ru:"Мышь и палец"}],
-  ["✱",{de:"Text markieren — der Strich liegt sofort, im letzten Marker",en:"Select text — the stroke goes down at once, in the last marker",ru:"Выделить текст — мазок ложится сразу, последним маркером"}],
-  ["✱ ",{de:"Auf einen Strich tippen — Farbe ändern oder abnehmen",en:"Tap a stroke — change its colour or take it off",ru:"Нажать на мазок — сменить цвет или снять"}],
-  ["✱  ",{de:"In den Text tippen — am Rand erscheint +, für eigene Worte",en:"Tap into the text — a + appears in the margin for your own words",ru:"Нажать в текст — в поле появится + для своих слов"}],
-  ["✱   ",{de:"Alles Gemalte kommt mit ins PDF",en:"Everything drawn comes along into the PDF",ru:"Всё нарисованное уходит в PDF"}]
+  ["cap",{de:"So wird gearbeitet",en:"How it works",ru:"Как это работает"}],
+  ["✱",{de:"Werkzeug links nehmen — markieren — wieder weglegen. Solange es in der Hand ist, färbt jede Markierung.",
+        en:"Take a tool on the left, mark away, put it back. While it is in hand every selection is painted.",
+        ru:"Взял инструмент слева — размечаешь — положил. Пока он в руке, каждое выделение красится."}],
+  ["✱ ",{de:"Nichts in der Hand: der Text lässt sich ganz normal markieren und kopieren",
+         en:"Nothing in hand: the text selects and copies as anywhere else",
+         ru:"Ничего в руке — текст выделяется и копируется как обычно"}],
+  ["✱  ",{de:"Auf einen Strich tippen — Farbe wechseln, Notiz anhängen, abnehmen",
+          en:"Tap a stroke — change its colour, hang a note on it, take it off",
+          ru:"Нажать на мазок — сменить цвет, повесить заметку, снять"}],
+  ["cap2",{de:"Tasten",en:"Keys",ru:"Клавиши"}],
+  ["1 – 4",{de:"Marker · Strich · Linie · Welle (nochmal drücken = weglegen)",
+            en:"Highlighter · stroke · line · wave (press again to put it down)",
+            ru:"Маркер · штрих · линия · волна (ещё раз — положить)"}],
+  ["M",{de:"Letztes Werkzeug nehmen oder weglegen",en:"Take the last tool or put it down",ru:"Взять последний инструмент или положить"}],
+  ["I",{de:"Eigenen Text schreiben — dann einmal in die Zeile tippen",
+        en:"Write your own — then click once into the line",
+        ru:"Вписать своё — потом один клик в строку"}],
+  ["N",{de:"Eigene Notiz — dann auf den Absatz tippen",en:"Own note — then click the paragraph",ru:"Своя заметка — потом клик по абзацу"}],
+  ["E",{de:"Radierer — markieren nimmt alles weg",en:"Eraser — a selection takes everything off",ru:"Ластик — выделение снимает всё"}],
+  ["C",{de:"Kopieren mit Bibelstelle — einfach markieren",en:"Copy with the reference — just select",ru:"Копировать со ссылкой — просто выдели"}],
+  ["Esc",{de:"Werkzeug weglegen, alles schließen",en:"Put the tool down, close everything",ru:"Положить инструмент, всё закрыть"}]
+];
+/* what the reader should know about where his work lives */
+const MK_STORE=[
+  ["title",{de:"Wo die Markierungen liegen",en:"Where the marks are kept",ru:"Где лежат пометки"}],
+  ["✱",{de:"In diesem Browser, auf diesem Gerät — nicht auf einem Server",
+        en:"In this browser, on this device — not on a server",
+        ru:"В этом браузере, на этом устройстве — не на сервере"}],
+  ["✱ ",{de:"Getrennt für jede Lektion und jede Sprache",
+         en:"Separately for every lesson and every language",
+         ru:"Отдельно по каждому уроку и языку"}],
+  ["✱  ",{de:"Auf einem anderen Gerät sind sie nicht da; Browserdaten löschen löscht auch sie",
+          en:"They are not there on another device; clearing browser data clears them too",
+          ru:"На другом устройстве их не будет; очистка данных браузера удалит и их"}],
+  ["✱   ",{de:"Ins PDF kommen sie mit — das PDF ist die Kopie zum Behalten",
+           en:"They come along into the PDF — that is the copy to keep",
+           ru:"В PDF они уходят — это и есть копия, которая останется"}]
 ];
 
-const mkPop=document.getElementById("pop"), mkPick=document.getElementById("mpick"),
-      mkInks=document.getElementById("inks"), mkSeg=document.getElementById("mseg"),
-      mkPill=document.getElementById("mpill"), mkArea=document.getElementById("mkarea"),
-      mkHue=document.getElementById("mkhue"), mkBar=document.getElementById("caretbar"),
-      mkCaret=document.getElementById("caretbtn"), mkToastEl=document.getElementById("mtoast");
+const mkRail=document.getElementById("rail"), mkBub=document.getElementById("bub"),
+      mkPickBox=document.getElementById("rpick"), mkInks=document.getElementById("inks"),
+      mkChip=document.getElementById("mkchip"), mkArea=document.getElementById("mkarea"),
+      mkHue=document.getElementById("mkhue"), mkToastEl=document.getElementById("mtoast");
 
 function mkGet(k,d){ try{ const v=localStorage.getItem("sbl."+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }
 function mkSet(k,v){ try{ localStorage.setItem("sbl."+k,JSON.stringify(v)); }catch(e){} }
@@ -1114,15 +1194,17 @@ let mkTool=mkGet("pen",{c:"#ffd84d",s:"fill"});
    panel reads as one block and not as two ledges */
 const MK_KEEP=8;
 let mkRecent=mkGet("recent8",["#ffd84d","#ffb35c","#ffaec8","#e0a9f5","#a8c9ff","#8fe0d8","#a9e58c","#ff8d8d"]);
-let mkInstant=mkGet("instant",false);
-let mkOn=mkGet("markeron",true);   /* the pencil can be put down altogether */
+let mkMode=null;   /* null | "mark" | "ins" | "note" | "erase" | "copy" — the tool in hand */
+/* the lesson opens as a lesson, not as an editor: the rail appears only when
+   the reader asks for it in the settings, and that choice is remembered */
+let mkRailOn=mkGet("rail",false);
 let MKALL=mkGet("pencil",{});          /* lang/lesson → {marks, ins, notes} */
 let mkQuiet=false, mkGroup=null, mkCaretRange=null;
 
 function mkRemember(c,s){
   mkTool={c:c,s:s}; mkSet("pen",mkTool);
   mkRecent=[c].concat(mkRecent.filter(function(x){return x!==c;})).slice(0,MK_KEEP);
-  mkSet("recent8",mkRecent); mkPaintUI();
+  mkSet("recent8",mkRecent); mkRailInks();
 }
 function mkToast(t,undo){
   mkToastEl.textContent=t;
@@ -1137,17 +1219,46 @@ function mkRgb(h){ h=h.replace("#","");
   if(h.length===3) h=h[0]+h[0]+h[1]+h[1]+h[2]+h[2];
   return [parseInt(h.slice(0,2),16),parseInt(h.slice(2,4),16),parseInt(h.slice(4,6),16)]; }
 /* one function draws every stroke, in any colour the reader picks */
+/* The end of a felt pen is not a straight cut. Each end is its own little
+   shape of fixed width, so it never stretches with the stroke: the ink runs
+   out in a soft round nose the way it does on paper. */
+function mkCap(c,right){
+  const col=encodeURIComponent(c);
+  const d=right
+    ? "M0 1.4c5.4-.6 9 1.2 10.6 5.2 1.5 3.8 1.6 12.6 0 17.8-1.6 5.2-5.2 7.4-10.6 6.8z"
+    : "M12 1.4C6.6.8 3 2.6 1.4 6.6c-1.5 3.8-1.6 12.6 0 17.8C3 29.6 6.6 31.8 12 31.2z";
+  return "url(\"data:image/svg+xml;charset=utf8,"
+    +"%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 33' preserveAspectRatio='none'%3E"
+    +"%3Cpath d='"+encodeURIComponent(d)+"' fill='"+col+"' opacity='.84'/%3E%3C/svg%3E\")";
+}
+/* the ink is put on the element, not just handed back: the fill needs three
+   background layers, and the layers need their own sizes and places */
+function mkInkTo(el,c,s,ps,pe){
+  el.style.backgroundImage=mkInk(c,s,ps,pe);
+  if(s!=="fill"){ el.style.backgroundSize=""; el.style.backgroundPosition=""; return; }
+  const W=.42, L=ps!==false, R=pe!==false;
+  const sizes=[], poss=[];
+  if(L){ sizes.push(W+"em 1.04em"); poss.push("left .16em"); }
+  if(R){ sizes.push(W+"em 1.04em"); poss.push("right .16em"); }
+  sizes.push("calc(100% - "+((L?W:0)+(R?W:0))+"em) 1.04em");
+  poss.push((L?W+"em":"0")+" .16em");
+  el.style.backgroundSize=sizes.join(",");
+  el.style.backgroundPosition=poss.join(",");
+}
 function mkInk(c,s,ps,pe){
   const p=mkRgb(c),A=function(a){ return "rgba("+p[0]+","+p[1]+","+p[2]+","+a+")"; },col=encodeURIComponent(c);
   if(s==="fill"){
     /* the density holds a plateau the whole way; the tapered ends are drawn
        only where the selection really begins and ends, so a piece that is one
        of several shows no seam in the middle */
-    const st=[];
-    if(ps!==false) st.push(A(0)+" 0%",A(.96)+" 1.6%",A(.87)+" 5%"); else st.push(A(.85)+" 0%");
-    st.push(A(.84)+" 52%");
-    if(pe!==false) st.push(A(.88)+" 95%",A(.96)+" 98.4%",A(0)+" 100%"); else st.push(A(.85)+" 100%");
-    return "linear-gradient(100deg,"+st.join(",")+"),linear-gradient(to top,"+A(.2)+" 0%,"+A(0)+" 46%)";
+    /* body: an even bed of ink with a little more weight at the bottom, where
+       it would settle on paper; the ends are the caps above */
+    const body="linear-gradient(178deg,"+A(.78)+" 0%,"+A(.86)+" 55%,"+A(.9)+" 100%)";
+    const out=[];
+    if(ps!==false) out.push(mkCap(c,false));
+    if(pe!==false) out.push(mkCap(c,true));
+    out.push(body);
+    return out.join(",");
   }
   let svg;
   if(s==="tex") svg="%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 240 34' preserveAspectRatio='none'%3E%3Cpath d='M3.4 11.6c14-3.4 41-5.9 78-6.8 37-.9 84 .4 120 2.1 14 .7 27 1.9 35 3.4 3 .6 3.6 1.8 3 4.6-.7 3.3-1.4 7.7-3.1 10.4-1.3 2-5 2.5-11 3-31 2.4-96 3.9-150 3.1-27-.4-48-1.3-60-2.7-8-.9-11-2.2-12-4.6-1-2.6-1.4-6.9-.9-9.6.3-1.9 1-2.6 1-2.9z' fill='"+col+"' opacity='.8'/%3E%3Cpath d='M9 22.6c22 2.2 62 3.4 112 3.5 46 .1 88-.7 111-2.2' stroke='"+col+"' stroke-width='2.6' fill='none' opacity='.45' stroke-linecap='round'/%3E%3C/svg%3E";
@@ -1160,9 +1271,51 @@ function mkInk(c,s,ps,pe){
 function mkOwn(n){ return !!(n.parentNode&&n.parentNode.closest&&n.parentNode.closest(".myins,.mynote")); }
 function mkWalk(b){ return document.createTreeWalker(b,NodeFilter.SHOW_TEXT,{
   acceptNode:function(n){ return mkOwn(n)?NodeFilter.FILTER_REJECT:NodeFilter.FILTER_ACCEPT; }}); }
+/* A stroke is never left cutting a word in half: whatever the hand caught,
+   the range grows out to whole words first. It is what makes a highlight look
+   deliberate instead of brushed. */
+const MK_EDGE=/[\s.,;:!?()\[\]«»"'“”„…—–-]/;
+function mkSnapWords(r){
+  let n=r.startContainer,o=r.startOffset;
+  if(n.nodeType===3){ const t=n.nodeValue;
+    while(o>0&&!MK_EDGE.test(t[o-1])) o--;
+    r.setStart(n,o); }
+  n=r.endContainer; o=r.endOffset;
+  if(n.nodeType===3){ const t=n.nodeValue;
+    while(o<t.length&&!MK_EDGE.test(t[o])) o++;
+    r.setEnd(n,o); }
+  return r;
+}
 let mkGid=0;
+/* One stroke wants to be one element. If the range swallows whole tags — the
+   bold label of a memory verse, an italic book title — the browser can wrap it
+   in a single <mark>, and a single background has no seams to show: no white
+   hairline, no darker notch where two pieces met. Only a range that cuts a tag
+   in half falls back to piece-by-piece. */
+function mkWhole(range,c,s,g){
+  let frag;
+  try{ frag=range.cloneContents(); }catch(e){ return false; }
+  if(frag.querySelector){
+    if(frag.querySelector(".myins,.mynote")) return false;          /* never tint the reader's own words */
+    if(frag.querySelector('mark[data-c="'+c+'"][data-y="'+s+'"]')) return false;  /* same ink already there */
+  }
+  const m=document.createElement("mark");
+  m.className=s+" ps pe"; m.dataset.c=c; m.dataset.y=s; m.dataset.g=g;
+  mkInkTo(m,c,s,true,true);
+  try{ range.surroundContents(m); }catch(e){ return false; }
+  return true;
+}
 function mkPaint(range,c,s){
   const g=++mkGid;
+  try{ mkSnapWords(range); }catch(e){}
+  if(mkWhole(range,c,s,String(g))){
+    const host=(range.commonAncestorContainer.nodeType===1?range.commonAncestorContainer
+      :range.commonAncestorContainer.parentElement);
+    const pg=host&&host.closest?(host.closest(".page")||host):host;
+    if(pg) mkMerge(pg,String(g));
+    mkStore();
+    return g;
+  }
   const sc=range.startContainer,so=range.startOffset,ec=range.endContainer,eo=range.endOffset;
   const root=range.commonAncestorContainer;
   /* a second pass in a different colour darkens, as real ink does — but the
@@ -1189,7 +1342,7 @@ function mkPaint(range,c,s){
     const m=document.createElement("mark");
     m.className=s+(ps?" ps":"")+(pe?" pe":"");
     m.dataset.c=c; m.dataset.y=s; m.dataset.g=g;
-    m.style.backgroundImage=mkInk(c,s,ps,pe);
+    mkInkTo(m,c,s,ps,pe);
     try{ r.surroundContents(m); }catch(err){}
   });
   const blk=(root.nodeType===1?root:root.parentElement);
@@ -1215,8 +1368,7 @@ function mkMerge(scope,g){
       if(n.classList.contains("pe")) m.classList.add("pe");
       if(g&&(n.dataset.g===g||m.dataset.g===g)) m.dataset.g=g;
       n.remove();
-      m.style.backgroundImage=mkInk(m.dataset.c,m.dataset.y,
-        m.classList.contains("ps"),m.classList.contains("pe"));
+      mkInkTo(m,m.dataset.c,m.dataset.y,m.classList.contains("ps"),m.classList.contains("pe"));
       again=true;
     });
   }
@@ -1278,7 +1430,7 @@ function mkStore(){
     MKALL[mkKey(pg)]=out;
   });
   mkSet("pencil",MKALL);
-  mkLegend();
+  mkLegend(); mkChipPaint(true);
 }
 function mkLegend(){
   document.querySelectorAll(".page[data-les]").forEach(function(pg){
@@ -1312,7 +1464,7 @@ function mkRestore(){
       mkNote(b,o.t,true);
     });
   });
-  mkQuiet=false; mkLegend();
+  mkQuiet=false; mkLegend(); mkChipPaint();
 }
 
 /* ——— the reader's own words ——— */
@@ -1356,23 +1508,124 @@ function mkNote(afterEl,html,quiet){
   return d;
 }
 
-/* ——— the panel ——— */
-function mkPaintUI(){
-  mkInks.innerHTML=mkRecent.map(function(c){
-    return '<span class="ink'+(c===mkTool.c?" on":"")+'" data-c="'+c+'" style="background:'+c+'"></span>'; }).join("");
-  mkSeg.querySelectorAll(".o").forEach(function(o){
-    o.classList.toggle("on",o.dataset.s===mkTool.s); o.title=T(o.dataset.s); });
-  const i=MK_STYLES.indexOf(mkTool.s), step=(mkSeg.querySelector(".o")||{offsetWidth:30}).offsetWidth||30;
-  mkPill.style.opacity=i<0?0:1;
-  if(i>=0) mkPill.style.transform="translateX("+(i*step)+"px)";   /* step follows the touch sizes */
-  document.getElementById("more").title=T("more");
-  mkPop.querySelector('[data-a="ins"]').title=T("ins");
-  mkPop.querySelector('[data-a="note"]').title=T("addnote");
-  mkPop.querySelector('[data-a="copy"]').title=T("copy");
-  mkPop.querySelector('[data-a="erase"]').title=T("erase");
+/* ——— THE RAIL — a tool is taken first, then the work is done ———
+   Nothing pops up to be found and nothing closes after a click: take the
+   yellow marker, run through the lesson phrase by phrase, put it back. */
+function mkPenCursor(c){
+  const svg="%3Csvg xmlns='http://www.w3.org/2000/svg' width='30' height='30' viewBox='0 0 30 30'%3E"
+    +"%3Cg transform='rotate(-38 15 15)'%3E%3Crect x='11' y='2' width='9' height='14' rx='2.2' fill='%233c3c41'/%3E"
+    +"%3Crect x='11.5' y='15' width='8' height='4' fill='%238e8e93'/%3E"
+    +"%3Cpath d='M12 19h7l-3.5 8z' fill='"+encodeURIComponent(c)+"' stroke='%23000' stroke-opacity='.25'/%3E"
+    +"%3C/g%3E%3C/svg%3E";
+  return 'url("data:image/svg+xml;charset=utf8,'+svg+'") 4 27, crosshair';
+}
+const MK_CURSOR={ins:"text",note:"copy",erase:"cell"};
+/* the cursor, the selection colour and the lit buttons all say the same thing:
+   this is what is in your hand right now */
+function mkPaintMode(){
+  const sh=document.getElementById("sheets");
+  sh.style.cursor=mkMode==="mark"?mkPenCursor(mkTool.c):(MK_CURSOR[mkMode]||"");
+  const p=mkRgb(mkTool.c);
+  document.documentElement.style.setProperty("--selc",
+    mkMode==="mark"?"rgba("+p[0]+","+p[1]+","+p[2]+",.5)":"rgba(0,122,255,.22)");
+  mkRail.querySelectorAll("[data-mode]").forEach(function(b){
+    b.classList.toggle("on",!!mkMode&&b.dataset.mode===mkMode); });
+  mkRail.querySelectorAll("[data-s]").forEach(function(b){
+    b.classList.toggle("on",mkMode==="mark"&&b.dataset.s===mkTool.s);
+    b.title=T(b.dataset.s); });
+  document.querySelector('[data-mode="ins"]').title=T("ins");
+  document.querySelector('[data-mode="note"]').title=T("addnote");
+  document.querySelector('[data-mode="erase"]').title=T("erase");
+  document.querySelector('[data-mode="copy"]').title=T("copy");
+  mkRailInks();
+}
+/* seven inks and the gamut make eight cells — two even columns, no odd circle
+   left standing in the middle */
+function mkRailInks(){
+  mkInks.innerHTML=mkRecent.slice(0,7).map(function(c){
+    return '<span class="ink'+(mkMode==="mark"&&c===mkTool.c?" on":"")+'" data-c="'+c+'" style="background:'+c+'"></span>';
+  }).join("")+'<span class="ink more'+(mkPickBox.hidden?"":" on")+'" id="more" title="'+esc(T("more"))+'"></span>';
+}
+function mkSetRail(v){
+  mkRailOn=v; mkSet("rail",v);
+  if(!v){ mkMode=null; mkBubClose(); }
+  mkRail.style.display=v?"":"none";
+  document.getElementById("mk-rail").classList.toggle("on",v);
+  mkPaintMode();
+  mkToast(T(v?"railshown":"railhid"));
+}
+function mkSetMode(m){
+  if(!mkRailOn) return;
+  mkMode=(mkMode===m)?null:m;
+  if(mkMode!=="mark") mkPickBox.hidden=true;
+  mkBubClose(); mkPaintMode();
+}
+/* a type button takes the marker; pressing the same one again puts it down */
+function mkTakeStyle(y){
+  if(!mkRailOn) return;
+  if(mkGroup&&mkGroup.length){ mkApply(mkTool.c,y); mkTool.s=y; mkSet("pen",mkTool); mkPaintMode(); return; }
+  if(mkMode==="mark"&&mkTool.s===y) mkMode=null;
+  else { mkTool.s=y; mkSet("pen",mkTool); mkMode="mark"; }
+  mkPaintMode();
+}
+/* a colour never puts the tool down — it only changes what it writes with */
+function mkTakeColour(c){
+  if(mkGroup&&mkGroup.length){ mkApply(c,mkTool.s); return; }
+  mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode();
+}
+mkRail.addEventListener("click",function(e){
+  const y=e.target.closest("[data-s]"); if(y) return mkTakeStyle(y.dataset.s);
+  const m=e.target.closest("[data-mode]"); if(m) return mkSetMode(m.dataset.mode);
+  if(e.target.closest("#more")){
+    const open=mkPickBox.hidden;
+    mkPickBox.hidden=!open;
+    if(open){ mkHSV=mkHex2hsv(mkTool.c); mkPaintPicker(); if(!mkMode) mkMode="mark"; }
+    mkPaintMode(); return;
+  }
+  const c=e.target.closest("[data-c]"); if(c) return mkTakeColour(c.dataset.c);
+  if(e.target.closest("#mkchip")) mkStoreCard();
+});
+
+/* ——— how many marks are kept, and where ——— */
+function mkCount(){
+  let n=0;
+  document.querySelectorAll(".page[data-les]").forEach(function(pg){
+    const d=MKALL[mkKey(pg)];
+    if(d) n+=(d.marks||[]).length+(d.ins||[]).length+(d.notes||[]).length;
+  });
+  return n;
+}
+function mkChipPaint(flash){
+  mkChip.textContent="✓ "+mkCount();
+  mkChip.title=T("kept");
+  if(flash){ mkChip.classList.add("flash");
+    clearTimeout(mkChipPaint.t);
+    mkChipPaint.t=setTimeout(function(){ mkChip.classList.remove("flash"); },1300); }
+}
+let mkWipeArmed=false;
+function mkStoreCard(){
+  mkCard(MK_STORE);
+  const b=document.createElement("div");
+  b.className="krow"; b.style.marginTop="14px";
+  b.innerHTML='<kbd id="mk-wipe" style="min-width:auto;cursor:pointer;color:#b3261e">'+esc(T("wipe"))+'</kbd>'
+             +'<span>'+esc(T("wipehint"))+'</span>';
+  keysPop.appendChild(b);
+  mkWipeArmed=false;
+  document.getElementById("mk-wipe").onclick=function(){
+    if(!mkWipeArmed){ mkWipeArmed=true; this.textContent=T("sure"); return; }
+    const before=JSON.parse(JSON.stringify(MKALL));
+    document.querySelectorAll(".page[data-les]").forEach(function(pg){
+      pg.querySelectorAll("mark").forEach(mkUnwrap);
+      pg.querySelectorAll(".myins").forEach(function(e){ e.replaceWith(document.createTextNode(mkInsText(e))); });
+      pg.querySelectorAll(".mynote").forEach(function(e){ e.remove(); });
+      delete MKALL[mkKey(pg)];
+    });
+    mkSet("pencil",MKALL); mkLegend(); mkChipPaint(true); mkKeysClose();
+    mkToast(T("cleared"),function(){ MKALL=before; mkSet("pencil",MKALL); mkRestore(); mkChipPaint(true); });
+  };
 }
 
-/* ——— colour, picked inside the panel ——— */
+/* ——— colour, picked beside the rail ——— */
 function mkHsv2hex(h,s,v){
   const f=function(n){ const k=(n+h/60)%6, x=v-v*s*Math.max(0,Math.min(k,4-k,1));
     return ("0"+Math.round(x*255).toString(16)).slice(-2); };
@@ -1394,14 +1647,14 @@ function mkPaintPicker(){
   mkArea.firstElementChild.style.top=((1-mkHSV[2])*100)+"%";
   mkHue.firstElementChild.style.left=(h/360*100)+"%";
 }
-/* the stroke changes colour under the finger, so the choice is made on the
-   text itself and not on a swatch */
+/* dragging the field recolours the stroke under the hand, if there is one —
+   the choice is made on the text itself, not on a swatch */
 function mkLive(){
   const hex=mkHsv2hex(mkHSV[0],mkHSV[1],mkHSV[2]);
   mkPaintPicker();
-  if(mkGroup) mkGroup.forEach(function(m){
+  if(mkGroup&&mkGroup.length) mkGroup.forEach(function(m){
     const ps=m.classList.contains("ps"),pe=m.classList.contains("pe");
-    m.dataset.c=hex; m.style.backgroundImage=mkInk(hex,m.dataset.y,ps,pe); });
+    m.dataset.c=hex; mkInkTo(m,hex,m.dataset.y,ps,pe); });
   return hex;
 }
 function mkDrag(el,fn){
@@ -1412,191 +1665,146 @@ function mkDrag(el,fn){
     e.preventDefault(); el.setPointerCapture(e.pointerId); go(e);
     const mv=function(ev){ go(ev); };
     const up=function(){ el.removeEventListener("pointermove",mv); el.removeEventListener("pointerup",up);
-      const hex=mkLive(); mkRemember(hex,mkTool.s); mkStore(); };
+      const hex=mkLive(); mkRemember(hex,mkTool.s); mkMode="mark"; mkPaintMode(); mkStore(); };
     el.addEventListener("pointermove",mv); el.addEventListener("pointerup",up);
   });
 }
 mkDrag(mkArea,function(x,y){ mkHSV=[mkHSV[0],x,1-y]; });
 mkDrag(mkHue,function(x){ mkHSV=[x*360,mkHSV[1],mkHSV[2]]; });
-function mkPlace(rect){
-  mkPop.classList.add("on");
-  const w=mkPop.offsetWidth,h=mkPop.offsetHeight;
+
+/* ——— the bubble on a stroke already laid down ——— */
+function mkBubPlace(rect){
+  mkBub.classList.add("on");
+  mkBub.querySelector('[data-a="erase"]').title=T("erase");
+  const w=mkBub.offsetWidth,h=mkBub.offsetHeight;
   let x=rect.left+window.scrollX+rect.width/2-w/2;
   x=Math.max(10,Math.min(x,document.documentElement.clientWidth-w-10));
-  /* the panel sits BELOW the selection: the browser's own menu comes up above it */
-  let y=rect.bottom+window.scrollY+11,below=true;
-  if(rect.bottom+h+18>window.innerHeight){ y=rect.top+window.scrollY-h-11; below=false; }
-  mkPop.classList.toggle("below",below);
-  mkPop.style.left=x+"px"; mkPop.style.top=y+"px";
+  let y=rect.bottom+window.scrollY+9;
+  if(rect.bottom+h+16>window.innerHeight) y=rect.top+window.scrollY-h-9;
+  mkBub.style.left=x+"px"; mkBub.style.top=y+"px";
 }
-function mkClose(){ mkPop.classList.remove("on"); mkPick.hidden=true;
-  document.getElementById("more").classList.remove("on"); mkGroup=null; }
-/* recolour the stroke that is currently under the hand — the one just laid
-   down, or the one that was clicked */
+function mkBubClose(){
+  mkBub.classList.remove("on");
+  if(mkGroup) mkGroup.forEach(function(m){ m.classList.remove("sel"); });
+  mkGroup=null;
+}
+/* recolour the stroke that was clicked — and stay open, so the colours can be
+   tried one after another */
 function mkApply(c,s){
   if(!mkGroup||!mkGroup.length) return;
   mkGroup.forEach(function(m){
     const ps=m.classList.contains("ps"),pe=m.classList.contains("pe");
     m.dataset.c=c; m.dataset.y=s;
     m.className=s+(ps?" ps":"")+(pe?" pe":"");
-    m.style.backgroundImage=mkInk(c,s,ps,pe);
+    mkInkTo(m,c,s,ps,pe);
   });
-  mkRemember(c,s); mkStore(); mkClose();
+  mkRemember(c,s); mkStore(); mkRailInks();
 }
-/* The stroke is laid down the moment the selection ends, in the marker that
-   was used last — what you see is already the finished thing, not a grey
-   preview of it. The panel only changes its colour afterwards. */
+document.addEventListener("click",function(e){
+  if(e.target.tagName!=="MARK"||mkMode==="erase") return;
+  mkBubClose();
+  mkGroup=e.target.dataset.g?mkPieces(e.target.dataset.g):[e.target];
+  mkGroup.forEach(function(m){ m.classList.add("sel"); });
+  mkBubPlace(e.target.getBoundingClientRect());
+});
+mkBub.addEventListener("mousedown",function(e){ e.preventDefault(); });
+mkBub.addEventListener("click",function(e){
+  if(!e.target.closest("[data-a]")||!mkGroup||!mkGroup.length) return;
+  const g=mkGroup; mkBubClose(); mkEraseAround(g);
+});
+document.addEventListener("mousedown",function(e){
+  if(!mkBub.contains(e.target)&&e.target.tagName!=="MARK") mkBubClose();
+});
+
+/* ——— the eraser takes the text clean ——— */
+function mkEraseRange(r){
+  [].slice.call(document.querySelectorAll("mark")).filter(function(m){ return r.intersectsNode(m); }).forEach(mkUnwrap);
+  [].slice.call(document.querySelectorAll(".myins")).filter(function(m){ return r.intersectsNode(m); })
+    .forEach(function(m){ m.remove(); });
+  mkStore();
+}
+function mkEraseAround(g){
+  const r=document.createRange(); r.setStartBefore(g[0]); r.setEndAfter(g[g.length-1]);
+  mkEraseRange(r);
+}
+
+/* ——— what a finished selection does depends on the tool in hand ——— */
+const mkTouch=matchMedia("(pointer:coarse)").matches;
 function mkFromSelection(e){
-  if(!mkOn||mkPop.contains(e.target)||mkCaret.contains(e.target)) return;
-  /* a finger needs a moment: the system finishes the selection after the
-     touch has already ended */
+  if(mkMode!=="mark"&&mkMode!=="erase"&&mkMode!=="copy") return;
+  if(mkRail.contains(e.target)||mkBub.contains(e.target)) return;
   setTimeout(function(){
     const s=window.getSelection();
-    if(!s.rangeCount) return;
+    if(!s.rangeCount||s.isCollapsed) return;
     const r=s.getRangeAt(0);
     const host=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement;
-    const pg=host&&host.closest?host.closest(".page[data-les]"):null;
-    if(!pg) return mkClose();
-    if(s.isCollapsed){ if(!mkGroup) mkCaretShow(r); return; }
-    mkCaretHide();
-    const keep=r.cloneRange(),box=r.getBoundingClientRect();
-    s.removeAllRanges();                       /* и меню браузера не всплывает */
-    const g=mkPaint(keep,mkTool.c,mkTool.s);
-    if(mkInstant){ mkRemember(mkTool.c,mkTool.s); return; }
-    mkGroup=mkPieces(g); mkPlace(box);
+    if(!host||!host.closest||!host.closest(".page[data-les]")) return;
+    const keep=r.cloneRange();
+    s.removeAllRanges();
+    if(mkMode==="erase") mkEraseRange(keep);
+    else if(mkMode==="copy") mkCopyRange(keep);
+    else mkPaint(keep,mkTool.c,mkTool.s);
   },mkTouch?120:0);
 }
-const mkTouch=matchMedia("(pointer:coarse)").matches;
 document.addEventListener("mouseup",mkFromSelection);
 document.addEventListener("touchend",mkFromSelection);
-function mkCaretHide(){ clearTimeout(mkCaretShow.t); clearTimeout(mkCaretShow.h);
-  mkCaret.classList.remove("on"); mkBar.classList.remove("on"); }
-/* the caret stands in the very gap the words will go into, and the button
-   sits on top of it — so there is no guessing where the text will land */
-function mkCaretShow(r){
-  const host=r.startContainer.parentElement;
-  const blk=host&&host.closest?host.closest("[data-k]"):null;
-  if(!blk||host.closest(".myins,.mynote")) return mkCaretHide();
-  mkCaretRange=r.cloneRange();
-  /* the button never appears under the pointer: it waits a moment, then
-     stands out in the left margin, level with the line. The caret alone marks
-     the spot the words will go into. */
-  clearTimeout(mkCaretShow.t); clearTimeout(mkCaretShow.h);
-  mkCaretShow.t=setTimeout(function(){
-    const rr=mkCaretRange.cloneRange();
-    const probe=document.createElement("span"); probe.textContent="​";
-    rr.insertNode(probe);
-    const b=probe.getBoundingClientRect(), a=blk.getBoundingClientRect();
-    const pg=blk.closest(".page"), pr=pg?pg.getBoundingClientRect():a;
-    const x=b.left+window.scrollX, y=b.top+window.scrollY, h=b.height||18;
-    probe.parentNode.removeChild(probe);
-    if(!h) return;
-    /* the button lives in the margin and covers nothing: first the sheet's own
-       white edge, then the grey outside it. If neither has room — a narrow
-       phone — it simply does not appear, and the key I still works. */
-    let bx=null;
-    if(a.left-pr.left>=30) bx=a.left-30;
-    else if(pr.left-30>=6) bx=pr.left-30;
-    mkBar.style.left=x+"px"; mkBar.style.top=y+"px"; mkBar.style.height=h+"px";
-    mkBar.classList.add("on");
-    if(bx==null){ mkCaret.classList.remove("on"); }
-    else{
-      mkCaret.style.left=(bx+window.scrollX)+"px";
-      mkCaret.style.top=(y+(h-20)/2)+"px";
-      mkCaret.classList.add("on");
-    }
-    mkCaretShow.h=setTimeout(mkCaretHide,6000);
-  },450);
+
+/* copying carries the reference with it: the verse above the passage, or the
+   lesson itself */
+function mkCopyRange(r){
+  const t=r.toString().trim(); if(!t) return;
+  let el=r.commonAncestorContainer;
+  if(el.nodeType===3) el=el.parentElement;
+  const item=el.closest?el.closest(".vitem"):null;
+  const ref=item&&item.querySelector(".vref")?item.querySelector(".vref").textContent.trim():"";
+  const out="«"+t+"»"+(ref?" ("+ref+")":"");
+  if(navigator.clipboard) navigator.clipboard.writeText(out);
+  mkToast(T("copied"));
 }
-mkCaret.onmousedown=function(e){ e.preventDefault(); };
-mkCaret.onclick=function(){ if(mkCaretRange){ mkInsert(mkCaretRange.cloneRange()); mkCaretHide(); } };
-document.addEventListener("mousedown",function(e){
-  if(!mkPop.contains(e.target)&&!mkCaret.contains(e.target)&&e.target.tagName!=="MARK"){
-    mkClose(); if(!e.target.closest||!e.target.closest(".page")) mkCaretHide();
+
+/* ——— one click writes your own words exactly where you clicked ——— */
+function mkRangeAt(x,y){
+  if(document.caretRangeFromPoint) return document.caretRangeFromPoint(x,y);
+  if(document.caretPositionFromPoint){
+    const p=document.caretPositionFromPoint(x,y);
+    if(p){ const r=document.createRange(); r.setStart(p.offsetNode,p.offset); r.collapse(true); return r; }
   }
-});
-/* a stroke already on the page: the same panel picks it up — change its
-   colour, add a note to it, take it off */
-/* a stroke already on the page can always be picked up — even with the marker
-   put down. Switching it off stops new ink, not the housekeeping. */
+  return null;
+}
 document.addEventListener("click",function(e){
-  if(e.target.tagName!=="MARK") return;
-  mkGroup=e.target.dataset.g?mkPieces(e.target.dataset.g):[e.target];
-  mkTool={c:e.target.dataset.c,s:e.target.dataset.y}; mkPaintUI();
-  mkPlace(e.target.getBoundingClientRect());
-});
-mkPop.addEventListener("mousedown",function(e){ e.preventDefault(); });
-mkPop.addEventListener("click",function(e){
-  const o=e.target.closest("[data-s]"); if(o){ mkApply(mkTool.c,o.dataset.s); return; }
-  const i=e.target.closest("[data-c]"); if(i){ mkApply(i.dataset.c,mkTool.s); return; }
-  if(e.target.closest("#more")){
-    const on=mkPick.hidden;
-    mkPick.hidden=!on; document.getElementById("more").classList.toggle("on",on);
-    if(on){ mkHSV=mkHex2hsv(mkTool.c); mkPaintPicker(); }
-    return; }
-  const a=e.target.closest("[data-a]"); if(!a) return;
-  const g=mkGroup; if(!g||!g.length) return;
-  if(a.dataset.a==="copy"){
-    const t=g.map(function(m){ return m.textContent; }).join("").trim();
-    if(navigator.clipboard) navigator.clipboard.writeText("«"+t+"»");
-    mkToast(T("copied")); mkClose();
+  if(!mkMode||mkMode==="mark") return;
+  if(mkRail.contains(e.target)||mkBub.contains(e.target)) return;
+  const blk=e.target.closest?e.target.closest("[data-k]"):null;
+  if(!blk||!blk.closest(".page[data-les]")) return;
+  if(e.target.closest(".myins,.mynote")) return;
+  if(mkMode==="ins"){
+    const r=mkRangeAt(e.clientX,e.clientY);
+    if(r&&blk.contains(r.startContainer)) mkInsert(r);
   }
-  /* the eraser takes the text clean: every stroke lying over the chosen words
-     goes, not only the one that happens to be in hand */
-  if(a.dataset.a==="erase"){
-    const r=document.createRange(); r.setStartBefore(g[0]); r.setEndAfter(g[g.length-1]);
-    const all=[].slice.call(document.querySelectorAll("mark")).filter(function(m){ return r.intersectsNode(m); });
-    (all.length?all:g).forEach(mkUnwrap);
-    /* и свой вписанный текст, если он лежит внутри стираемого куска */
-    [].slice.call(document.querySelectorAll(".myins")).filter(function(m){ return r.intersectsNode(m); })
-      .forEach(function(m){ m.remove(); });
-    mkStore(); mkClose();
+  if(mkMode==="note"){
+    const host=blk.classList.contains("vtext")?(blk.closest(".vgroup")||blk):blk;
+    mkNote(host);
   }
-  if(a.dataset.a==="ins"){
-    const r=document.createRange(); r.setStartAfter(g[g.length-1]); r.collapse(true);
-    mkClose(); mkInsert(r);
-  }
-  if(a.dataset.a==="note"){
-    const b=g[0].parentElement.closest("[data-k]"); if(!b) return mkClose();
-    const host=b.classList.contains("vtext")?(b.closest(".vgroup")||b):b;
-    mkClose(); mkNote(host);
+  if(mkMode==="erase"&&e.target.tagName==="MARK"){
+    mkEraseAround(e.target.dataset.g?mkPieces(e.target.dataset.g):[e.target]);
   }
 });
+
+/* ——— keys: the same tools, without reaching for the rail ——— */
 document.addEventListener("keydown",function(e){
   if(e.target.isContentEditable||/^(INPUT|TEXTAREA)$/.test(e.target.tagName)) return;
-  const has=!!(mkGroup&&mkGroup.length);
-  if(e.key.toLowerCase()==="m"){ mkSetOn(!mkOn); return; }   /* положить или снова взять маркер */
-  if(e.key==="Escape"){ mkClose(); mkCaretHide(); return; }
-  if(!mkOn) return;
-  if(e.key>="1"&&e.key<="4"&&has) mkApply(mkTool.c,MK_STYLES[+e.key-1]);
-  if(e.key.toLowerCase()==="h"&&has) mkApply(mkTool.c,mkTool.s);
-  if(e.key.toLowerCase()==="e"&&has) mkPop.querySelector('[data-a="erase"]').click();
-  if(e.key.toLowerCase()==="n"&&has) mkPop.querySelector('[data-a="note"]').click();
-  if(e.key.toLowerCase()==="i"){
-    if(has) mkPop.querySelector('[data-a="ins"]').click();
-    else if(mkCaret.classList.contains("on")) mkCaret.click();
-  }
+  if(e.metaKey||e.ctrlKey||e.altKey) return;
+  if(!mkRailOn) return;              /* the rail is away: the keys are quiet too */
+  const k=e.key.toLowerCase();
+  if(e.key==="Escape"){ mkSetMode(null); mkBubClose(); mkKeysClose(); return; }
+  if(e.key>="1"&&e.key<="4"){ mkTakeStyle(MK_STYLES[+e.key-1]); return; }
+  if(k==="e"){ mkSetMode("erase"); return; }
+  if(k==="c"){ mkSetMode("copy"); return; }
+  if(k==="i"){ mkSetMode("ins"); return; }
+  if(k==="n"){ mkSetMode("note"); return; }
+  if(k==="m"){ mkMode?mkSetMode(null):mkTakeStyle(mkTool.s); return; }
 });
-/* two switches in the settings sheet: paint straight away, and wipe the lesson */
-document.getElementById("mk-on").onclick=function(){ mkSetOn(!mkOn); };
-function mkSetOn(v){
-  mkOn=v; mkSet("markeron",mkOn);
-  if(!mkOn){ mkClose(); mkCaretHide(); }
-  mkPaintMarksRow(); mkToast(T(mkOn?"mkon":"mkoff"));
-}
-document.getElementById("mk-instant").onclick=function(){
-  mkInstant=!mkInstant; mkSet("instant",mkInstant); mkPaintMarksRow();
-  mkToast(T("instant")+": "+(mkInstant?"✓":"—")); };
-function mkPaintMarksRow(){
-  document.getElementById("lab-marks").textContent=T("marks");
-  document.getElementById("lab-keys").textContent=T("keys");
-  document.getElementById("mk-ver").textContent="SBL Edition "+APP_VERSION+" · "+
-    ({de:"Was ist neu",en:"What's new",ru:"Что нового"}[lang]||"What's new");
-  const on=document.getElementById("mk-on"), b=document.getElementById("mk-instant");
-  on.textContent=T("marker"); on.style.background=mkOn?"#2b2b2b":""; on.style.color=mkOn?"#fff":"";
-  b.textContent=T("instant"); b.style.background=mkInstant?"#2b2b2b":""; b.style.color=mkInstant?"#fff":"";
-  b.style.opacity=mkOn?"":".4";
-}
+
 /* ——— the cheat sheet ——— */
 const keysPop=document.getElementById("keyspop"), keysBack=document.getElementById("keysback");
 function mkCard(list){
@@ -1617,7 +1825,9 @@ document.getElementById("mk-ver").onclick=function(){ mkCard(MK_NEW); };
 keysBack.onclick=mkKeysClose;
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") mkKeysClose(); },true);
 
-mkPaintUI(); mkPaintMarksRow();
+document.getElementById("mk-rail").onclick=function(){ mkSetRail(!mkRailOn); };
+mkRail.style.display=mkRailOn?"":"none";
+mkPaintMode(); mkChipPaint();
 
 render();
 </script>

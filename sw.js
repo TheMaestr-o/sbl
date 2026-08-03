@@ -1,5 +1,5 @@
-/* SBL Edition 2.0 — cache once, then instant (and offline). */
-const SHELL = "sbl-shell-v2";
+/* SBL Edition 2.1 — cache once, then instant (and offline). */
+const SHELL = "sbl-shell-v3";
 const DATA  = "sbl-data-v1";
 const SHELL_FILES = ["index.html"];
 

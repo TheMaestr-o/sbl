@@ -10,7 +10,7 @@
 
 <br>
 
-![Version](https://img.shields.io/badge/version-2.0-c6a15b?style=flat-square)
+![Version](https://img.shields.io/badge/version-2.1-c6a15b?style=flat-square)
 ![Live](https://img.shields.io/badge/live-themaestr--o.github.io-606162?style=flat-square)
 ![Languages](https://img.shields.io/badge/DE%20%C2%B7%20EN%20%C2%B7%20RU-606162?style=flat-square)
 ![Export](https://img.shields.io/badge/export-PDF-2d2d2d?style=flat-square)
@@ -59,26 +59,28 @@ The reference above the passage, the verse number and the first word of the ques
 
 <br>
 
-## A hand on the sheet &nbsp;<sub>new in 2.0</sub>
+## A hand on the sheet
 
-<div align="center"><img src="screenshots/pencil.png" alt="A lesson with the memory verse under a yellow highlighter, a hand-drawn red line under the question, a blue stroke over the commentary, the reader's own note in the margin colour, and the marker panel open below the selection"></div>
+<div align="center"><img src="screenshots/pencil.png" alt="A lesson with the memory verse under a yellow highlighter, a hand-drawn red line under the question, a blue stroke over the commentary, the reader's own note and an insertion in the line — and the tool rail standing to the left of the sheet"></div>
 
-Select a line and the ink is **already there** — in the marker you used last. The panel that comes up only changes its colour afterwards, so what you see first is the finished thing, not a grey preview of it.
+The lesson opens as a lesson: the text selects and copies like anywhere else. Turn **Marker and notes** on in ⚙ and a rail comes out beside the sheet — from then on it works the way a desk does: **take a tool, mark away, put it back.** Nothing pops up to be found and nothing closes after a click, so a whole lesson can be gone through phrase by phrase.
 
 | | |
 |---|---|
-| **Four strokes** | Highlighter with the slanted sweep of a real felt pen, a rough-edged stroke, a hand-drawn line, a wave |
-| **Any colour** | Eight last-used inks in the panel, the whole gamut behind the rainbow, and it is remembered |
+| **Four strokes** | Highlighter with the soft round nose of a felt pen, a rough-edged stroke, a hand-drawn line, a wave |
+| **Any colour** | Seven last-used inks in the rail, the whole gamut behind the rainbow — the stroke under the hand changes colour as you drag through it |
 | **Two passes go darker** | A second colour over the first behaves like real ink; the same colour twice does not muddy it |
-| **Your own note** | After any paragraph — blue, in the other face, labelled and dated, so nobody mistakes it for the lesson |
-| **Your own words in the line** | Click into the text and a caret shows the exact gap they will go into |
-| **Kept in the browser** | Separately for every lesson and every language; they come back after a reload |
+| **Whole words** | A stroke never ends cutting a word in half, and a stroke that swallows a bold label or an italic title is laid as **one** mark — no seam, no notch, no white hairline |
+| **Your own note** | Take ≡, click a paragraph — blue, in the other face, labelled and dated, so nobody mistakes it for the lesson |
+| **Your own words in the line** | Take ✚, click into the text — the field opens exactly where you clicked |
+| **Copy with the reference** | A tool of its own: select a verse and the clipboard has the text with its reference |
+| **Kept in the browser** | The counter at the foot of the rail says how much, and opens the page that says where |
 
-Put the marker down with **M** when you only want to read — what is already drawn stays clickable, so a stroke can still be recoloured or taken off.
+Tap a stroke already on the page and it is picked up: the rail's colours and strokes now act on it, and a single ✕ takes it off.
 
-<div align="center"><img src="screenshots/keys.png" width="560" alt="The shortcuts card: keys for the marker, the styles, the note and the insertion, and the mouse and finger gestures"></div>
+<div align="center"><img src="screenshots/keys.png" width="520" alt="The shortcuts card: how the tools work, and the keys for the strokes, the note, the insertion, the eraser and copying"></div>
 
-Every key and gesture is listed under **⚙ → Shortcuts**, in the language of the lesson.
+Keys do the same without reaching for the rail: **1 – 4** the strokes, **N** a note, **I** your own words, **E** the eraser, **C** copy, **M** the last tool, **Esc** put it down. They are all listed under **⚙ → Shortcuts**, in the language of the lesson.
 
 <br>
 
@@ -113,7 +115,7 @@ Long quotes and verse groups flow across the page break instead of jumping whole
 
 The toolbar folds into two rows and stays there — nothing wraps out of view down to 320 px. On a narrow screen justified text is set ragged-right instead, so no rivers of white run through the paragraphs. The PDF is unaffected: every phone rule sits behind `@media screen`.
 
-Where the pointer is a finger, the marker panel grows to match: bigger inks, bigger buttons, a wider colour field, and the delete cross on a note always visible instead of waiting for a hover.
+Where the pointer is a finger the tools grow to match, and the rail lies down along the bottom edge instead of standing beside the page — on a phone in two even rows, so nothing has to be scrolled to be reached.
 
 <br>
 
@@ -140,10 +142,20 @@ Five presets — grey, the quarterly's cover navy, wine, forest, gold — or any
 | **Lesson 6 ▾** | Opens the month: every week carries its lesson, and today is marked |
 | **⚙** | Everything else — language, Bible text, type size, colour, marker, shortcuts, PDF |
 | **← →** | A week at a time; a quarter at a time when the whole quarter is on screen |
-| **M** | Pick the marker up or put it down |
+| **⚙ → Marker and notes** | Brings the tool rail out beside the sheet, or puts it away |
 | **1 – 4** | Highlighter · stroke · line · wave |
-| **H · E** | Paint with the last marker · take everything off the chosen text |
 | **N · I** | Your own note after the paragraph · your own words inside the line |
+| **E · C** | The eraser · copy with the reference |
+
+<br>
+
+## What 2.1 brought
+
+**The tool comes first.** The rail stands beside the sheet with everything visible — four strokes, seven inks, the note, the insertion, the eraser, copying. No submenus, nothing that opens and shuts. And it stays out of the way until it is asked for: the lesson opens as a lesson.
+
+**The stroke looks like a stroke.** Round felt-pen ends instead of a slanted cut, whole words instead of half ones, and one mark for the whole highlight — the dark notch where two pieces used to meet, and the white hairline where they used to part, are both gone.
+
+**It is clear what is kept.** A counter at the foot of the rail, and behind it the page that says the marks live in this browser, per lesson and per language — and that the PDF is the copy to keep.
 
 <br>
 
