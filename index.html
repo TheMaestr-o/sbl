@@ -719,7 +719,9 @@ function inlineSource(t){
   /* a periodical is cited by date rather than by page: "…school, 1 December 1912." */
   if(p<=0&&/[0-9]{4}[^0-9]{0,14}$/.test(m[3])) p=m[3].lastIndexOf(",");
   if(p<=0) return t;
-  return m[1]+m[2]+'<i>'+m[3].slice(0,p).trim()+'</i>'+m[3].slice(p);
+  /* the whole source is set as one: the title and the page it stands on read
+     as a single line of credit, not as two kinds of type */
+  return m[1]+m[2]+'<i>'+m[3]+'</i>';
 }
 /* Source of an EGW quote. English data keeps it apart in `sop`; DE/RU already
    have it inside the text, so this simply returns nothing there. */
@@ -728,7 +730,8 @@ function sopHtml(sop,text){
   const s=String(sop.label);
   const m=s.match(/<span[^>]*sop-book[^>]*>([\s\S]*?)<\/span>([\s\S]*)$/i);
   const dash=/[—–-]\s*$/.test(String(text||"").trim())?"":"—";
-  return dash+(m?'<i>'+esc(strip(m[1]).trim())+'</i>'+esc(strip(m[2])):esc(strip(s)));
+  /* title and page together, in one italic — see inlineSource() */
+  return dash+'<i>'+(m?esc(strip(m[1]).trim())+esc(strip(m[2])):esc(strip(s)))+'</i>';
 }
 /* "a. How did Paul…" → ["a.", "How did Paul…"] so the marker can hold its own
    column. Latin and Cyrillic letters, and numbers for the review questions. */
