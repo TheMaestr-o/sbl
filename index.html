@@ -444,9 +444,13 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 @media (prefers-reduced-motion:reduce){
   .days .dpill{transition:none} .sec.flash::after{display:none}
 }
+/* the mark travels like a drop: it stretches along the way it is going, then
+   springs back into a circle when it lands */
 .days .dpill{position:absolute;left:6px;top:6px;width:30px;height:30px;border-radius:50%;
   background:var(--gray-dk);opacity:0;pointer-events:none;
-  transition:transform .42s cubic-bezier(.32,1.5,.4,1),opacity .2s}
+  transition:transform .2s cubic-bezier(.4,0,.5,1),opacity .2s}
+.days .dpill.land{transition:transform .44s cubic-bezier(.34,1.56,.44,1)}
+@media (prefers-reduced-motion:reduce){ .days .dpill{transition:none} }
 .days.ready .dpill{opacity:1}
 .dchip{position:relative;z-index:1;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.2px;
@@ -678,6 +682,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 </div>
 
 <div class="days" id="days"></div>
+
 <div class="hintchip" id="mkhint"></div>
 
 <div class="bub" id="bub">
@@ -2049,11 +2054,27 @@ mkDaysEl.addEventListener("click",function(e){
   mkGoTo(el,true);
   setTimeout(mkDaysMark,700);
 });
+let mkPillAt=null;
 function mkDaysMove(c){
-  const pill=mkDaysEl.querySelector(".dpill"); if(!pill||!c) return;
-  pill.style.width=c.offsetWidth+"px"; pill.style.height=c.offsetHeight+"px";
-  pill.style.transform="translate("+(c.offsetLeft-6)+"px,"+(c.offsetTop-6)+"px)";
+  const p=mkDaysEl.querySelector(".dpill"); if(!p||!c) return;
+  const x=c.offsetLeft-6, y=c.offsetTop-6;
+  p.style.width=c.offsetWidth+"px"; p.style.height=c.offsetHeight+"px";
+  const was=mkPillAt, vert=mkDaysEl.clientHeight>mkDaysEl.clientWidth;
+  const d=was?(vert?y-was.y:x-was.x):0;
+  mkPillAt={x:x,y:y};
   mkDaysEl.classList.add("ready");
+  if(!was||Math.abs(d)<2||matchMedia("(prefers-reduced-motion:reduce)").matches){
+    p.classList.add("land"); p.style.transform="translate("+x+"px,"+y+"px)"; return;
+  }
+  /* stretch by how far it has to go, and never past a droplet's worth */
+  const k=Math.min(1,Math.abs(d)/90), a=1+.34*k, b=1-.2*k;
+  p.classList.remove("land");
+  p.style.transform="translate("+x+"px,"+y+"px) scale("+(vert?b:a)+","+(vert?a:b)+")";
+  clearTimeout(mkDaysMove.t);
+  mkDaysMove.t=setTimeout(function(){
+    p.classList.add("land");
+    p.style.transform="translate("+x+"px,"+y+"px)";
+  },170);
 }
 function mkDaysMark(){
   if(!mkAnchors.length) return;
