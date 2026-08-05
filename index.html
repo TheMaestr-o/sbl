@@ -430,9 +430,9 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
    A lesson is seven days long; this is the thread you pull to get to any of
    them, and it says which one you are reading now. */
 .days{position:fixed;right:max(10px,calc((100vw - 900px) / 2));top:50%;transform:translateY(-50%);
-  z-index:59;display:flex;flex-direction:column;gap:3px;padding:7px 6px;
+  z-index:59;display:flex;flex-direction:column;gap:3px;padding:6px;
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);
-  border-radius:15px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.1);
+  border-radius:999px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.1);
   transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
 .days:empty{display:none}
 /* the band you jumped to answers with a shine, so the eye lands on it */
@@ -444,22 +444,20 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 @media (prefers-reduced-motion:reduce){
   .days .dpill{transition:none} .sec.flash::after{display:none}
 }
-.days .dpill{position:absolute;left:6px;top:7px;width:30px;height:30px;border-radius:50%;
-  box-shadow:0 0 0 2px var(--gray-dk);opacity:0;pointer-events:none;
+.days .dpill{position:absolute;left:6px;top:6px;width:30px;height:30px;border-radius:50%;
+  background:var(--gray-dk);opacity:0;pointer-events:none;
   transition:transform .42s cubic-bezier(.32,1.5,.4,1),opacity .2s}
 .days.ready .dpill{opacity:1}
 .dchip{position:relative;z-index:1;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.2px;
   color:#8a8a8e;text-transform:uppercase;transition:color .16s,background .16s}
 .dchip:hover{background:rgba(120,120,128,.14);color:#2b2b2b}
-.dchip.on{color:var(--gray-dk)}
-.dchip.today::after{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);
-  width:3.5px;height:3.5px;border-radius:50%;background:currentColor;opacity:.6}
+.dchip.on{color:#fff}
 body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
 @media (max-width:1010px){ .days{right:8px} }
 @media (max-width:700px){
   .days{right:auto;left:50%;top:auto;bottom:calc(env(safe-area-inset-bottom) + 96px);
-    transform:translateX(-50%);flex-direction:row;border-radius:13px}
+    transform:translateX(-50%);flex-direction:row;border-radius:999px}
   body.bare .days{transform:translateX(-50%) translateY(140%)}
 }
 @media (pointer:coarse){ .dchip,.days .dpill{width:36px;height:36px} .dchip{font-size:11.5px} }
@@ -2011,20 +2009,19 @@ function mkOpenToday(){
 function mkDaysBuild(){
   mkAnchors=[];
   let html="";
-  const today=ymd(new Date());
   if(scope==="quarter"){
     document.querySelectorAll(".page[data-les]").forEach(function(pg){
       const h=pg.querySelector(".lesson"); if(!h) return;
       const n=(strip(h.textContent).match(/\d+/)||[""])[0];
       mkAnchors.push(pg);
-      html+='<div class="dchip'+(pg.dataset.les===today?" today":"")+'">'+esc(n)+'</div>';
+      html+='<div class="dchip">'+esc(n)+'</div>';
     });
   } else {
     document.querySelectorAll(".sec[data-d]").forEach(function(sec){
       const d=sec.querySelector(".day"); if(!d) return;
       const short=strip(d.textContent).trim().split(/[\s,.]+/)[0];
       mkAnchors.push(sec);
-      html+='<div class="dchip'+(sec.dataset.d===today?" today":"")+'">'+esc(short)+'</div>';
+      html+='<div class="dchip">'+esc(short)+'</div>';
     });
   }
   mkDaysEl.innerHTML=mkAnchors.length>1?('<i class="dpill"></i>'+html):"";
@@ -2054,7 +2051,7 @@ mkDaysEl.addEventListener("click",function(e){
 function mkDaysMove(c){
   const pill=mkDaysEl.querySelector(".dpill"); if(!pill||!c) return;
   pill.style.width=c.offsetWidth+"px"; pill.style.height=c.offsetHeight+"px";
-  pill.style.transform="translate("+(c.offsetLeft-6)+"px,"+(c.offsetTop-7)+"px)";
+  pill.style.transform="translate("+(c.offsetLeft-6)+"px,"+(c.offsetTop-6)+"px)";
   mkDaysEl.classList.add("ready");
 }
 function mkDaysMark(){
