@@ -176,6 +176,9 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .page{position:relative;overflow:hidden;max-width:min(calc(820px / var(--z)),100%);
   margin:6px auto 44px;background:#fff;zoom:var(--z);
   padding:calc(56px / var(--z)) calc(64px / var(--z)) calc(72px / var(--z))}
+/* the browser tries to keep the old text under your eye when the sheet is
+   replaced, and quietly scrolls back to it — which fought every jump to a day */
+#sheets{overflow-anchor:none}
 .msg{text-align:center;color:#999;padding:80px 0;font-family:var(--serif);font-style:italic;font-size:19px}
 
 /* LESSON tag — contour from L4.eps: vertical sides, horizontal top (bleeds off page top),
@@ -943,6 +946,7 @@ function relaxDayStarts(){
 
 async function render(){
   const my=++token;
+  mkKeepY=window.scrollY;              /* where the reader was, in case the lesson stays */
   /* the whole sheet is set justified with hyphens:auto, and the browser picks
      its hyphenation dictionary by the language of the document: without this
      line German breaks by English rules and Russian never breaks at all, which
@@ -957,14 +961,16 @@ async function render(){
     const data=await loadQuarter(lang,current.getFullYear(),qOf(current));
     if(my!==token) return;
     const lessons=(data&&data.lessons)||[];
-    if(!lessons.length){ sheets.innerHTML=sheet('<div class="msg">No lessons for this quarter.</div>'); wk.innerHTML=""; return; }
+    if(!lessons.length){ sheets.innerHTML=sheet('<div class="msg">No lessons for this quarter.</div>');
+      wk.innerHTML=""; mkDaysBuild(); mkLastLes=null; window.scrollTo(0,0); return; }
     wk.innerHTML='<b>'+esc(strip(data.title||""))+'</b>';
     docName=fileSafe("SBL "+current.getFullYear()+"-Q"+qOf(current)+" "+strip(data.title||""));
     sheets.innerHTML=lessons.map(function(les){ return sheet(renderLesson(les,tasks),les.date); }).join("");
   } else {
     const les=await findLesson(current,lang);
     if(my!==token) return;
-    if(!les){ sheets.innerHTML=sheet('<div class="msg">No lesson for this week.</div>'); wk.innerHTML=""; return; }
+    if(!les){ sheets.innerHTML=sheet('<div class="msg">No lesson for this week.</div>');
+      wk.innerHTML=""; mkDaysBuild(); mkLastLes=null; window.scrollTo(0,0); return; }
     /* the lesson number alone — the date is on the sheet and in the calendar */
     wk.innerHTML='<b>'+esc(strip(les.header||""))+'</b>';
     docName=fileSafe("SBL "+String(les.date).replace(/^(\d{4})(\d{2})(\d{2})$/,"$1-$2-$3")
@@ -2025,18 +2031,41 @@ document.addEventListener("click",function(e){
    day takes you to it; scrolling moves the mark along by itself. */
 const mkDaysEl=document.getElementById("days");
 let mkAnchors=[];
-/* a lesson runs a week: when today is one of its days, that is where it opens.
-   Only when the lesson itself changes — switching the language or turning the
-   verses on must not throw the reader back. */
-let mkLastLes=null;
+/* Opening a lesson puts you where you belong in it: on today, if today is one
+   of its days, and at its very beginning otherwise — a lesson you turned to on
+   purpose must not open halfway down because the last one was scrolled there.
+   Changing the language or turning the verses on is not opening a lesson, and
+   leaves the reader where he was. */
+let mkLastLes=null, mkKeepY=0;
 function mkOpenToday(){
-  if(scope!=="week") return;
-  const pg=document.querySelector(".page[data-les]"); if(!pg) return;
-  if(mkLastLes===pg.dataset.les) return;
-  mkLastLes=pg.dataset.les;
-  const sec=document.querySelector('.sec[data-d="'+ymd(new Date())+'"]');
-  if(!sec) return;
-  requestAnimationFrame(function(){ mkGoTo(sec,false); mkDaysMark(); });
+  const pg=document.querySelector(".page[data-les]");
+  const id=scope+"/"+(pg?pg.dataset.les:"");
+  const same=mkLastLes===id;
+  mkLastLes=id;
+  const sec=!same&&scope==="week"&&pg?document.querySelector('.sec[data-d="'+ymd(new Date())+'"]'):null;
+  /* wait for the sheet to finish laying itself out: a place measured while the
+     text is still flowing puts the reader — and the mark — on the wrong day */
+  mkAfterLayout(function(){
+    if(same) window.scrollTo(0,mkKeepY);          /* same lesson, other language — stay put */
+    else if(sec) mkGoTo(sec,false);
+    else window.scrollTo(0,0);
+    mkDaysMark(); requestAnimationFrame(mkDaysMark);   /* now, and again once the frame lands */
+  });
+}
+/* Run once the sheet has stopped growing. Frames are the good signal, but a
+   tab in the background gets none — so a timer stands behind them, and
+   whichever arrives first wins. */
+function mkAfterLayout(fn){
+  let last=-1,n=0,done=false;
+  const fire=function(){ if(done) return; done=true; clearTimeout(tm); fn(); };
+  const step=function(){
+    if(done) return;
+    const h=document.documentElement.scrollHeight;
+    if(h===last||n>8) return fire();
+    last=h; n++; requestAnimationFrame(step);
+  };
+  const tm=setTimeout(fire,220);
+  requestAnimationFrame(step);
 }
 function mkDaysBuild(){
   mkAnchors=[];
