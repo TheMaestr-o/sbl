@@ -346,17 +346,24 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
   vertical-align:.05em}
 .myins .del:hover{background:var(--mine);color:#fff}
 .myins:focus{background:rgba(47,91,208,.13);box-shadow:0 0 0 2px rgba(47,91,208,.18)}
-.mynote{position:relative;margin:14px 0 18px;padding:11px 16px 9px 17px;text-indent:0;
-  background:rgba(47,91,208,.055);border-left:3px solid var(--mine);border-radius:0 10px 10px 0;
+/* the reader's own block: rounded on every corner, with its own colour and a
+   bar of the same shape down the side */
+.mynote{position:relative;margin:14px 0 18px;padding:11px 16px 9px 19px;text-indent:0;
+  background:var(--nbg,rgba(47,91,208,.055));border-radius:11px;
   font-family:var(--sans);font-size:15.5px;line-height:1.55;color:#22304e;outline:none;text-align:left}
-.mynote.blank::before{content:attr(data-ph);color:#9aa7c4}
-.mynote::after{content:attr(data-lab);display:block;margin-top:7px;font-size:8.5px;letter-spacing:1.1px;
-  text-transform:uppercase;color:var(--mine);opacity:.55;font-weight:700}
+.mynote::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:3px;
+  background:var(--nc,var(--mine))}
+.mynote b,.mynote strong{font-weight:700}
+.mynote i,.mynote em{font-style:italic}
+.mynote.blank::after{content:attr(data-ph);color:#9aa7c4}
+.mynote .lab{display:block;margin-top:7px;font-size:8.5px;letter-spacing:1.1px;
+  text-transform:uppercase;color:var(--nc,var(--mine));opacity:.6;font-weight:700}
 .mynote:focus{box-shadow:0 0 0 3px rgba(47,91,208,.14)}
-.mynote .del{position:absolute;top:7px;right:9px;width:20px;height:20px;border-radius:6px;cursor:pointer;
+.mynote .del{position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:6px;cursor:pointer;
   display:none;align-items:center;justify-content:center;color:var(--mine);opacity:.55;font-size:14px}
 .mynote:hover .del{display:flex}
-.mynote .del:hover{opacity:1;background:rgba(47,91,208,.12)}
+.mynote .del{color:var(--nc,var(--mine))}
+.mynote .del:hover{opacity:1;background:rgba(120,120,128,.16)}
 .legend{display:none}
 
 /* one tap and the room is empty: the rail slides out to the left, the bar
@@ -415,6 +422,31 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 .area .dot,.hue .dot{position:absolute;width:13px;height:13px;border-radius:50%;border:2px solid #fff;
   box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none}
 .hue .dot{top:50%}
+
+/* ——— the days of the lesson, down the right edge ———
+   A lesson is seven days long; this is the thread you pull to get to any of
+   them, and it says which one you are reading now. */
+.days{position:fixed;right:max(10px,calc((100vw - 900px) / 2));top:50%;transform:translateY(-50%);
+  z-index:59;display:flex;flex-direction:column;gap:3px;padding:7px 6px;
+  background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);
+  border-radius:15px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.1);
+  transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
+.days:empty{display:none}
+.dchip{min-width:30px;height:26px;display:flex;align-items:center;justify-content:center;
+  border-radius:8px;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.3px;
+  color:#8a8a8e;text-transform:uppercase;transition:background .16s,color .16s}
+.dchip:hover{background:rgba(120,120,128,.16);color:#2b2b2b}
+.dchip.on{background:var(--gray-dk);color:#fff}
+.dchip.today::after{content:"";width:4px;height:4px;border-radius:50%;background:currentColor;
+  margin-left:4px;opacity:.65}
+body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
+@media (max-width:1010px){ .days{right:8px} }
+@media (max-width:700px){
+  .days{right:auto;left:50%;top:auto;bottom:calc(env(safe-area-inset-bottom) + 96px);
+    transform:translateX(-50%);flex-direction:row;border-radius:13px}
+  body.bare .days{transform:translateX(-50%) translateY(140%)}
+}
+@media (pointer:coarse){ .dchip{min-width:38px;height:34px;font-size:12px} }
 
 /* the quiet invitation: shown a few times, never again after that */
 .hintchip{position:absolute;z-index:61;display:none;align-items:center;gap:6px;
@@ -560,7 +592,7 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .note,.quote,.mem{orphans:2;widows:2}
   .vtext{orphans:3;widows:3}
   /* the pencil work prints with the lesson; the tools themselves never do */
-  .rail,.rpick,.bub,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del{display:none!important}
+  .rail,.rpick,.bub,.days,.hintchip,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del{display:none!important}
   .mynote,.myins{break-inside:avoid;page-break-inside:avoid}
   /* whoever picks up the sheet must see at a glance which lines are not
      the lesson's own */
@@ -625,6 +657,7 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   </div>
 </div>
 
+<div class="days" id="days"></div>
 <div class="hintchip" id="mkhint"></div>
 
 <div class="bub" id="bub">
@@ -803,7 +836,7 @@ function renderLesson(les,tasks){
     const st=strip(day.sectionTitle||"").trim();
     const mm=st.match(/^(\d+[.)]?)\s+(.*)$/);
     const secInner=mm?'<span class="n">'+esc(mm[1])+'</span><span class="ttl">'+esc(mm[2])+'</span>':'<span class="ttl">'+esc(st)+'</span>';
-    const band='<div class="sec"><div class="t" data-k="d'+di+'">'+secInner+'</div><div class="day">'+esc(tag)+'</div></div>';
+    const band='<div class="sec" data-d="'+esc(day.date)+'"><div class="t" data-k="d'+di+'">'+secInner+'</div><div class="day">'+esc(tag)+'</div></div>';
     /* the day is built as a list of blocks first, so that its opening can be
        held together below */
     const subs=day.subsections||[], blocks=[];
@@ -891,6 +924,7 @@ async function render(){
 
   relaxDayStarts();
   mkRestore();
+  mkDaysBuild();
 
   if(versesOn && tasks.length){
     const bib=await loadBible(BIBLE[lang]);
@@ -1122,9 +1156,9 @@ const MK_STYLES=["fill","tex","line","wave"];
 const MKW={
   note:{de:"Meine Notiz",en:"My note",ru:"Моя заметка"},
   ph:{de:"Eigener Gedanke, Frage, Antwort …",en:"A thought, a question, an answer …",ru:"Своя мысль, вопрос, ответ…"},
-  legend:{de:"Blau — Notizen und Einfügungen des Lesers; sie gehören nicht zum Text der Lektion.",
-          en:"In blue — the reader's own notes and insertions; they are not part of the lesson.",
-          ru:"Синим — заметки и вставки читателя; они не входят в текст урока."},
+  legend:{de:"Farbige Blöcke mit Datum und eingefügte Wörter stammen vom Leser; sie gehören nicht zum Text der Lektion.",
+          en:"The dated blocks with a coloured bar, and the words inserted into the lines, are the reader's own; they are not part of the lesson.",
+          ru:"Блоки с цветной полосой и датой, а также вписанные в строку слова — от читателя; они не входят в текст урока."},
   ins:{de:"Eigenen Text einfügen",en:"Write your own here",ru:"Вписать своё"},
   addnote:{de:"Eigene Notiz",en:"Own note",ru:"Своя заметка"},
   copy:{de:"Mit Bibelstelle kopieren",en:"Copy with the reference",ru:"Копировать со ссылкой"},
@@ -1216,6 +1250,9 @@ const MK_KEYS=[
   ["N",{de:"Eigene Notiz — dann auf den Absatz tippen",en:"Own note — then click the paragraph",ru:"Своя заметка — потом клик по абзацу"}],
   ["E",{de:"Radierer — markieren nimmt alles weg",en:"Eraser — a selection takes everything off",ru:"Ластик — выделение снимает всё"}],
   ["C",{de:"Kopieren mit Bibelstelle — einfach markieren",en:"Copy with the reference — just select",ru:"Копировать со ссылкой — просто выдели"}],
+  ["⌘B ⌘I",{de:"Fett und kursiv in der eigenen Notiz; eine Farbe im Etui färbt die Notiz selbst",
+            en:"Bold and italic inside your own note; a colour in the rail tints the note itself",
+            ru:"Жирный и курсив в своей заметке; цвет в пенале красит саму заметку"}],
   ["Esc",{de:"Werkzeug weglegen, alles schließen",en:"Put the tool down, close everything",ru:"Положить инструмент, всё закрыть"}]
 ];
 /* what the reader should know about where his work lives */
@@ -1248,9 +1285,11 @@ let mkTool=mkGet("pen",{c:"#ffd84d",s:"fill"});
 const MK_KEEP=8;
 let mkRecent=mkGet("recent8",["#ffd84d","#ffb35c","#ffaec8","#e0a9f5","#a8c9ff","#8fe0d8","#a9e58c","#ff8d8d"]);
 let mkMode=null;   /* null | "mark" | "ins" | "note" | "erase" | "copy" — the tool in hand */
-/* the lesson opens as a lesson, not as an editor: the rail appears only when
-   the reader asks for it in the settings, and that choice is remembered */
-let mkRailOn=mkGet("rail",false);
+/* The first time round the rail is out, so nobody has to guess the tools are
+   there. Put it away once and it stays away — the choice is remembered. The
+   lesson still opens as a lesson: the rail is only the box, nothing is in hand
+   until a tool is taken. */
+let mkRailOn=mkGet("rail",true);
 let MKALL=mkGet("pencil",{});          /* lang/lesson → {marks, ins, notes} */
 let mkQuiet=false, mkGroup=null, mkCaretRange=null;
 
@@ -1476,9 +1515,8 @@ function mkStore(){
       });
     });
     pg.querySelectorAll(".mynote").forEach(function(el){
-      const c=el.cloneNode(true),d=c.querySelector(".del"); if(d) d.remove();
       const prev=el.previousElementSibling;
-      if(prev&&prev.dataset.k) out.notes.push({k:prev.dataset.k,t:c.innerHTML});
+      if(prev&&prev.dataset.k) out.notes.push({k:prev.dataset.k,t:mkNoteBody(el).innerHTML,c:el.dataset.c});
     });
     MKALL[mkKey(pg)]=out;
   });
@@ -1514,7 +1552,7 @@ function mkRestore(){
     });
     (d.notes||[]).forEach(function(o){
       const b=pg.querySelector('[data-k="'+o.k+'"]'); if(!b) return;
-      mkNote(b,o.t,true);
+      mkNote(b,o.t,true,o.c);
     });
   });
   mkQuiet=false; mkLegend(); mkChipPaint();
@@ -1543,15 +1581,36 @@ function mkInsert(range,text,quiet){
   }
   return s;
 }
-function mkNoteText(d){ const c=d.cloneNode(true),x=c.querySelector(".del"); if(x) x.remove(); return c.textContent.trim(); }
-function mkNote(afterEl,html,quiet){
+let mkNoteFocused=null;
+function mkNoteBody(d){ const c=d.cloneNode(true);
+  c.querySelectorAll(".del,.lab").forEach(function(x){ x.remove(); }); return c; }
+function mkNoteText(d){ return mkNoteBody(d).textContent.trim(); }
+function mkNoteTint(d,c){
+  const p=mkRgb(c||"#2f5bd0");
+  d.dataset.c=c||"#2f5bd0";
+  d.style.setProperty("--nc",c||"#2f5bd0");
+  d.style.setProperty("--nbg","rgba("+p[0]+","+p[1]+","+p[2]+",.06)");
+}
+function mkNote(afterEl,html,quiet,colour){
   const d=document.createElement("div");
   d.className="mynote"; d.contentEditable="true"; d.spellcheck=false;
-  d.dataset.lab=T("note")+" · "+mkStamp(); d.dataset.ph=T("ph");
+  d.dataset.ph=T("ph");
+  mkNoteTint(d,colour);
   d.innerHTML=html||"";
+  const lab=document.createElement("div");
+  lab.className="lab"; lab.contentEditable="false"; lab.textContent=T("note")+" · "+mkStamp();
+  d.appendChild(lab);
   const del=document.createElement("div"); del.className="del"; del.contentEditable="false"; del.textContent="×";
   del.onclick=function(e){ e.stopPropagation(); d.remove(); mkStore(); };
   d.appendChild(del);
+  /* pasting brings the reader's words, not somebody's markup */
+  d.addEventListener("paste",function(e){
+    e.preventDefault();
+    const t=(e.clipboardData||window.clipboardData).getData("text/plain");
+    document.execCommand("insertText",false,t);
+  });
+  d.addEventListener("focus",function(){ mkNoteFocused=d; });
+  d.addEventListener("blur",function(){ setTimeout(function(){ if(mkNoteFocused===d) mkNoteFocused=null; },150); });
   afterEl.parentNode.insertBefore(d,afterEl.nextSibling);
   const blank=function(){ d.classList.toggle("blank",!mkNoteText(d)); };
   d.addEventListener("input",blank);
@@ -1632,6 +1691,7 @@ function mkRailInks(){
 }
 function mkSetRail(v){
   mkRailOn=v; mkSet("rail",v);
+  if(!v){ mkHintLeft=0; mkSet("hint",0); mkHintHide(); }   /* он уже знает, где они */
   if(!v){ mkMode=null; mkBubClose(); }
   mkRail.style.display=v?"":"none";
   document.getElementById("mk-rail").classList.toggle("on",v);
@@ -1654,6 +1714,8 @@ function mkTakeStyle(y){
 }
 /* a colour never puts the tool down — it only changes what it writes with */
 function mkTakeColour(c){
+  if(mkNoteFocused&&document.body.contains(mkNoteFocused)){   /* a note is open — colour it */
+    mkNoteTint(mkNoteFocused,c); mkStore(); return; }
   if(mkGroup&&mkGroup.length){ mkApply(c,mkTool.s); return; }
   mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode();
 }
@@ -1871,12 +1933,60 @@ document.addEventListener("click",function(e){
   }
   if(mkMode==="note"){
     const host=blk.classList.contains("vtext")?(blk.closest(".vgroup")||blk):blk;
-    mkNote(host);
+    mkNote(host,"",false,mkTool.c);
   }
   if(mkMode==="erase"&&e.target.tagName==="MARK"){
     mkEraseAround(e.target.dataset.g?mkPieces(e.target.dataset.g):[e.target]);
   }
 });
+
+/* ——— the days down the side ———
+   Seven bands make a lesson; the strip is built from what is on the page, so
+   it works the same for one week and for a whole quarter of them. Clicking a
+   day takes you to it; scrolling moves the mark along by itself. */
+const mkDaysEl=document.getElementById("days");
+let mkAnchors=[];
+function mkDaysBuild(){
+  mkAnchors=[];
+  let html="";
+  const today=ymd(new Date());
+  if(scope==="quarter"){
+    document.querySelectorAll(".page[data-les]").forEach(function(pg){
+      const h=pg.querySelector(".lesson"); if(!h) return;
+      const n=(strip(h.textContent).match(/\d+/)||[""])[0];
+      mkAnchors.push(pg);
+      html+='<div class="dchip'+(pg.dataset.les===today?" today":"")+'">'+esc(n)+'</div>';
+    });
+  } else {
+    document.querySelectorAll(".sec[data-d]").forEach(function(sec){
+      const d=sec.querySelector(".day"); if(!d) return;
+      const short=strip(d.textContent).trim().split(/[\s,.]+/)[0];
+      mkAnchors.push(sec);
+      html+='<div class="dchip'+(sec.dataset.d===today?" today":"")+'">'+esc(short)+'</div>';
+    });
+  }
+  mkDaysEl.innerHTML=mkAnchors.length>1?html:"";
+  mkDaysMark();
+}
+mkDaysEl.addEventListener("click",function(e){
+  const c=e.target.closest(".dchip"); if(!c) return;
+  const el=mkAnchors[[].indexOf.call(mkDaysEl.children,c)]; if(!el) return;
+  const y=el.getBoundingClientRect().top+window.scrollY-72;
+  window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
+  [].forEach.call(mkDaysEl.children,function(x){ x.classList.toggle("on",x===c); });
+  setTimeout(mkDaysMark,600);
+});
+function mkDaysMark(){
+  if(!mkAnchors.length) return;
+  let cur=0;
+  for(let i=0;i<mkAnchors.length;i++) if(mkAnchors[i].getBoundingClientRect().top<=110) cur=i;
+  [].forEach.call(mkDaysEl.children,function(c,i){ c.classList.toggle("on",i===cur); });
+}
+let mkTick=false;
+window.addEventListener("scroll",function(){
+  if(mkTick) return; mkTick=true;
+  requestAnimationFrame(function(){ mkTick=false; mkDaysMark(); });
+},{passive:true});
 
 /* ——— two ways in for someone who has never met the tools ———
    A swipe from the left edge pulls the rail out, the way a drawer opens on the
