@@ -398,8 +398,9 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 .rail .two{display:grid;grid-template-columns:repeat(2,30px);gap:4px}
 .rbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px;
   color:#5b5b60;cursor:pointer;transition:background .16s,color .16s,transform .12s}
-.rbtn:hover{background:rgba(120,120,128,.16);color:#1c1c1e}
+@media (hover:hover){ .rbtn:hover{background:rgba(120,120,128,.16);color:#1c1c1e} }
 .rbtn:active{transform:scale(.92)}
+.rbtn:focus,.mtool:focus,.ink:focus,.dchip:focus{outline:none}
 .rbtn.on{background:#2b2b2b;color:#fff}
 .rbtn.own.on{background:var(--mine);color:#fff}
 .rbtn svg{display:block}
@@ -407,7 +408,8 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 .ink{position:relative;width:22px;height:22px;border-radius:50%;cursor:pointer;flex:none;
   box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),inset 0 -3px 5px rgba(0,0,0,.06),inset 0 3px 4px rgba(255,255,255,.5);
   transition:transform .16s cubic-bezier(.3,1.4,.4,1),box-shadow .16s}
-.ink:hover{transform:scale(1.14)} .ink:active{transform:scale(.94)}
+@media (hover:hover){ .ink:hover{transform:scale(1.14)} }
+.ink:active{transform:scale(.94)}
 .ink.on{box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 0 0 2px #2b2b2b}
 /* a pinned ink keeps its place: the row may reshuffle around it, it will not */
 .ink.pin::after{content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);
@@ -487,7 +489,7 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 .dchip{position:relative;z-index:1;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.2px;
   color:#8a8a8e;text-transform:uppercase;transition:color .16s,background .16s}
-.dchip:hover{background:rgba(120,120,128,.14);color:#2b2b2b}
+@media (hover:hover){ .dchip:hover{background:rgba(120,120,128,.14);color:#2b2b2b} }
 .dchip.on{color:#fff}
 body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
 @media (max-width:1010px){ .days{right:8px} }
@@ -508,7 +510,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 @keyframes hintin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
 /* ——— the bubble on a stroke already laid down ——— */
-.bub{position:absolute;z-index:62;display:flex;align-items:center;gap:5px;padding:5px 6px;
+.bub{position:fixed;z-index:62;display:flex;align-items:center;gap:5px;padding:5px 6px;
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px);
   border-radius:13px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.18);
   opacity:0;transform:scale(.92) translateY(3px);pointer-events:none;transform-origin:50% 0;
@@ -517,7 +519,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 .bub .mhair{width:.5px;height:20px;background:var(--hair);margin:0 2px}
 .mtool{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;
   color:#5b5b60;cursor:pointer;transition:background .16s,color .16s,transform .12s}
-.mtool:hover{background:rgba(120,120,128,.16);color:#1c1c1e}
+@media (hover:hover){ .mtool:hover{background:rgba(120,120,128,.16);color:#1c1c1e} }
 .mtool:active{transform:scale(.92)}
 .mtool.own{color:var(--mine)}
 
@@ -1484,6 +1486,7 @@ function mkWhole(range,c,s,g){
 }
 function mkPaint(range,c,s){
   const g=++mkGid;
+  mkLastSel=null;          /* a selection is spent once it has been painted */
   try{ mkSnapWords(range); }catch(e){}
   if(mkWhole(range,c,s,String(g))){
     const host=(range.commonAncestorContainer.nodeType===1?range.commonAncestorContainer
@@ -1791,9 +1794,44 @@ function mkSetMode(m){
   mkBubClose(); mkPaintMode();
 }
 /* a type button takes the marker; pressing the same one again puts it down */
+/* A tap on a button drops the selection before the click is delivered, so the
+   last live one is kept aside: pressing a tool then paints what the reader had
+   already chosen, instead of quietly swallowing it. */
+let mkLastSel=null, mkLastSelAt=0;
+document.addEventListener("selectionchange",function(){
+  const s=window.getSelection();
+  if(!s.rangeCount||s.isCollapsed) return;
+  const r=s.getRangeAt(0);
+  const h=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement;
+  if(h&&h.closest&&h.closest(".page[data-les]")&&!h.closest(".myins,.mynote")){
+    mkLastSel=r.cloneRange(); mkLastSelAt=Date.now();
+  }
+});
+function mkPending(){
+  const s=window.getSelection();
+  if(s.rangeCount&&!s.isCollapsed){
+    const r=s.getRangeAt(0);
+    const h=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement;
+    if(h&&h.closest&&h.closest(".page[data-les]")) return r.cloneRange();
+  }
+  if(mkLastSel&&Date.now()-mkLastSelAt<4000&&mkLastSel.startContainer.isConnected&&!mkLastSel.collapsed)
+    return mkLastSel.cloneRange();
+  return null;
+}
+function mkUseSelection(c,y){
+  const r=mkPending(); if(!r) return false;
+  mkPaint(r,c,y);
+  mkLastSel=null;
+  const s=window.getSelection(); if(s.removeAllRanges) s.removeAllRanges();
+  return true;
+}
 function mkTakeStyle(y){
   if(!mkRailOn) return;
   if(mkGroup&&mkGroup.length){ mkApply(mkTool.c,y); mkTool.s=y; mkSet("pen",mkTool); mkPaintMode(); return; }
+  /* something is already chosen on the page — paint that, and keep the tool */
+  if(mkUseSelection(mkTool.c,y)){
+    mkTool.s=y; mkSet("pen",mkTool); mkMode="mark"; mkPaintMode(); return;
+  }
   if(mkMode==="mark"&&mkTool.s===y) mkMode=null;
   else { mkTool.s=y; mkSet("pen",mkTool); mkMode="mark"; }
   mkPaintMode();
@@ -1803,6 +1841,7 @@ function mkTakeColour(c){
   if(mkNoteFocused&&document.body.contains(mkNoteFocused)){   /* a note is open — colour it */
     mkNoteTint(mkNoteFocused,c); mkStore(); return; }
   if(mkGroup&&mkGroup.length){ mkApply(c,mkTool.s); return; }
+  if(mkUseSelection(c,mkTool.s)){ mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode(); return; }
   mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode();
 }
 /* two fingers of hint: a double click on a desktop, a long press on a screen */
@@ -1817,6 +1856,9 @@ mkRail.addEventListener("touchstart",function(e){
 },{passive:true});
 mkRail.addEventListener("touchend",function(){ clearTimeout(mkHold); },{passive:true});
 mkRail.addEventListener("touchmove",function(){ clearTimeout(mkHold); },{passive:true});
+mkRail.addEventListener("mousedown",function(e){
+  if(e.target.closest("[data-c],[data-s],[data-mode],#more")) e.preventDefault();   /* keep the selection */
+});
 mkRail.addEventListener("click",function(e){
   const y=e.target.closest("[data-s]"); if(y) return mkTakeStyle(y.dataset.s);
   const m=e.target.closest("[data-mode]"); if(m) return mkSetMode(m.dataset.mode);
@@ -1920,12 +1962,14 @@ mkDrag(mkHue,function(x){ mkHSV=[x*360,mkHSV[1],mkHSV[2]]; });
 function mkBubPlace(rect){
   mkBub.classList.add("on");
   mkBub.querySelector('[data-a="erase"]').title=T("erase");
+  /* placed in what is actually on screen: adding the scroll position put it a
+     browser bar's worth away on iOS */
   const w=mkBub.offsetWidth,h=mkBub.offsetHeight;
-  let x=rect.left+window.scrollX+rect.width/2-w/2;
+  let x=rect.left+rect.width/2-w/2;
   x=Math.max(10,Math.min(x,document.documentElement.clientWidth-w-10));
-  let y=rect.bottom+window.scrollY+9;
-  if(rect.bottom+h+16>window.innerHeight) y=rect.top+window.scrollY-h-9;
-  mkBub.style.left=x+"px"; mkBub.style.top=y+"px";
+  let y=rect.bottom+9;
+  if(y+h+10>window.innerHeight) y=Math.max(10,rect.top-h-9);
+  mkBub.style.left=Math.round(x)+"px"; mkBub.style.top=Math.round(y)+"px";
 }
 function mkBubClose(){
   mkBub.classList.remove("on");
