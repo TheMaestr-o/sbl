@@ -532,10 +532,11 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
    rail goes down to a single narrow column so it fits inside the sheet's own
    white margin without touching a letter */
 @media (min-width:701px) and (max-width:1010px){
-  .rail{left:9px;padding:7px 6px;gap:4px;border-radius:16px}
-  .rail .two{grid-template-columns:30px}
-  .inks{grid-template-columns:26px;gap:4px}
-  .ink{width:26px;height:26px}
+  .rail{left:9px;padding:7px 6px;gap:4px;border-radius:20px}
+  /* one narrow column, and every row centred on its own width — a finger makes
+     the buttons bigger than the inks, and a fixed grid column would push them
+     off to one side */
+  .rail .two,.rail .inks{display:flex;flex-direction:column;align-items:center;gap:4px}
   .rail .sep{width:20px}
   .days{right:9px}
 }
