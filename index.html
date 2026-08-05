@@ -401,6 +401,9 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   transition:transform .16s cubic-bezier(.3,1.4,.4,1),box-shadow .16s}
 .ink:hover{transform:scale(1.14)} .ink:active{transform:scale(.94)}
 .ink.on{box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 0 0 2px #2b2b2b}
+/* a pinned ink keeps its place: the row may reshuffle around it, it will not */
+.ink.pin::after{content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);
+  width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
 .ink.more{background:conic-gradient(from .5turn,#ff6b6b,#ffb35c,#ffe066,#8fe08f,#7fc8f8,#b39ddb,#f48fb1,#ff6b6b)}
 /* the saved mark: how many, and that they are kept at all */
 .chip{font-size:9.5px;font-weight:700;letter-spacing:.2px;color:#9a9a9e;cursor:pointer;
@@ -441,17 +444,17 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 @media (prefers-reduced-motion:reduce){
   .days .dpill{transition:none} .sec.flash::after{display:none}
 }
-.days .dpill{position:absolute;left:6px;top:7px;width:30px;height:26px;border-radius:8px;
-  background:var(--gray-dk);opacity:0;pointer-events:none;
-  transition:transform .42s cubic-bezier(.32,1.5,.4,1),opacity .2s,width .28s,height .28s}
+.days .dpill{position:absolute;left:6px;top:7px;width:30px;height:30px;border-radius:50%;
+  box-shadow:0 0 0 2px var(--gray-dk);opacity:0;pointer-events:none;
+  transition:transform .42s cubic-bezier(.32,1.5,.4,1),opacity .2s}
 .days.ready .dpill{opacity:1}
-.dchip{position:relative;z-index:1;min-width:30px;height:26px;display:flex;align-items:center;justify-content:center;
-  border-radius:8px;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.3px;
-  color:#8a8a8e;text-transform:uppercase;transition:background .16s,color .16s}
-.dchip:hover{background:rgba(120,120,128,.16);color:#2b2b2b}
-.dchip.on{color:#fff}
-.dchip.today::after{content:"";width:4px;height:4px;border-radius:50%;background:currentColor;
-  margin-left:4px;opacity:.65}
+.dchip{position:relative;z-index:1;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.2px;
+  color:#8a8a8e;text-transform:uppercase;transition:color .16s,background .16s}
+.dchip:hover{background:rgba(120,120,128,.14);color:#2b2b2b}
+.dchip.on{color:var(--gray-dk)}
+.dchip.today::after{content:"";position:absolute;left:50%;bottom:2px;transform:translateX(-50%);
+  width:3.5px;height:3.5px;border-radius:50%;background:currentColor;opacity:.6}
 body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
 @media (max-width:1010px){ .days{right:8px} }
 @media (max-width:700px){
@@ -459,7 +462,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
     transform:translateX(-50%);flex-direction:row;border-radius:13px}
   body.bare .days{transform:translateX(-50%) translateY(140%)}
 }
-@media (pointer:coarse){ .dchip{min-width:38px;height:34px;font-size:12px} }
+@media (pointer:coarse){ .dchip,.days .dpill{width:36px;height:36px} .dchip{font-size:11.5px} }
 
 /* the quiet invitation: shown a few times, never again after that */
 .hintchip{position:absolute;z-index:61;display:none;align-items:center;gap:6px;
@@ -1187,6 +1190,9 @@ const MKW={
   marks:{de:"Markierungen",en:"Marks",ru:"Пометки"},
   keys:{de:"Kurzbefehle",en:"Shortcuts",ru:"Подсказки"},
   marking:{de:"Marker und Notizen",en:"Marker and notes",ru:"Маркер и заметки"},
+  pinhint:{de:"Doppelklick — Farbe festhalten",en:"Double-click to pin the colour",ru:"Двойной клик — закрепить цвет"},
+  pinned:{de:"Farbe festgehalten",en:"Colour pinned",ru:"Цвет закреплён"},
+  unpinned:{de:"Farbe losgelassen",en:"Colour unpinned",ru:"Цвет откреплён"},
   markit:{de:"Markieren?",en:"Mark it?",ru:"Разметить?"},
   railon:{de:"An",en:"On",ru:"Вкл"},
   railoff:{de:"Aus",en:"Off",ru:"Выкл"},
@@ -1302,6 +1308,18 @@ let mkTool=mkGet("pen",{c:"#ffd84d",s:"fill"});
    panel reads as one block and not as two ledges */
 const MK_KEEP=8;
 let mkRecent=mkGet("recent8",["#ffd84d","#ffb35c","#ffaec8","#e0a9f5","#a8c9ff","#8fe0d8","#a9e58c","#ff8d8d"]);
+/* pinned inks hold their seats: the row of last-used shuffles around them */
+let mkPins=mkGet("pins",[]);
+function mkInkRow(){
+  const rest=mkRecent.filter(function(c){ return mkPins.indexOf(c)<0; });
+  return mkPins.concat(rest).slice(0,7);
+}
+function mkPinToggle(c){
+  const i=mkPins.indexOf(c);
+  if(i>=0) mkPins.splice(i,1); else if(mkPins.length<7) mkPins.push(c);
+  mkSet("pins",mkPins); mkRailInks();
+  mkToast(T(i>=0?"unpinned":"pinned"));
+}
 let mkMode=null;   /* null | "mark" | "ins" | "note" | "erase" | "copy" — the tool in hand */
 /* The first time round the rail is out, so nobody has to guess the tools are
    there. Put it away once and it stays away — the choice is remembered. The
@@ -1703,8 +1721,9 @@ function mkPaintMode(){
 /* seven inks and the gamut make eight cells — two even columns, no odd circle
    left standing in the middle */
 function mkRailInks(){
-  mkInks.innerHTML=mkRecent.slice(0,7).map(function(c){
-    return '<span class="ink'+(mkMode==="mark"&&c===mkTool.c?" on":"")+'" data-c="'+c+'" style="background:'+c+'"></span>';
+  mkInks.innerHTML=mkInkRow().map(function(c){
+    return '<span class="ink'+(mkMode==="mark"&&c===mkTool.c?" on":"")+(mkPins.indexOf(c)>=0?" pin":"")
+      +'" data-c="'+c+'" style="background:'+c+'" title="'+esc(T("pinhint"))+'"></span>';
   }).join("")+'<span class="ink more'+(mkPickBox.hidden?"":" on")+'" id="more" title="'+esc(T("more"))+'"></span>';
 }
 function mkSetRail(v){
@@ -1737,6 +1756,18 @@ function mkTakeColour(c){
   if(mkGroup&&mkGroup.length){ mkApply(c,mkTool.s); return; }
   mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode();
 }
+/* two fingers of hint: a double click on a desktop, a long press on a screen */
+mkRail.addEventListener("dblclick",function(e){
+  const i=e.target.closest(".inks [data-c]"); if(i) mkPinToggle(i.dataset.c);
+});
+let mkHold=null;
+mkRail.addEventListener("touchstart",function(e){
+  const i=e.target.closest&&e.target.closest(".inks [data-c]"); if(!i) return;
+  clearTimeout(mkHold);
+  mkHold=setTimeout(function(){ mkHold=null; mkPinToggle(i.dataset.c); },550);
+},{passive:true});
+mkRail.addEventListener("touchend",function(){ clearTimeout(mkHold); },{passive:true});
+mkRail.addEventListener("touchmove",function(){ clearTimeout(mkHold); },{passive:true});
 mkRail.addEventListener("click",function(e){
   const y=e.target.closest("[data-s]"); if(y) return mkTakeStyle(y.dataset.s);
   const m=e.target.closest("[data-mode]"); if(m) return mkSetMode(m.dataset.mode);
@@ -2000,8 +2031,12 @@ function mkDaysBuild(){
   mkDaysEl.classList.remove("ready");
   mkDaysMark();
 }
+function mkBarH(){
+  const b=document.querySelector(".bar");
+  return (b&&getComputedStyle(b).position==="sticky"?b.getBoundingClientRect().height:0)+10;
+}
 function mkGoTo(el,smooth){
-  const y=el.getBoundingClientRect().top+window.scrollY-72;
+  const y=el.getBoundingClientRect().top+window.scrollY-mkBarH();
   window.scrollTo({top:Math.max(0,y),behavior:smooth?"smooth":"auto"});
   const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
   if(band){ band.classList.remove("flash"); void band.offsetWidth; band.classList.add("flash");
@@ -2026,7 +2061,8 @@ function mkDaysMark(){
   if(!mkAnchors.length) return;
   const chips=[].slice.call(mkDaysEl.querySelectorAll(".dchip"));
   let cur=0;
-  for(let i=0;i<mkAnchors.length;i++) if(mkAnchors[i].getBoundingClientRect().top<=110) cur=i;
+  const line=mkBarH()+38;
+  for(let i=0;i<mkAnchors.length;i++) if(mkAnchors[i].getBoundingClientRect().top<=line) cur=i;
   chips.forEach(function(c,i){ c.classList.toggle("on",i===cur); });
   mkDaysMove(chips[cur]);
 }
