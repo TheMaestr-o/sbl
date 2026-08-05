@@ -2276,20 +2276,49 @@ function mkFlash(band){
    running to a target measured before the browser's bar slid away, so the day
    lands mid-screen; and `scrollend` is not everywhere. Recomputing the goal on
    every frame makes the landing exact whatever the layout does on the way. */
+/* Ask the browser where the day would end up if it placed it itself — by
+   letting it do exactly that and reading the answer — then put the page back
+   the same frame, before anything is painted. Now the destination is known
+   before the journey starts, so nothing has to be corrected on arrival. */
+function mkTargetFor(el){
+  const back=window.scrollY;
+  mkBarH(); mkLand(el);
+  const y=window.scrollY;
+  window.scrollTo(0,back);
+  return y;
+}
 function mkAnimTo(el,after){
   const from=window.scrollY, t0=performance.now();
-  const dur=Math.min(620,Math.max(260,Math.abs(el.getBoundingClientRect().top-mkBarH())*0.55));
+  const aim=mkTargetFor(el);
+  const dur=Math.min(640,Math.max(240,Math.abs(aim-from)*0.42));
   const id=++mkAnim;
-  const goal=function(){ return Math.max(0,el.getBoundingClientRect().top+window.scrollY-mkBarH()); };
+  const goal=function(){ return aim; };
   const stop=function(){ if(id===mkAnim) mkAnim++; };
   ["touchstart","wheel","keydown"].forEach(function(ev){
     window.addEventListener(ev,stop,{passive:true,once:true}); });
   let over=false;
-  const finish=function(ok){ if(over) return; over=true; clearTimeout(guard);
-    if(ok) window.scrollTo(0,goal());   /* the last word, on the settled layout */
-    after(ok); };
+  const finish=function(ok){
+    if(over) return; over=true; clearTimeout(guard);
+    if(!ok) return after(false);
+    /* whatever the layout did on the way, the last stretch is travelled, not
+       jumped: a leftover of a few pixels is eased out over a fifth of a second */
+    const rest=mkTargetFor(el)-window.scrollY;
+    if(Math.abs(rest)<2){ after(true); return; }
+    const s0=window.scrollY, r0=performance.now(), rd=200;
+    const glide=function(now){
+      const q=Math.min(1,(now-r0)/rd), e=1-Math.pow(1-q,3);
+      window.scrollTo(0,Math.round(s0+rest*e));
+      if(q<1) return requestAnimationFrame(glide);
+      after(true);
+    };
+    requestAnimationFrame(glide);
+    setTimeout(function(){ window.scrollTo(0,s0+rest); after(true); },rd+120);
+  };
   /* a tab with no frames — in the background, or throttled — still arrives */
-  const guard=setTimeout(function(){ finish(id===mkAnim); },dur+140);
+  const guard=setTimeout(function(){
+    if(id===mkAnim) window.scrollTo(0,goal());
+    finish(id===mkAnim);
+  },dur+140);
   const tick=function(now){
     if(over) return;
     if(id!==mkAnim) return finish(false);
@@ -2304,11 +2333,7 @@ function mkAnimTo(el,after){
 function mkGoTo(el,smooth){
   const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
   const land=function(){ mkBarH(); mkLand(el); };
-  /* On a finger device the browser owns the scroll: it clamps our own steps
-     while its bars are moving, the journey stalls short and the correction
-     that follows reads as a jerk. There the day is simply put in place at
-     once — no travel, nothing to fight. */
-  if(!smooth||mkTouch||matchMedia("(prefers-reduced-motion:reduce)").matches){
+  if(!smooth||matchMedia("(prefers-reduced-motion:reduce)").matches){
     land(); requestAnimationFrame(land);
     setTimeout(function(){ land(); mkDaysMark(); },200);
     mkFlash(band); return;
@@ -2317,8 +2342,7 @@ function mkGoTo(el,smooth){
   mkAnimTo(el,function(arrived){
     mkJumping=false;
     if(!arrived) return mkDaysMark();      /* the reader took over — leave him be */
-    land(); mkFlash(band); mkDaysMark();
-    setTimeout(function(){ if(!mkJumping){ land(); mkDaysMark(); } },300);
+    mkFlash(band); mkDaysMark();
   });
 }
 mkDaysEl.addEventListener("click",function(e){
