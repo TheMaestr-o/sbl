@@ -432,11 +432,24 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   border-radius:15px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.1);
   transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
 .days:empty{display:none}
-.dchip{min-width:30px;height:26px;display:flex;align-items:center;justify-content:center;
+/* the band you jumped to answers with a shine, so the eye lands on it */
+.sec.flash{overflow:hidden}
+.sec.flash::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
+  background:linear-gradient(100deg,transparent 22%,rgba(255,255,255,.6) 46%,transparent 68%);
+  transform:translateX(-110%);animation:secsweep .9s cubic-bezier(.3,.7,.3,1)}
+@keyframes secsweep{to{transform:translateX(110%)}}
+@media (prefers-reduced-motion:reduce){
+  .days .dpill{transition:none} .sec.flash::after{display:none}
+}
+.days .dpill{position:absolute;left:6px;top:7px;width:30px;height:26px;border-radius:8px;
+  background:var(--gray-dk);opacity:0;pointer-events:none;
+  transition:transform .42s cubic-bezier(.32,1.5,.4,1),opacity .2s,width .28s,height .28s}
+.days.ready .dpill{opacity:1}
+.dchip{position:relative;z-index:1;min-width:30px;height:26px;display:flex;align-items:center;justify-content:center;
   border-radius:8px;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.3px;
   color:#8a8a8e;text-transform:uppercase;transition:background .16s,color .16s}
 .dchip:hover{background:rgba(120,120,128,.16);color:#2b2b2b}
-.dchip.on{background:var(--gray-dk);color:#fff}
+.dchip.on{color:#fff}
 .dchip.today::after{content:"";width:4px;height:4px;border-radius:50%;background:currentColor;
   margin-left:4px;opacity:.65}
 body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
@@ -514,11 +527,16 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .area .dot,.hue .dot{width:17px;height:17px}
   .mynote .del{display:flex;width:26px;height:26px}
 }
-/* a tablet: the sheet steps aside and gives the rail a gutter of its own, so
-   the tools stand beside the text instead of on top of it */
+/* a tablet: the sheet stays where it is — centred, not nudged aside — and the
+   rail goes down to a single narrow column so it fits inside the sheet's own
+   white margin without touching a letter */
 @media (min-width:701px) and (max-width:1010px){
-  #sheets,footer{padding-left:88px}
-  .rail{left:10px}
+  .rail{left:9px;padding:7px 6px;gap:4px;border-radius:16px}
+  .rail .two{grid-template-columns:30px}
+  .inks{grid-template-columns:26px;gap:4px}
+  .ink{width:26px;height:26px}
+  .rail .sep{width:20px}
+  .days{right:9px}
 }
 /* only a phone has no margin at all: there the rail lies down at the foot */
 @media (max-width:700px){
@@ -924,7 +942,7 @@ async function render(){
 
   relaxDayStarts();
   mkRestore();
-  mkDaysBuild();
+  mkDaysBuild(); mkOpenToday();
 
   if(versesOn && tasks.length){
     const bib=await loadBible(BIBLE[lang]);
@@ -1946,6 +1964,19 @@ document.addEventListener("click",function(e){
    day takes you to it; scrolling moves the mark along by itself. */
 const mkDaysEl=document.getElementById("days");
 let mkAnchors=[];
+/* a lesson runs a week: when today is one of its days, that is where it opens.
+   Only when the lesson itself changes — switching the language or turning the
+   verses on must not throw the reader back. */
+let mkLastLes=null;
+function mkOpenToday(){
+  if(scope!=="week") return;
+  const pg=document.querySelector(".page[data-les]"); if(!pg) return;
+  if(mkLastLes===pg.dataset.les) return;
+  mkLastLes=pg.dataset.les;
+  const sec=document.querySelector('.sec[data-d="'+ymd(new Date())+'"]');
+  if(!sec) return;
+  requestAnimationFrame(function(){ mkGoTo(sec,false); mkDaysMark(); });
+}
 function mkDaysBuild(){
   mkAnchors=[];
   let html="";
@@ -1965,22 +1996,39 @@ function mkDaysBuild(){
       html+='<div class="dchip'+(sec.dataset.d===today?" today":"")+'">'+esc(short)+'</div>';
     });
   }
-  mkDaysEl.innerHTML=mkAnchors.length>1?html:"";
+  mkDaysEl.innerHTML=mkAnchors.length>1?('<i class="dpill"></i>'+html):"";
+  mkDaysEl.classList.remove("ready");
   mkDaysMark();
+}
+function mkGoTo(el,smooth){
+  const y=el.getBoundingClientRect().top+window.scrollY-72;
+  window.scrollTo({top:Math.max(0,y),behavior:smooth?"smooth":"auto"});
+  const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
+  if(band){ band.classList.remove("flash"); void band.offsetWidth; band.classList.add("flash");
+    setTimeout(function(){ band.classList.remove("flash"); },1000); }
 }
 mkDaysEl.addEventListener("click",function(e){
   const c=e.target.closest(".dchip"); if(!c) return;
-  const el=mkAnchors[[].indexOf.call(mkDaysEl.children,c)]; if(!el) return;
-  const y=el.getBoundingClientRect().top+window.scrollY-72;
-  window.scrollTo({top:Math.max(0,y),behavior:"smooth"});
-  [].forEach.call(mkDaysEl.children,function(x){ x.classList.toggle("on",x===c); });
-  setTimeout(mkDaysMark,600);
+  const chips=[].slice.call(mkDaysEl.querySelectorAll(".dchip"));
+  const el=mkAnchors[chips.indexOf(c)]; if(!el) return;
+  chips.forEach(function(x){ x.classList.toggle("on",x===c); });
+  mkDaysMove(c);
+  mkGoTo(el,true);
+  setTimeout(mkDaysMark,700);
 });
+function mkDaysMove(c){
+  const pill=mkDaysEl.querySelector(".dpill"); if(!pill||!c) return;
+  pill.style.width=c.offsetWidth+"px"; pill.style.height=c.offsetHeight+"px";
+  pill.style.transform="translate("+(c.offsetLeft-6)+"px,"+(c.offsetTop-7)+"px)";
+  mkDaysEl.classList.add("ready");
+}
 function mkDaysMark(){
   if(!mkAnchors.length) return;
+  const chips=[].slice.call(mkDaysEl.querySelectorAll(".dchip"));
   let cur=0;
   for(let i=0;i<mkAnchors.length;i++) if(mkAnchors[i].getBoundingClientRect().top<=110) cur=i;
-  [].forEach.call(mkDaysEl.children,function(c,i){ c.classList.toggle("on",i===cur); });
+  chips.forEach(function(c,i){ c.classList.toggle("on",i===cur); });
+  mkDaysMove(chips[cur]);
 }
 let mkTick=false;
 window.addEventListener("scroll",function(){
