@@ -416,6 +416,15 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   box-shadow:0 0 0 1px rgba(0,0,0,.35),0 1px 3px rgba(0,0,0,.3);transform:translate(-50%,-50%);pointer-events:none}
 .hue .dot{top:50%}
 
+/* the quiet invitation: shown a few times, never again after that */
+.hintchip{position:absolute;z-index:61;display:none;align-items:center;gap:6px;
+  padding:7px 12px;border-radius:11px;cursor:pointer;
+  font-size:12.5px;font-weight:700;letter-spacing:.2px;color:#fff;background:rgba(28,28,30,.92);
+  -webkit-backdrop-filter:blur(20px);backdrop-filter:blur(20px);box-shadow:0 8px 22px rgba(0,0,0,.22);
+  animation:hintin .22s cubic-bezier(.2,1.4,.4,1)}
+.hintchip.on{display:flex}
+@keyframes hintin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
+
 /* ——— the bubble on a stroke already laid down ——— */
 .bub{position:absolute;z-index:62;display:flex;align-items:center;gap:5px;padding:5px 6px;
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px);
@@ -615,6 +624,8 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
     <div class="hue" id="mkhue"><i class="dot"></i></div>
   </div>
 </div>
+
+<div class="hintchip" id="mkhint"></div>
 
 <div class="bub" id="bub">
   <span class="mtool" data-a="erase"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.2h9.5M4.6 9.9 9.2 5.3l3.1 3.1-4.6 4.6H5.9z"/></svg></span>
@@ -1124,6 +1135,7 @@ const MKW={
   marks:{de:"Markierungen",en:"Marks",ru:"Пометки"},
   keys:{de:"Kurzbefehle",en:"Shortcuts",ru:"Подсказки"},
   marking:{de:"Marker und Notizen",en:"Marker and notes",ru:"Маркер и заметки"},
+  markit:{de:"Markieren?",en:"Mark it?",ru:"Разметить?"},
   railon:{de:"An",en:"On",ru:"Вкл"},
   railoff:{de:"Aus",en:"Off",ru:"Выкл"},
   railshown:{de:"Das Etui steht links",en:"The rail stands on the left",ru:"Пенал стоит слева"},
@@ -1865,6 +1877,61 @@ document.addEventListener("click",function(e){
     mkEraseAround(e.target.dataset.g?mkPieces(e.target.dataset.g):[e.target]);
   }
 });
+
+/* ——— two ways in for someone who has never met the tools ———
+   A swipe from the left edge pulls the rail out, the way a drawer opens on the
+   side it lives on. And the first few times a reader selects a line with the
+   tools away, a small chip offers them — after three refusals it never asks
+   again. */
+const mkHintEl=document.getElementById("mkhint");
+let mkHintLeft=mkGet("hint",3);
+function mkHintHide(){ mkHintEl.classList.remove("on"); }
+function mkHintShow(rect){
+  if(mkRailOn||mkHintLeft<=0) return;
+  mkHintEl.textContent="✎ "+T("markit");
+  mkHintEl.classList.add("on");
+  const w=mkHintEl.offsetWidth,h=mkHintEl.offsetHeight;
+  let x=Math.max(10,Math.min(rect.left+window.scrollX+rect.width/2-w/2,
+    document.documentElement.clientWidth-w-10));
+  let y=rect.bottom+window.scrollY+10;
+  if(rect.bottom+h+16>window.innerHeight) y=rect.top+window.scrollY-h-10;
+  mkHintEl.style.left=x+"px"; mkHintEl.style.top=y+"px";
+  mkHintLeft--; mkSet("hint",mkHintLeft);
+  clearTimeout(mkHintShow.t); mkHintShow.t=setTimeout(mkHintHide,5000);
+}
+mkHintEl.onmousedown=function(e){ e.preventDefault(); };
+mkHintEl.onclick=function(){ mkHintHide(); mkHintLeft=0; mkSet("hint",0); mkSetRail(true); };
+document.addEventListener("selectionchange",function(){
+  if(window.getSelection().isCollapsed) mkHintHide();
+});
+function mkOffer(){
+  if(mkRailOn||mkHintLeft<=0) return;
+  setTimeout(function(){
+    const s=window.getSelection();
+    if(!s.rangeCount||s.isCollapsed) return;
+    const r=s.getRangeAt(0);
+    const host=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement;
+    if(!host||!host.closest||!host.closest(".page[data-les]")) return;
+    if(String(s).trim().length<6) return;
+    mkHintShow(r.getBoundingClientRect());
+  },mkTouch?140:0);
+}
+document.addEventListener("mouseup",mkOffer);
+document.addEventListener("touchend",mkOffer);
+
+/* a swipe in from the left edge pulls the rail out */
+let mkEdge=null;
+document.addEventListener("touchstart",function(e){
+  if(mkRailOn||e.touches.length!==1){ mkEdge=null; return; }
+  const t=e.touches[0];
+  mkEdge=t.clientX<=28?{x:t.clientX,y:t.clientY}:null;
+},{passive:true});
+document.addEventListener("touchend",function(e){
+  if(!mkEdge) return;
+  const t=e.changedTouches[0],dx=t.clientX-mkEdge.x,dy=Math.abs(t.clientY-mkEdge.y);
+  mkEdge=null;
+  if(dx>60&&dy<70){ mkHintHide(); mkHintLeft=0; mkSet("hint",0); mkSetRail(true); }
+},{passive:true});
 
 /* ——— a tap on the page, with nothing in hand, clears the room ——— */
 if(mkTouch) document.addEventListener("click",function(e){
