@@ -440,6 +440,13 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   border-radius:999px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.1);
   transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
 .days:empty{display:none}
+/* the panel itself never reacts: no grey flash from the system's tap
+   highlight, no accidental selection of the day letters — only the drop moves */
+.days,.rail,.bub,.rpick,.hintchip,.caretbtn,.mtoast{
+  -webkit-tap-highlight-color:transparent;
+  -webkit-user-select:none;-moz-user-select:none;user-select:none;
+  -webkit-touch-callout:none}
+.days *,.rail *{-webkit-tap-highlight-color:transparent}
 /* the band you jumped to answers with a shine, so the eye lands on it */
 .sec.flash{overflow:hidden}
 .sec.flash::after{content:"";position:absolute;inset:0;z-index:2;pointer-events:none;
