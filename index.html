@@ -2117,52 +2117,59 @@ function mkBarH(){
   const b=document.querySelector(".bar");
   return (b&&getComputedStyle(b).position==="sticky"?b.getBoundingClientRect().height:0)+10;
 }
-let mkJumping=false;
+let mkJumping=false, mkAnim=0;
 function mkFlash(band){
   if(!band) return;
   band.classList.remove("flash"); void band.offsetWidth; band.classList.add("flash");
   setTimeout(function(){ band.classList.remove("flash"); },1000);
 }
-/* while the page is on its way the strip stops watching the scroll — otherwise
-   the mark is dragged back through every day it passes. The shine plays when
-   the page has arrived, so it is seen and not scrolled past. */
+/* The journey is driven here, frame by frame, instead of being handed to the
+   browser's own smooth scrolling. Two reasons: on iOS that animation keeps
+   running to a target measured before the browser's bar slid away, so the day
+   lands mid-screen; and `scrollend` is not everywhere. Recomputing the goal on
+   every frame makes the landing exact whatever the layout does on the way. */
+function mkAnimTo(el,after){
+  const from=window.scrollY, t0=performance.now();
+  const dur=Math.min(620,Math.max(260,Math.abs(el.getBoundingClientRect().top-mkBarH())*0.55));
+  const id=++mkAnim;
+  const goal=function(){ return Math.max(0,el.getBoundingClientRect().top+window.scrollY-mkBarH()); };
+  const stop=function(){ if(id===mkAnim) mkAnim++; };
+  ["touchstart","wheel","keydown"].forEach(function(ev){
+    window.addEventListener(ev,stop,{passive:true,once:true}); });
+  let over=false;
+  const finish=function(ok){ if(over) return; over=true; clearTimeout(guard);
+    if(ok) window.scrollTo(0,goal());   /* the last word, on the settled layout */
+    after(ok); };
+  /* a tab with no frames — in the background, or throttled — still arrives */
+  const guard=setTimeout(function(){ finish(id===mkAnim); },dur+140);
+  const tick=function(now){
+    if(over) return;
+    if(id!==mkAnim) return finish(false);
+    const p=Math.min(1,(now-t0)/dur), e=1-Math.pow(1-p,3);
+    const g=goal();
+    window.scrollTo(0,Math.round(from+(g-from)*e));
+    if(p<1) return requestAnimationFrame(tick);
+    finish(true);
+  };
+  requestAnimationFrame(tick);
+}
 function mkGoTo(el,smooth){
-  const y=Math.max(0,el.getBoundingClientRect().top+window.scrollY-mkBarH());
   const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
-  /* On a tablet or a phone the browser's own bar slides away while the page is
-     travelling, the layout shifts under it, and the day lands mid-screen. So
-     when the journey ends we look again and make up the difference. */
-  const settleOn=function(t){
-    const d=t.getBoundingClientRect().top-mkBarH();
-    if(Math.abs(d)>6) window.scrollBy(0,d);
+  const land=function(){
+    const d=el.getBoundingClientRect().top-mkBarH();
+    if(Math.abs(d)>4) window.scrollBy(0,d);
   };
-  const done=function(){
-    if(!mkJumping) return;
-    mkJumping=false;
-    clearTimeout(mkGoTo.t); clearTimeout(mkGoTo.cap);
-    window.removeEventListener("scrollend",done);
-    if(mkGoTo.off) mkGoTo.off();
-    settleOn(el);
-    mkFlash(band); mkDaysMark();
-  };
-  if(!smooth||Math.abs(window.scrollY-y)<4){
-    window.scrollTo(0,y);
-    requestAnimationFrame(function(){ settleOn(el); });
-    setTimeout(function(){ settleOn(el); },160);
+  if(!smooth||matchMedia("(prefers-reduced-motion:reduce)").matches){
+    window.scrollTo(0,Math.max(0,el.getBoundingClientRect().top+window.scrollY-mkBarH()));
+    requestAnimationFrame(land); setTimeout(land,160);
     mkFlash(band); return;
   }
-  /* "arrived" is when the scrolling has gone quiet — scrollend where it exists,
-     and a settle timer everywhere else. A fixed delay would either cut the
-     journey short or leave the strip deaf too long. */
   mkJumping=true;
-  const settle=function(){ clearTimeout(mkGoTo.t); mkGoTo.t=setTimeout(done,140); };
-  window.addEventListener("scroll",settle,{passive:true});
-  window.addEventListener("scrollend",done);
-  const off=mkGoTo.off; if(off) off();
-  mkGoTo.off=function(){ window.removeEventListener("scroll",settle); mkGoTo.off=null; };
-  settle();
-  clearTimeout(mkGoTo.cap); mkGoTo.cap=setTimeout(done,1800);
-  window.scrollTo({top:y,behavior:"smooth"});
+  mkAnimTo(el,function(arrived){
+    mkJumping=false;
+    if(!arrived) return mkDaysMark();      /* the reader took over — leave him be */
+    land(); mkFlash(band); mkDaysMark();
+  });
 }
 mkDaysEl.addEventListener("click",function(e){
   const c=e.target.closest(".dchip"); if(!c) return;
