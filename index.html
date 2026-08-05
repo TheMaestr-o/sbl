@@ -366,6 +366,24 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
   background:var(--nc,var(--mine))}
 .mynote b,.mynote strong{font-weight:700}
 .mynote i,.mynote em{font-style:italic}
+/* a quotation inside your own note is set the way the lesson sets its quotes:
+   the serif face, a rule of your colour down the side */
+.mynote blockquote{position:relative;margin:9px 0 9px 2px;padding-left:14px;
+  font-family:var(--serif);font-size:16.5px;line-height:1.5}
+.mynote blockquote::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:2px;
+  border-radius:2px;background:var(--nc,var(--mine));opacity:.4}
+.mynote blockquote i,.mynote blockquote em{font-style:italic}
+/* bold · italic · quote, at the head of the note and nowhere else */
+.mynote .fmt{position:absolute;top:5px;right:32px;display:none;gap:2px;user-select:none}
+.mynote:hover .fmt,.mynote:focus .fmt{display:flex}
+.mynote .fmt span{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;
+  justify-content:center;font-size:13px;color:var(--nc,var(--mine));opacity:.55;cursor:pointer;
+  font-family:var(--serif);line-height:1}
+.mynote .fmt span:hover{opacity:1;background:rgba(120,120,128,.14)}
+.mynote .fmt span.on{opacity:1;background:rgba(120,120,128,.15)}
+.mynote .fmt svg{flex:none;width:13px;height:12px}
+.mynote .fmt .b{font-weight:700}
+.mynote .fmt .i{font-style:italic}
 .mynote.blank::after{content:attr(data-ph);color:#9aa7c4}
 .mynote .lab{display:block;margin-top:7px;font-size:8.5px;letter-spacing:1.1px;
   text-transform:uppercase;color:var(--nc,var(--mine));opacity:.6;font-weight:700}
@@ -580,6 +598,8 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .area{width:min(260px,66vw);height:130px} .hue{width:min(260px,66vw);height:20px}
   .area .dot,.hue .dot{width:17px;height:17px}
   .mynote .del{display:flex;width:26px;height:26px}
+  .mynote .fmt{display:flex;right:38px}
+  .mynote .fmt span{width:26px;height:26px}
 }
 /* a tablet: the sheet stays where it is — centred, not nudged aside — and the
    rail goes down to a single narrow column so it fits inside the sheet's own
@@ -673,8 +693,9 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .note,.quote,.mem{orphans:2;widows:2}
   .vtext{orphans:3;widows:3}
   /* the pencil work prints with the lesson; the tools themselves never do */
-  .rail,.rpick,.bub,.grip,.days,.hintchip,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del{display:none!important}
+  .rail,.rpick,.bub,.grip,.days,.hintchip,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del,.mynote .fmt{display:none!important}
   .mynote,.myins{break-inside:avoid;page-break-inside:avoid}
+  .mynote blockquote{break-inside:avoid;page-break-inside:avoid}
   /* whoever picks up the sheet must see at a glance which lines are not
      the lesson's own */
   .legend.has{display:block;margin-top:30px;padding-top:9px;border-top:.5px solid #ddd;
@@ -1306,7 +1327,10 @@ const MKW={
   fill:{de:"Marker",en:"Highlighter",ru:"Маркер"},
   tex:{de:"Strich",en:"Stroke",ru:"Штрих"},
   line:{de:"Linie",en:"Line",ru:"Линия"},
-  wave:{de:"Welle",en:"Wave",ru:"Волна"}
+  wave:{de:"Welle",en:"Wave",ru:"Волна"},
+  fmtb:{de:"Fett",en:"Bold",ru:"Жирный"},
+  fmti:{de:"Kursiv",en:"Italic",ru:"Курсив"},
+  fmtq:{de:"Zitat",en:"Quotation",ru:"Цитата"}
 };
 function T(k){ const w=MKW[k]||{}; return w[lang]||w.en||""; }
 const APP_VERSION="2.1";
@@ -1365,9 +1389,12 @@ const MK_KEYS=[
   ["N",{de:"Eigene Notiz — dann auf den Absatz tippen",en:"Own note — then click the paragraph",ru:"Своя заметка — потом клик по абзацу"}],
   ["E",{de:"Radierer — markieren nimmt alles weg",en:"Eraser — a selection takes everything off",ru:"Ластик — выделение снимает всё"}],
   ["C",{de:"Kopieren mit Bibelstelle — einfach markieren",en:"Copy with the reference — just select",ru:"Копировать со ссылкой — просто выдели"}],
-  ["⌘B ⌘I",{de:"Fett und kursiv in der eigenen Notiz; eine Farbe im Etui färbt die Notiz selbst",
-            en:"Bold and italic inside your own note; a colour in the rail tints the note itself",
-            ru:"Жирный и курсив в своей заметке; цвет в пенале красит саму заметку"}],
+  ["⌘B ⌘I",{de:"Fett und kursiv — in der eigenen Notiz und im eigenen Text in der Zeile",
+            en:"Bold and italic — in your own note and in your own words in the line",
+            ru:"Жирный и курсив — в своей заметке и в своих словах внутри строки"}],
+  ["⌘⇧9",{de:"Zitat: die Zeile wird gesetzt wie die Zitate der Lektion. Auch über die Taste \u201e am Kopf der Notiz oder indem die Zeile mit \u00bb> \u00ab beginnt",
+          en:"Quotation: the line is set the way the lesson sets its quotes. Also the \u201e button at the head of the note, or start the line with \u201c> \u201d",
+          ru:"Цитата: строка ставится так же, как цитаты урока. Ещё кнопка \u201e в шапке заметки или начать строку с \u00ab> \u00bb"}],
   ["Esc",{de:"Werkzeug weglegen, alles schließen",en:"Put the tool down, close everything",ru:"Положить инструмент, всё закрыть"}]
 ];
 /* what the reader should know about where his work lives */
@@ -1639,12 +1666,12 @@ function mkStore(){
           if(probe.comparePoint(m,m.nodeValue.length)<=0){ off+=m.nodeValue.length; continue; }
           break;
         }
-        out.ins.push({k:k,s:off,t:mkInsText(el)});
+        out.ins.push({k:k,s:off,t:mkInsText(el),h:mkClean(mkInsHtml(el))});
       });
     });
     pg.querySelectorAll(".mynote").forEach(function(el){
       const prev=el.previousElementSibling;
-      if(prev&&prev.dataset.k) out.notes.push({k:prev.dataset.k,t:mkNoteBody(el).innerHTML,c:el.dataset.c});
+      if(prev&&prev.dataset.k) out.notes.push({k:prev.dataset.k,t:mkClean(mkNoteBody(el).innerHTML),c:el.dataset.c});
     });
     MKALL[mkKey(pg)]=out;
   });
@@ -1676,7 +1703,7 @@ function mkRestore(){
     (d.ins||[]).forEach(function(o){
       const b=pg.querySelector('[data-k="'+o.k+'"]'); if(!b) return;
       const r=mkOffsets(b,o.s,o.s+1); if(!r) return;
-      r.collapse(true); mkInsert(r,o.t,true);
+      r.collapse(true); mkInsert(r,o.h||o.t,true,!!o.h);
     });
     (d.notes||[]).forEach(function(o){
       const b=pg.querySelector('[data-k="'+o.k+'"]'); if(!b) return;
@@ -1692,26 +1719,65 @@ function mkStamp(){ try{ return new Date().toLocaleDateString(LOCALE[lang],{day:
    little cross: an insertion in the middle of a paragraph must be as easy to
    take back as it was to put in. */
 function mkInsText(el){ const c=el.cloneNode(true),d=c.querySelector(".del"); if(d) d.remove(); return c.textContent; }
-function mkInsert(range,text,quiet){
+function mkInsHtml(el){ const c=el.cloneNode(true),d=c.querySelector(".del"); if(d) d.remove(); return c.innerHTML; }
+function mkInsert(range,text,quiet,html){
   const s=document.createElement("span");
   s.className="myins"; s.contentEditable="true"; s.spellcheck=false;
-  const t=document.createTextNode(text||"");
+  let t;
+  if(html){ const w=document.createElement("span"); w.innerHTML=mkClean(text||""); t=w; }
+  else t=document.createTextNode(text||"");
   const x=document.createElement("span");
   x.className="del"; x.contentEditable="false"; x.textContent="×"; x.title=T("erase");
   x.onmousedown=function(e){ e.preventDefault(); };
   x.onclick=function(e){ e.stopPropagation(); s.remove(); mkStore(); };
-  s.appendChild(t); s.appendChild(x);
+  if(html){ while(t.firstChild) s.appendChild(t.firstChild); }
+  else s.appendChild(t);
+  s.appendChild(x);
   range.insertNode(s);
+  /* bold and italic work inside the line as they do inside a note */
+  s.addEventListener("keydown",function(e){
+    if(!(e.metaKey||e.ctrlKey)) return;
+    const k=e.key.toLowerCase();
+    if(k==="b"||k==="i"){ e.preventDefault(); mkCmd(k==="b"?"bold":"italic"); mkStore(); }
+  });
   s.addEventListener("blur",function(){ if(!mkInsText(s).trim()) s.remove(); mkStore(); });
   if(!quiet){
-    const r=document.createRange(); r.setStart(t,t.nodeValue.length); r.collapse(true);
+    const r=document.createRange(); r.setStartBefore(x); r.collapse(true);
     const sel=window.getSelection(); sel.removeAllRanges(); sel.addRange(r); s.focus(); mkStore();
   }
   return s;
 }
 let mkNoteFocused=null;
 function mkNoteBody(d){ const c=d.cloneNode(true);
-  c.querySelectorAll(".del,.lab").forEach(function(x){ x.remove(); }); return c; }
+  c.querySelectorAll(".del,.lab,.fmt").forEach(function(x){ x.remove(); }); return c; }
+/* what may live inside the reader's own text: bold, italic, a quotation, a line
+   break. Everything else — a pasted colour, a foreign class — is unwrapped, so
+   what is stored is always the same handful of tags */
+const MK_TAGS={B:1,STRONG:1,I:1,EM:1,BLOCKQUOTE:1,DIV:1,BR:1};
+function mkAs(el,tag){
+  const n=document.createElement(tag);
+  while(el.firstChild) n.appendChild(el.firstChild);
+  el.parentNode.replaceChild(n,el);
+  return n;
+}
+function mkClean(html){
+  const t=document.createElement("div"); t.innerHTML=String(html||"");
+  (function walk(el){
+    [].slice.call(el.children).forEach(function(c){
+      walk(c);
+      if(!MK_TAGS[c.tagName]){
+        /* the browser sometimes leaves a styled span behind — keep the meaning,
+           drop the style */
+        const st=c.getAttribute&&c.getAttribute("style")||"";
+        if(/font-weight:\s*(bold|[6-9]00)/i.test(st)) mkAs(c,"b");
+        else if(/font-style:\s*italic/i.test(st)) mkAs(c,"i");
+        else mkUnwrap(c);
+      }
+      else [].slice.call(c.attributes).forEach(function(a){ c.removeAttribute(a.name); });
+    });
+  })(t);
+  return t.innerHTML;
+}
 function mkNoteText(d){ return mkNoteBody(d).textContent.trim(); }
 function mkNoteTint(d,c){
   const p=mkRgb(c||"#2f5bd0");
@@ -1719,12 +1785,82 @@ function mkNoteTint(d,c){
   d.style.setProperty("--nc",c||"#2f5bd0");
   d.style.setProperty("--nbg","rgba("+p[0]+","+p[1]+","+p[2]+",.06)");
 }
+/* the line of the note the caret sits in — never the label, the cross or the bar */
+function mkNoteLine(d){
+  const sel=window.getSelection(); if(!sel.rangeCount) return null;
+  let n=sel.getRangeAt(0).startContainer;
+  if(!d.contains(n)) return null;
+  while(n&&n.parentNode!==d) n=n.parentNode;
+  if(!n) return null;
+  if(n.nodeType===1&&n.classList&&
+     (n.classList.contains("lab")||n.classList.contains("del")||n.classList.contains("fmt"))) return null;
+  return n;
+}
+/* bold and italic as tags, not as inline styles — that is what survives a
+   reload and what the printer understands */
+function mkCmd(name){
+  try{ document.execCommand("styleWithCSS",false,false); }catch(e){}
+  try{ document.execCommand(name); }catch(e){}
+}
+function mkCaretEnd(el){
+  const r=document.createRange(); r.selectNodeContents(el); r.collapse(false);
+  const s=window.getSelection(); s.removeAllRanges(); s.addRange(r);
+}
+/* the line becomes a quotation, set like the lesson sets its own; pressing again
+   gives the line back */
+function mkQuote(d){
+  const n=mkNoteLine(d); if(!n) return;
+  let el;
+  if(n.nodeType===1&&n.tagName==="BLOCKQUOTE"){
+    el=document.createElement("div");
+    while(n.firstChild) el.appendChild(n.firstChild);
+    d.replaceChild(el,n);
+  }else{
+    el=document.createElement("blockquote");
+    d.insertBefore(el,n);
+    if(n.nodeType===3) el.appendChild(n);
+    else{ while(n.firstChild) el.appendChild(n.firstChild); d.removeChild(n); }
+  }
+  mkCaretEnd(el); mkStore(); mkFmtPaint(d);
+}
+function mkFmtPaint(d){
+  const bar=d.querySelector(".fmt"); if(!bar) return;
+  const n=mkNoteLine(d);
+  let b=false,i=false;
+  try{ b=document.queryCommandState("bold"); i=document.queryCommandState("italic"); }catch(e){}
+  bar.querySelector(".b").classList.toggle("on",b);
+  bar.querySelector(".i").classList.toggle("on",i);
+  bar.querySelector(".q").classList.toggle("on",!!(n&&n.nodeType===1&&n.tagName==="BLOCKQUOTE"));
+}
+function mkFmtBar(d){
+  const bar=document.createElement("div");
+  bar.className="fmt"; bar.contentEditable="false";
+  bar.innerHTML='<span class="b" title="'+esc(T("fmtb"))+'">B</span>'+
+                '<span class="i" title="'+esc(T("fmti"))+'">I</span>'+
+                '<span class="q" title="'+esc(T("fmtq"))+'">'+
+                '<svg width="13" height="12" viewBox="0 0 13 12" fill="none" stroke="currentColor" '+
+                'stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5v9"/>'+
+                '<path d="M5 3h6.5M5 6h6.5M5 9h3.8" opacity=".7"/></svg></span>';
+  bar.addEventListener("mousedown",function(e){ e.preventDefault(); });
+  bar.addEventListener("click",function(e){
+    const t=e.target.closest("span"); if(!t) return;
+    e.stopPropagation();
+    if(document.activeElement!==d) d.focus();
+    if(t.classList.contains("q")) mkQuote(d);
+    else{ mkCmd(t.classList.contains("b")?"bold":"italic"); mkStore(); mkFmtPaint(d); }
+  });
+  return bar;
+}
 function mkNote(afterEl,html,quiet,colour){
   const d=document.createElement("div");
   d.className="mynote"; d.contentEditable="true"; d.spellcheck=false;
   d.dataset.ph=T("ph");
   mkNoteTint(d,colour);
-  d.innerHTML=html||"";
+  d.innerHTML=mkClean(html||"");
+  /* a note with nothing but its label and its cross has nowhere to put the
+     caret — so an empty note is given one empty line to write on */
+  if(!d.firstChild){ const ln=document.createElement("div"); ln.appendChild(document.createElement("br")); d.appendChild(ln); }
+  d.appendChild(mkFmtBar(d));
   const lab=document.createElement("div");
   lab.className="lab"; lab.contentEditable="false"; lab.textContent=T("note")+" · "+mkStamp();
   d.appendChild(lab);
@@ -1737,6 +1873,27 @@ function mkNote(afterEl,html,quiet,colour){
     const t=(e.clipboardData||window.clipboardData).getData("text/plain");
     document.execCommand("insertText",false,t);
   });
+  /* ⌘B, ⌘I and ⌘⇧9 do what the three buttons do; typing "> " opens a quotation
+     the way it is typed everywhere else */
+  d.addEventListener("keydown",function(e){
+    if(!(e.metaKey||e.ctrlKey)) return;
+    const k=e.key.toLowerCase();
+    if(k==="b"||k==="i"){ e.preventDefault(); mkCmd(k==="b"?"bold":"italic"); mkStore(); mkFmtPaint(d); }
+    else if(e.shiftKey&&e.code==="Digit9"){ e.preventDefault(); mkQuote(d); }
+  });
+  d.addEventListener("input",function(){
+    const n=mkNoteLine(d); if(!n) return;
+    const isQ=n.nodeType===1&&n.tagName==="BLOCKQUOTE";
+    const txt=n.nodeType===3?n.nodeValue:n.textContent;
+    if(!isQ&&txt.slice(0,2)==="> "){
+      if(n.nodeType===3) n.nodeValue=n.nodeValue.slice(2);
+      else{ const t=mkFirstText(n); if(t) t.nodeValue=t.nodeValue.replace(/^> /,""); }
+      mkQuote(d);
+    }
+  });
+  ["keyup","mouseup","focus"].forEach(function(ev){
+    d.addEventListener(ev,function(){ mkFmtPaint(d); });
+  });
   d.addEventListener("focus",function(){ mkNoteFocused=d; });
   d.addEventListener("blur",function(){ setTimeout(function(){ if(mkNoteFocused===d) mkNoteFocused=null; },150); });
   afterEl.parentNode.insertBefore(d,afterEl.nextSibling);
@@ -1744,7 +1901,11 @@ function mkNote(afterEl,html,quiet,colour){
   d.addEventListener("input",blank);
   d.addEventListener("blur",function(){ if(!mkNoteText(d)) d.remove(); mkStore(); });
   blank();
-  if(!quiet){ d.focus(); mkStore(); }
+  if(!quiet){
+    const ln=d.querySelector("blockquote,div:not(.fmt):not(.lab):not(.del)");
+    d.focus(); if(ln) mkCaretEnd(ln);
+    mkStore();
+  }
   return d;
 }
 

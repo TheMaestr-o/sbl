@@ -72,6 +72,7 @@ The lesson opens as a lesson: the text selects and copies like anywhere else. Tu
 | **Two passes go darker** | A second colour over the first behaves like real ink; the same colour twice does not muddy it |
 | **Whole words** | A stroke never ends cutting a word in half, and a stroke that swallows a bold label or an italic title is laid as **one** mark — no seam, no notch, no white hairline |
 | **Your own note** | Take ≡, click a paragraph — blue, in the other face, labelled and dated, so nobody mistakes it for the lesson |
+| **Set like the lesson** | Inside a note: **bold**, *italic* and a quotation block set in the serif face with a rule down its side — three buttons at the head of the note, or ⌘B ⌘I ⌘⇧9, or simply start the line with `>` |
 | **Your own words in the line** | Take ✚, click into the text — the field opens exactly where you clicked |
 | **Copy with the reference** | A tool of its own: select a verse and the clipboard has the text with its reference |
 | **Kept in the browser** | The counter at the foot of the rail says how much, and opens the page that says where |
@@ -80,7 +81,7 @@ Tap a stroke already on the page and it is picked up: the rail's colours and str
 
 <div align="center"><img src="screenshots/keys.png" width="520" alt="The shortcuts card: how the tools work, and the keys for the strokes, the note, the insertion, the eraser and copying"></div>
 
-Keys do the same without reaching for the rail: **1 – 4** the strokes, **N** a note, **I** your own words, **E** the eraser, **C** copy, **M** the last tool, **Esc** put it down. They are all listed under **⚙ → Shortcuts**, in the language of the lesson.
+Keys do the same without reaching for the rail: **1 – 4** the strokes, **N** a note, **I** your own words, **E** the eraser, **C** copy, **M** the last tool, **Esc** put it down. Inside your own text **⌘B ⌘I** set bold and italic, **⌘⇧9** opens a quotation. They are all listed under **⚙ → Shortcuts**, in the language of the lesson.
 
 <br>
 
