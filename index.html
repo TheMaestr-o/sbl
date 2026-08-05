@@ -179,6 +179,8 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 /* the browser tries to keep the old text under your eye when the sheet is
    replaced, and quietly scrolls back to it — which fought every jump to a day */
 #sheets{overflow-anchor:none}
+#mktail{height:0}
+@media print{ #mktail{display:none} }
 .msg{text-align:center;color:#999;padding:80px 0;font-family:var(--serif);font-style:italic;font-size:19px}
 
 /* LESSON tag — contour from L4.eps: vertical sides, horizontal top (bleeds off page top),
@@ -701,6 +703,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   </div>
 </div>
 
+<div id="mktail" aria-hidden="true"></div>
 <div class="days" id="days"></div>
 
 <div class="hintchip" id="mkhint"></div>
@@ -2067,6 +2070,19 @@ function mkAfterLayout(fn){
   const tm=setTimeout(fire,220);
   requestAnimationFrame(step);
 }
+/* the last day of a lesson must be able to come up under the bar like the
+   others — so the page is given just enough room after it, and not a pixel of
+   it reaches the PDF */
+function mkTail(){
+  const sp=document.getElementById("mktail"); if(!sp) return;
+  const last=mkAnchors[mkAnchors.length-1];
+  if(!last||!last.isConnected){ sp.style.height="0px"; return; }
+  sp.style.height="0px";
+  const pg=last.closest(".page")||last;
+  const rest=pg.getBoundingClientRect().bottom-last.getBoundingClientRect().top;
+  const need=Math.max(0,Math.round(window.innerHeight-mkBarH()-rest-32));
+  sp.style.height=need+"px";
+}
 function mkDaysBuild(){
   mkAnchors=[];
   let html="";
@@ -2087,6 +2103,7 @@ function mkDaysBuild(){
   }
   mkDaysEl.innerHTML=mkAnchors.length>1?('<i class="dpill"><b></b></i>'+html):"";
   mkDaysEl.classList.remove("ready");
+  mkTail();
   mkDaysMark();
 }
 function mkBarH(){
@@ -2105,16 +2122,27 @@ function mkFlash(band){
 function mkGoTo(el,smooth){
   const y=Math.max(0,el.getBoundingClientRect().top+window.scrollY-mkBarH());
   const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
+  /* On a tablet or a phone the browser's own bar slides away while the page is
+     travelling, the layout shifts under it, and the day lands mid-screen. So
+     when the journey ends we look again and make up the difference. */
+  const settleOn=function(t){
+    const d=t.getBoundingClientRect().top-mkBarH();
+    if(Math.abs(d)>6) window.scrollBy(0,d);
+  };
   const done=function(){
     if(!mkJumping) return;
     mkJumping=false;
     clearTimeout(mkGoTo.t); clearTimeout(mkGoTo.cap);
     window.removeEventListener("scrollend",done);
     if(mkGoTo.off) mkGoTo.off();
+    settleOn(el);
     mkFlash(band); mkDaysMark();
   };
   if(!smooth||Math.abs(window.scrollY-y)<4){
-    window.scrollTo(0,y); mkFlash(band); return;
+    window.scrollTo(0,y);
+    requestAnimationFrame(function(){ settleOn(el); });
+    setTimeout(function(){ settleOn(el); },160);
+    mkFlash(band); return;
   }
   /* "arrived" is when the scrolling has gone quiet — scrollend where it exists,
      and a settle timer everywhere else. A fixed delay would either cut the
@@ -2163,6 +2191,7 @@ function mkDaysMark(){
   mkDaysMove(chips[cur]);
 }
 let mkTick=false;
+window.addEventListener("resize",function(){ mkTail(); mkDaysMark(); });
 window.addEventListener("scroll",function(){
   if(mkTick) return; mkTick=true;
   requestAnimationFrame(function(){ mkTick=false; if(!mkJumping) mkDaysMark(); });
