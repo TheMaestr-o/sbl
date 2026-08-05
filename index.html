@@ -339,7 +339,10 @@ mark.pe{padding-right:.3em;margin-right:-.3em}
    стыке, а разрыв — белую щель. Обычно куска и вовсе один — см. mkWhole() */
 mark.fill:not(.ps),mark.tex:not(.ps){margin-left:0;padding-left:0}
 mark.fill:not(.pe),mark.tex:not(.pe){margin-right:0;padding-right:0}
-mark.line,mark.wave{mix-blend-mode:normal;padding:0 .05em .26em;margin:0;background-position:0 100%}
+/* an underline must not move a letter: side padding on an inline box pushes
+   the text along, so there is none — only the room under the baseline, which
+   costs the line nothing */
+mark.line,mark.wave{mix-blend-mode:normal;padding:0 0 .26em;margin:0;background-position:0 100%}
 mark.line{background-size:100% .48em}
 mark.wave{background-size:auto .42em;background-repeat:repeat-x}
 
@@ -1965,7 +1968,9 @@ function mkDrag(el,fn){
     e.preventDefault(); el.setPointerCapture(e.pointerId); go(e);
     const mv=function(ev){ go(ev); };
     const up=function(){ el.removeEventListener("pointermove",mv); el.removeEventListener("pointerup",up);
-      const hex=mkLive(); mkRemember(hex,mkTool.s); mkMode="mark"; mkPaintMode(); mkStore(); };
+      const hex=mkLive(); mkRemember(hex,mkTool.s); mkMode="mark"; mkStore();
+      mkPickBox.hidden=true; mkPaintMode();       /* the colour is chosen — the gamut steps aside */
+      mkUseSelection(hex,mkTool.s); };
     el.addEventListener("pointermove",mv); el.addEventListener("pointerup",up);
   });
 }
@@ -2090,6 +2095,7 @@ mkBub.addEventListener("click",function(e){
 /* the rail is not "somewhere else": while a stroke is picked up, pressing a
    colour or another stroke there has to reach the stroke, not the desk */
 document.addEventListener("mousedown",function(e){
+  if(!mkRail.contains(e.target)&&!mkPickBox.hidden){ mkPickBox.hidden=true; mkPaintMode(); }
   if(mkBub.contains(e.target)||mkRail.contains(e.target)) return;
   if(e.target.tagName==="MARK") return;
   mkBubClose();
