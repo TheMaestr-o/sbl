@@ -359,11 +359,10 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
 .myins:focus{background:rgba(47,91,208,.13);box-shadow:0 0 0 2px rgba(47,91,208,.18)}
 /* the reader's own block: rounded on every corner, with its own colour and a
    bar of the same shape down the side */
-.mynote{position:relative;margin:14px 0 18px;padding:11px 16px 9px 19px;text-indent:0;
-  background:var(--nbg,rgba(47,91,208,.055));border-radius:11px;
+.mynote{position:relative;margin:14px 0 18px;padding:12px 16px 10px;text-indent:0;
+  background:var(--nbg,rgba(47,91,208,.10));border-radius:12px;
+  box-shadow:inset 0 0 0 1px var(--nbd,rgba(47,91,208,.22));
   font-family:var(--sans);font-size:15.5px;line-height:1.55;color:#22304e;outline:none;text-align:left}
-.mynote::before{content:"";position:absolute;left:0;top:6px;bottom:6px;width:3px;border-radius:3px;
-  background:var(--nc,var(--mine))}
 .mynote b,.mynote strong{font-weight:700}
 .mynote i,.mynote em{font-style:italic}
 /* a quotation inside your own note is set the way the lesson sets its quotes:
@@ -374,20 +373,22 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
   border-radius:2px;background:var(--nc,var(--mine));opacity:.4}
 .mynote blockquote i,.mynote blockquote em{font-style:italic}
 /* bold · italic · quote, at the head of the note and nowhere else */
-.mynote .fmt{position:absolute;top:5px;right:32px;display:none;gap:2px;user-select:none}
+.mynote .fmt{display:none;gap:2px;user-select:none;margin:-4px -4px -4px 0}
 .mynote:hover .fmt,.mynote:focus .fmt{display:flex}
 .mynote .fmt span{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;
   justify-content:center;font-size:13px;color:var(--nc,var(--mine));opacity:.55;cursor:pointer;
   font-family:var(--serif);line-height:1}
 .mynote .fmt span:hover{opacity:1;background:rgba(120,120,128,.14)}
-.mynote .fmt span.on{opacity:1;background:rgba(120,120,128,.15)}
+.mynote .fmt span.on{opacity:1;background:var(--nbd,rgba(47,91,208,.22))}
 .mynote .fmt svg{flex:none;width:13px;height:12px}
 .mynote .fmt .b{font-weight:700}
 .mynote .fmt .i{font-style:italic}
 .mynote.blank::after{content:attr(data-ph);color:#9aa7c4}
-.mynote .lab{display:block;margin-top:7px;font-size:8.5px;letter-spacing:1.1px;
+/* the foot of the note: whose it is on the left, what it can be set in on the right */
+.mynote .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
+.mynote .lab{font-size:8.5px;letter-spacing:1.1px;
   text-transform:uppercase;color:var(--nc,var(--mine));opacity:.6;font-weight:700}
-.mynote:focus{box-shadow:0 0 0 3px rgba(47,91,208,.14)}
+.mynote:focus{box-shadow:inset 0 0 0 1px var(--nbd,rgba(47,91,208,.22)),0 0 0 3px rgba(47,91,208,.12)}
 .mynote .del{position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:6px;cursor:pointer;
   display:none;align-items:center;justify-content:center;color:var(--mine);opacity:.55;font-size:14px}
 .mynote:hover .del{display:flex}
@@ -598,7 +599,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .area{width:min(260px,66vw);height:130px} .hue{width:min(260px,66vw);height:20px}
   .area .dot,.hue .dot{width:17px;height:17px}
   .mynote .del{display:flex;width:26px;height:26px}
-  .mynote .fmt{display:flex;right:38px}
+  .mynote .fmt{display:flex}
   .mynote .fmt span{width:26px;height:26px}
 }
 /* a tablet: the sheet stays where it is — centred, not nudged aside — and the
@@ -1738,6 +1739,7 @@ function mkInsert(range,text,quiet,html){
   else s.appendChild(t);
   s.appendChild(x);
   range.insertNode(s);
+  s.addEventListener("input",mkStoreSoon);
   /* bold and italic work inside the line as they do inside a note */
   s.addEventListener("keydown",function(e){
     if(!(e.metaKey||e.ctrlKey)) return;
@@ -1752,8 +1754,12 @@ function mkInsert(range,text,quiet,html){
   return s;
 }
 let mkNoteFocused=null;
+/* what is being written is kept as it is written, not only when the note is
+   left: a tab closed mid-sentence must not lose the sentence */
+let mkTypeT=null;
+function mkStoreSoon(){ clearTimeout(mkTypeT); mkTypeT=setTimeout(mkStore,400); }
 function mkNoteBody(d){ const c=d.cloneNode(true);
-  c.querySelectorAll(".del,.lab,.fmt").forEach(function(x){ x.remove(); }); return c; }
+  c.querySelectorAll(".del,.foot,.lab,.fmt").forEach(function(x){ x.remove(); }); return c; }
 /* what may live inside the reader's own text: bold, italic, a quotation, a line
    break. Everything else — a pasted colour, a foreign class — is unwrapped, so
    what is stored is always the same handful of tags */
@@ -1787,7 +1793,8 @@ function mkNoteTint(d,c){
   const p=mkRgb(c||"#2f5bd0");
   d.dataset.c=c||"#2f5bd0";
   d.style.setProperty("--nc",c||"#2f5bd0");
-  d.style.setProperty("--nbg","rgba("+p[0]+","+p[1]+","+p[2]+",.06)");
+  d.style.setProperty("--nbg","rgba("+p[0]+","+p[1]+","+p[2]+",.10)");
+  d.style.setProperty("--nbd","rgba("+p[0]+","+p[1]+","+p[2]+",.22)");
 }
 /* the line of the note the caret sits in — never the label, the cross or the bar */
 function mkNoteLine(d){
@@ -1797,7 +1804,8 @@ function mkNoteLine(d){
   while(n&&n.parentNode!==d) n=n.parentNode;
   if(!n) return null;
   if(n.nodeType===1&&n.classList&&
-     (n.classList.contains("lab")||n.classList.contains("del")||n.classList.contains("fmt"))) return null;
+     (n.classList.contains("foot")||n.classList.contains("lab")||
+      n.classList.contains("del")||n.classList.contains("fmt"))) return null;
   return n;
 }
 /* bold and italic as tags, not as inline styles — that is what survives a
@@ -1864,10 +1872,12 @@ function mkNote(afterEl,html,quiet,colour){
   /* a note with nothing but its label and its cross has nowhere to put the
      caret — so an empty note is given one empty line to write on */
   if(!d.firstChild){ const ln=document.createElement("div"); ln.appendChild(document.createElement("br")); d.appendChild(ln); }
-  d.appendChild(mkFmtBar(d));
+  const foot=document.createElement("div");
+  foot.className="foot"; foot.contentEditable="false";
   const lab=document.createElement("div");
-  lab.className="lab"; lab.contentEditable="false"; lab.textContent=T("note")+" · "+mkStamp();
-  d.appendChild(lab);
+  lab.className="lab"; lab.textContent=T("note")+" · "+mkStamp();
+  foot.appendChild(lab); foot.appendChild(mkFmtBar(d));
+  d.appendChild(foot);
   const del=document.createElement("div"); del.className="del"; del.contentEditable="false"; del.textContent="×";
   del.onclick=function(e){ e.stopPropagation(); d.remove(); mkStore(); };
   d.appendChild(del);
@@ -1903,10 +1913,11 @@ function mkNote(afterEl,html,quiet,colour){
   afterEl.parentNode.insertBefore(d,afterEl.nextSibling);
   const blank=function(){ d.classList.toggle("blank",!mkNoteText(d)); };
   d.addEventListener("input",blank);
+  d.addEventListener("input",mkStoreSoon);
   d.addEventListener("blur",function(){ if(!mkNoteText(d)) d.remove(); mkStore(); });
   blank();
   if(!quiet){
-    const ln=d.querySelector("blockquote,div:not(.fmt):not(.lab):not(.del)");
+    const ln=d.querySelector("blockquote,div:not(.foot):not(.fmt):not(.lab):not(.del)");
     d.focus(); if(ln) mkCaretEnd(ln);
     mkStore();
   }
@@ -1925,33 +1936,48 @@ function mkSvgCursor(inner,hx,hy){
    a guessed arrow was. The nib carries the colour that is loaded. */
 function mkToolCursor(mode,c){
   const col=encodeURIComponent(c||"#ffd84d");
-  const g=function(body){ return "%3Cg transform='rotate(-38 7 26)'%3E"+body+"%3C/g%3E"; };
-  const barrel=function(x,w,top){
-    return "%3Crect x='"+x+"' y='"+top+"' width='"+w+"' height='"+(20-top)+"' rx='1.6' fill='%233c3c41'"
-      +" stroke='%23ffffff' stroke-opacity='.85' stroke-width='.9'/%3E"; };
-  if(mode==="mark"||mode==="note"){
-    const ink=mode==="note"?"%232f5bd0":col;
-    /* a chisel-tip highlighter: barrel, collar, and the felt wedge in the ink */
-    return mkSvgCursor(g(
-      barrel(2.6,9,5)
-      +"%3Crect x='2.6' y='20' width='9' height='2.4' fill='%238e8e93'/%3E"
-      +"%3Cpath d='M3.1 22.4h8L9.4 27.4H4.8z' fill='"+ink+"' stroke='%23000' stroke-opacity='.28' stroke-width='.5'/%3E"
-    ),7,26);
-  }
-  if(mode==="copy"){
-    /* a thin pen: the same hand, a finer point */
-    return mkSvgCursor(g(
-      barrel(4,6.4,4)
-      +"%3Cpath d='M4 20h6.4l-3.2 7z' fill='%23606162' stroke='%23000' stroke-opacity='.25' stroke-width='.5'/%3E"
+  const E=function(t){ return t.replace(/</g,"%3C").replace(/>/g,"%3E").replace(/#/g,"%23"); };
+  /* held at the angle a hand holds it, turned about its own nib — so the nib
+     stays exactly on the hot spot, and the barrel leans up and to the right,
+     where there is room for it inside the 32 pixels a cursor gets */
+  const hand=function(body){ return E("<g transform='rotate(28 7 26) translate(7 26) scale(1.15) translate(-7 -26)'>")+body+E("</g>"); };
+  if(mode==="mark"){
+    /* a felt marker: barrel, collar, and the wedge in the ink that is loaded */
+    return mkSvgCursor(hand(
+      E("<path d='M2.2 7a2.2 2.2 0 0 1 2.2-2.2h5.2A2.2 2.2 0 0 1 11.8 7v11H2.2z'")
+      +E(" fill='#3c3c41' stroke='#fff' stroke-width='1.5' stroke-linejoin='round'/>")
+      +E("<rect x='1.7' y='18' width='10.6' height='3.1' rx='1' fill='#8e8e93' stroke='#fff' stroke-width='1.3'/>")
+      +"%3Cpath d='M3 21.1h8l-1.5 5.3H4.5z' fill='"+col+"'"
+      +E(" stroke='#fff' stroke-width='1.3' stroke-linejoin='round'/>")
     ),7,26);
   }
   if(mode==="erase"){
     /* a rubber, held the same way, its working corner on the hot spot */
-    return mkSvgCursor(g(
-      "%3Crect x='2.2' y='16.4' width='9.6' height='9.6' rx='1.5' fill='%23f7f7fa' stroke='%235f5f66' stroke-width='1.1'/%3E"
-      +"%3Cpath d='M2.2 22h9.6' stroke='%235f5f66' stroke-width='1'/%3E"
-      +"%3Cpath d='M3.7 22h6.6v2.6a1.5 1.5 0 0 1-1.5 1.5H5.2a1.5 1.5 0 0 1-1.5-1.5z' fill='%23d8d8de'/%3E"
+    return mkSvgCursor(hand(
+      E("<rect x='1.6' y='13.8' width='11' height='12.4' rx='1.8' fill='#f6f6f9' stroke='#3c3c41' stroke-width='1.5'/>")
+      +E("<path d='M1.6 21.3h11' stroke='#3c3c41' stroke-width='1.3'/>")
+      +E("<path d='M3.1 21.3h8v3.3a1.6 1.6 0 0 1-1.6 1.6H4.7a1.6 1.6 0 0 1-1.6-1.6z' fill='#d7d7de'/>")
     ),7,26);
+  }
+  if(mode==="note"){
+    /* a card to hang under the paragraph — not a pen: nothing is drawn with it */
+    const ink=encodeURIComponent(c||"#2f5bd0");
+    return mkSvgCursor(
+      E("<rect x='3.2' y='4.2' width='19.6' height='17.6' rx='3' fill='#fff' stroke='#3c3c41' stroke-width='1.7'/>")
+      +"%3Cpath d='M7 9.6h12M7 13.2h12M7 16.8h7' stroke='"+ink+"'"
+      +E(" stroke-width='1.7' stroke-linecap='round'/>")
+      ,4,5);
+  }
+  if(mode==="copy"){
+    /* two cards, the way copying is drawn everywhere, on a beam that shows
+       where the words will be taken from */
+    return mkSvgCursor(
+      E("<path d='M5 3.4v17.2M2.2 3.4h5.6M2.2 20.6h5.6' stroke='#fff' stroke-width='3.6' stroke-linecap='round'/>")
+      +E("<path d='M5 3.4v17.2M2.2 3.4h5.6M2.2 20.6h5.6' stroke='#25252a' stroke-width='1.7' stroke-linecap='round'/>")
+      +E("<rect x='14' y='8.4' width='11.4' height='13.6' rx='2.2' fill='#fff' stroke='#3c3c41' stroke-width='1.6'/>")
+      +E("<rect x='10.4' y='12.4' width='11.4' height='13.6' rx='2.2' fill='#fff' stroke='#3c3c41' stroke-width='1.6'/>")
+      +E("<path d='M13.2 17h6M13.2 20.4h4' stroke='#6b6b73' stroke-width='1.4' stroke-linecap='round'/>")
+      ,5,12);
   }
   return "";
 }
