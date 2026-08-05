@@ -2304,8 +2304,13 @@ function mkAnimTo(el,after){
 function mkGoTo(el,smooth){
   const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
   const land=function(){ mkBarH(); mkLand(el); };
-  if(!smooth||matchMedia("(prefers-reduced-motion:reduce)").matches){
-    land(); requestAnimationFrame(land); setTimeout(land,180);
+  /* On a finger device the browser owns the scroll: it clamps our own steps
+     while its bars are moving, the journey stalls short and the correction
+     that follows reads as a jerk. There the day is simply put in place at
+     once — no travel, nothing to fight. */
+  if(!smooth||mkTouch||matchMedia("(prefers-reduced-motion:reduce)").matches){
+    land(); requestAnimationFrame(land);
+    setTimeout(function(){ land(); mkDaysMark(); },200);
     mkFlash(band); return;
   }
   mkJumping=true;
@@ -2313,10 +2318,7 @@ function mkGoTo(el,smooth){
     mkJumping=false;
     if(!arrived) return mkDaysMark();      /* the reader took over — leave him be */
     land(); mkFlash(band); mkDaysMark();
-    /* iOS moves its bars after the journey and takes the page with them — so
-       we put the day back under the heading a couple of times more */
-    setTimeout(function(){ if(!mkJumping) land(); },260);
-    setTimeout(function(){ if(!mkJumping){ land(); mkDaysMark(); } },700);
+    setTimeout(function(){ if(!mkJumping){ land(); mkDaysMark(); } },300);
   });
 }
 mkDaysEl.addEventListener("click",function(e){
