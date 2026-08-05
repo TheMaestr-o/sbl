@@ -47,7 +47,7 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 ::-moz-selection{background:var(--selc,#f7de84);color:#1c1c1c}
 
 /* control bar (screen only) — refined, document-like; hidden when printing */
-.bar{position:sticky;top:0;z-index:9;background:rgba(255,255,255,.82);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);color:#333;border-bottom:1px solid #ededed}
+.bar{position:sticky;top:0;z-index:70;background:rgba(255,255,255,.82);backdrop-filter:blur(12px) saturate(1.15);-webkit-backdrop-filter:blur(12px) saturate(1.15);color:#333;border-bottom:1px solid #ededed}
 /* the buttons line up with the text column, not with the edge of the sheet:
    same width and the same side margins as the page below */
 .bar-in{max-width:820px;margin:0 auto;padding:11px 64px;display:flex;align-items:center;justify-content:space-between;gap:12px}
@@ -89,7 +89,7 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 
 /* everything that used to sit in the bar now lives here, one row per setting */
 .setpop{position:absolute;top:calc(100% + 7px);right:0;background:#fff;border:1px solid #e9e9e9;border-radius:14px;
-  box-shadow:0 16px 44px rgba(0,0,0,.16);padding:6px;z-index:31;width:min(320px,calc(100vw - 24px))}
+  box-shadow:0 16px 44px rgba(0,0,0,.16);padding:6px;z-index:72;width:min(320px,calc(100vw - 24px))}
 .setpop[hidden]{display:none}
 .srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:9px}
 .srow + .srow{border-top:1px solid #f1f1f1}
@@ -141,7 +141,7 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 
 /* a month at a glance, with the lesson standing beside its week */
 .calpop{position:absolute;top:calc(100% + 7px);left:50%;transform:translateX(-50%);background:#fff;
-  border:1px solid #e9e9e9;border-radius:14px;box-shadow:0 16px 44px rgba(0,0,0,.16);padding:12px;z-index:31;
+  border:1px solid #e9e9e9;border-radius:14px;box-shadow:0 16px 44px rgba(0,0,0,.16);padding:12px;z-index:72;
   width:min(430px,calc(100vw - 24px));max-height:min(70vh,560px);overflow:auto}
 .calpop[hidden]{display:none}
 .calhead{display:flex;align-items:center;justify-content:space-between;margin-bottom:10px}
@@ -444,13 +444,30 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 @media (prefers-reduced-motion:reduce){
   .days .dpill{transition:none} .sec.flash::after{display:none}
 }
-/* the mark travels like a drop: it stretches along the way it is going, then
-   springs back into a circle when it lands */
-.days .dpill{position:absolute;left:6px;top:6px;width:30px;height:30px;border-radius:50%;
-  background:var(--gray-dk);opacity:0;pointer-events:none;
-  transition:transform .2s cubic-bezier(.4,0,.5,1),opacity .2s}
-.days .dpill.land{transition:transform .44s cubic-bezier(.34,1.56,.44,1)}
-@media (prefers-reduced-motion:reduce){ .days .dpill{transition:none} }
+/* The mark moves and changes shape at the same time, and the two are kept
+   apart: the outer layer only travels, the inner one only stretches. One
+   transform cannot be transitioned and animated at once. */
+.days .dpill{position:absolute;left:6px;top:6px;width:30px;height:30px;opacity:0;pointer-events:none;
+  transition:transform .52s cubic-bezier(.22,.9,.25,1),opacity .2s}
+.days .dpill b{display:block;width:100%;height:100%;border-radius:50%;background:var(--gray-dk);
+  transform-origin:50% 50%}
+.days .dpill.go b{animation:dropv .56s cubic-bezier(.3,.75,.25,1)}
+.days.row .dpill.go b{animation-name:droph}
+@keyframes dropv{
+  0%{transform:scale(1,1)}
+  22%{transform:scale(.78,1.32);border-radius:50% 50% 46% 46%/60% 60% 40% 40%}
+  55%{transform:scale(.94,1.12)}
+  78%{transform:scale(1.12,.9)}
+  100%{transform:scale(1,1)}}
+@keyframes droph{
+  0%{transform:scale(1,1)}
+  22%{transform:scale(1.32,.78);border-radius:46% 46% 46% 46%/50% 50% 50% 50%}
+  55%{transform:scale(1.12,.94)}
+  78%{transform:scale(.9,1.12)}
+  100%{transform:scale(1,1)}}
+@media (prefers-reduced-motion:reduce){
+  .days .dpill{transition:none} .days .dpill.go b{animation:none}
+}
 .days.ready .dpill{opacity:1}
 .dchip{position:relative;z-index:1;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
   border-radius:50%;cursor:pointer;font-size:10.5px;font-weight:700;letter-spacing:.2px;
@@ -895,6 +912,14 @@ function renderLesson(les,tasks){
 }
 function WORDsab(){return {de:"Sabbat",en:"Sabbath",ru:"Суббота"}[lang];}
 
+/* the month view reaches into the quarters on either side. Fetch them quietly
+   once the lesson is up: opening the calendar is then instant, and the service
+   worker keeps them for the next time — including offline. */
+function mkPrefetch(){
+  const go=function(){ neigh(current.getFullYear(),qOf(current)).slice(1)
+    .forEach(function(p){ loadQuarter(lang,p[0],p[1]); }); };
+  if(window.requestIdleCallback) requestIdleCallback(go,{timeout:2500}); else setTimeout(go,1200);
+}
 let token=0;
 let scope="week";                        /* "week" | "quarter" */
 /* the sheet carries which lesson it holds: pencil marks are stored per lesson
@@ -950,6 +975,7 @@ async function render(){
   relaxDayStarts();
   mkRestore();
   mkDaysBuild(); mkOpenToday();
+  mkPrefetch();
 
   if(versesOn && tasks.length){
     const bib=await loadBible(BIBLE[lang]);
@@ -2030,7 +2056,7 @@ function mkDaysBuild(){
       html+='<div class="dchip">'+esc(short)+'</div>';
     });
   }
-  mkDaysEl.innerHTML=mkAnchors.length>1?('<i class="dpill"></i>'+html):"";
+  mkDaysEl.innerHTML=mkAnchors.length>1?('<i class="dpill"><b></b></i>'+html):"";
   mkDaysEl.classList.remove("ready");
   mkDaysMark();
 }
@@ -2038,12 +2064,41 @@ function mkBarH(){
   const b=document.querySelector(".bar");
   return (b&&getComputedStyle(b).position==="sticky"?b.getBoundingClientRect().height:0)+10;
 }
+let mkJumping=false;
+function mkFlash(band){
+  if(!band) return;
+  band.classList.remove("flash"); void band.offsetWidth; band.classList.add("flash");
+  setTimeout(function(){ band.classList.remove("flash"); },1000);
+}
+/* while the page is on its way the strip stops watching the scroll — otherwise
+   the mark is dragged back through every day it passes. The shine plays when
+   the page has arrived, so it is seen and not scrolled past. */
 function mkGoTo(el,smooth){
-  const y=el.getBoundingClientRect().top+window.scrollY-mkBarH();
-  window.scrollTo({top:Math.max(0,y),behavior:smooth?"smooth":"auto"});
+  const y=Math.max(0,el.getBoundingClientRect().top+window.scrollY-mkBarH());
   const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
-  if(band){ band.classList.remove("flash"); void band.offsetWidth; band.classList.add("flash");
-    setTimeout(function(){ band.classList.remove("flash"); },1000); }
+  const done=function(){
+    if(!mkJumping) return;
+    mkJumping=false;
+    clearTimeout(mkGoTo.t); clearTimeout(mkGoTo.cap);
+    window.removeEventListener("scrollend",done);
+    if(mkGoTo.off) mkGoTo.off();
+    mkFlash(band); mkDaysMark();
+  };
+  if(!smooth||Math.abs(window.scrollY-y)<4){
+    window.scrollTo(0,y); mkFlash(band); return;
+  }
+  /* "arrived" is when the scrolling has gone quiet — scrollend where it exists,
+     and a settle timer everywhere else. A fixed delay would either cut the
+     journey short or leave the strip deaf too long. */
+  mkJumping=true;
+  const settle=function(){ clearTimeout(mkGoTo.t); mkGoTo.t=setTimeout(done,140); };
+  window.addEventListener("scroll",settle,{passive:true});
+  window.addEventListener("scrollend",done);
+  const off=mkGoTo.off; if(off) off();
+  mkGoTo.off=function(){ window.removeEventListener("scroll",settle); mkGoTo.off=null; };
+  settle();
+  clearTimeout(mkGoTo.cap); mkGoTo.cap=setTimeout(done,1800);
+  window.scrollTo({top:y,behavior:"smooth"});
 }
 mkDaysEl.addEventListener("click",function(e){
   const c=e.target.closest(".dchip"); if(!c) return;
@@ -2052,29 +2107,22 @@ mkDaysEl.addEventListener("click",function(e){
   chips.forEach(function(x){ x.classList.toggle("on",x===c); });
   mkDaysMove(c);
   mkGoTo(el,true);
-  setTimeout(mkDaysMark,700);
 });
 let mkPillAt=null;
 function mkDaysMove(c){
   const p=mkDaysEl.querySelector(".dpill"); if(!p||!c) return;
   const x=c.offsetLeft-6, y=c.offsetTop-6;
   p.style.width=c.offsetWidth+"px"; p.style.height=c.offsetHeight+"px";
-  const was=mkPillAt, vert=mkDaysEl.clientHeight>mkDaysEl.clientWidth;
-  const d=was?(vert?y-was.y:x-was.x):0;
+  mkDaysEl.classList.toggle("row",mkDaysEl.clientWidth>mkDaysEl.clientHeight);
+  const moved=!mkPillAt||Math.abs(x-mkPillAt.x)>2||Math.abs(y-mkPillAt.y)>2;
+  const first=!mkPillAt;
   mkPillAt={x:x,y:y};
   mkDaysEl.classList.add("ready");
-  if(!was||Math.abs(d)<2||matchMedia("(prefers-reduced-motion:reduce)").matches){
-    p.classList.add("land"); p.style.transform="translate("+x+"px,"+y+"px)"; return;
-  }
-  /* stretch by how far it has to go, and never past a droplet's worth */
-  const k=Math.min(1,Math.abs(d)/90), a=1+.34*k, b=1-.2*k;
-  p.classList.remove("land");
-  p.style.transform="translate("+x+"px,"+y+"px) scale("+(vert?b:a)+","+(vert?a:b)+")";
+  p.style.transform="translate("+x+"px,"+y+"px)";
+  if(!moved||first) return;
+  p.classList.remove("go"); void p.offsetWidth; p.classList.add("go");
   clearTimeout(mkDaysMove.t);
-  mkDaysMove.t=setTimeout(function(){
-    p.classList.add("land");
-    p.style.transform="translate("+x+"px,"+y+"px)";
-  },170);
+  mkDaysMove.t=setTimeout(function(){ p.classList.remove("go"); },600);
 }
 function mkDaysMark(){
   if(!mkAnchors.length) return;
@@ -2088,7 +2136,7 @@ function mkDaysMark(){
 let mkTick=false;
 window.addEventListener("scroll",function(){
   if(mkTick) return; mkTick=true;
-  requestAnimationFrame(function(){ mkTick=false; mkDaysMark(); });
+  requestAnimationFrame(function(){ mkTick=false; if(!mkJumping) mkDaysMark(); });
 },{passive:true});
 
 /* ——— two ways in for someone who has never met the tools ———
