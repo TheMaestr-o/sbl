@@ -509,6 +509,18 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 .hintchip.on{display:flex}
 @keyframes hintin{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:none}}
 
+/* the ends of a stroke can be taken and pulled: two knobs, the way a phone
+   offers them for text */
+.grip{position:fixed;z-index:63;display:none;width:15px;height:15px;border-radius:50%;
+  background:var(--gray-dk);box-shadow:0 0 0 2px #fff,0 2px 6px rgba(0,0,0,.3);
+  cursor:ew-resize;touch-action:none;-webkit-tap-highlight-color:transparent}
+.grip.on{display:block}
+.grip::after{content:"";position:absolute;left:50%;width:2px;transform:translateX(-50%);
+  background:var(--gray-dk);border-radius:1px}
+.grip.s::after{bottom:100%;height:var(--gh,18px)}
+.grip.e::after{top:100%;height:var(--gh,18px)}
+@media (pointer:coarse){ .grip{width:19px;height:19px} }
+
 /* ——— the bubble on a stroke already laid down ——— */
 .bub{position:fixed;z-index:62;display:flex;align-items:center;gap:5px;padding:5px 6px;
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px);
@@ -650,7 +662,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .note,.quote,.mem{orphans:2;widows:2}
   .vtext{orphans:3;widows:3}
   /* the pencil work prints with the lesson; the tools themselves never do */
-  .rail,.rpick,.bub,.days,.hintchip,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del{display:none!important}
+  .rail,.rpick,.bub,.grip,.days,.hintchip,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del{display:none!important}
   .mynote,.myins{break-inside:avoid;page-break-inside:avoid}
   /* whoever picks up the sheet must see at a glance which lines are not
      the lesson's own */
@@ -719,6 +731,8 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 <div class="days" id="days"></div>
 
 <div class="hintchip" id="mkhint"></div>
+
+<i class="grip" id="gripS"></i><i class="grip" id="gripE"></i>
 
 <div class="bub" id="bub">
   <span class="mtool" data-a="erase"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.2h9.5M4.6 9.9 9.2 5.3l3.1 3.1-4.6 4.6H5.9z"/></svg></span>
@@ -1974,8 +1988,80 @@ function mkBubPlace(rect){
 function mkBubClose(){
   mkBub.classList.remove("on");
   if(mkGroup) mkGroup.forEach(function(m){ m.classList.remove("sel"); });
-  mkGroup=null;
+  mkGroup=null; mkGripsHide();
 }
+
+/* ——— pulling a stroke by its ends ——— */
+const mkGripS=document.getElementById("gripS"), mkGripE=document.getElementById("gripE");
+mkGripS.className="grip s"; mkGripE.className="grip e";
+function mkGripsHide(){ mkGripS.classList.remove("on"); mkGripE.classList.remove("on"); }
+/* where a piece sits inside its block, counted in characters of the plain text */
+function mkOffsetOf(block,node,off){
+  const w=mkWalk(block); let n,acc=0;
+  while(n=w.nextNode()){ if(n===node) return acc+off; acc+=n.nodeValue.length; }
+  return acc;
+}
+function mkFirstText(el){ const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT); return w.nextNode(); }
+function mkLastText(el){ const w=document.createTreeWalker(el,NodeFilter.SHOW_TEXT); let n,l=null; while(n=w.nextNode()) l=n; return l; }
+function mkSpan(g){
+  const block=g[0].parentElement.closest("[data-k]"); if(!block) return null;
+  const a=mkFirstText(g[0]), b=mkLastText(g[g.length-1]); if(!a||!b) return null;
+  return {block:block,from:mkOffsetOf(block,a,0),to:mkOffsetOf(block,b,b.nodeValue.length)};
+}
+function mkGripsShow(){
+  if(!mkGroup||!mkGroup.length) return mkGripsHide();
+  const r1=mkGroup[0].getClientRects()[0];
+  const rs=mkGroup[mkGroup.length-1].getClientRects();
+  const r2=rs[rs.length-1];
+  if(!r1||!r2) return mkGripsHide();
+  mkGripS.style.setProperty("--gh",Math.round(r1.height*.7)+"px");
+  mkGripE.style.setProperty("--gh",Math.round(r2.height*.7)+"px");
+  mkGripS.style.left=Math.round(r1.left-7)+"px"; mkGripS.style.top=Math.round(r1.top-16)+"px";
+  mkGripE.style.left=Math.round(r2.right-8)+"px"; mkGripE.style.top=Math.round(r2.bottom+1)+"px";
+  mkGripS.classList.add("on"); mkGripE.classList.add("on");
+}
+/* lay the stroke again between two character offsets */
+function mkReshape(sp,from,to,c,y){
+  const lo=Math.max(0,Math.min(from,to)), hi=Math.max(from,to);
+  if(hi-lo<1) return;
+  mkQuiet=true;
+  mkGroup.forEach(mkUnwrap);
+  const r=mkOffsets(sp.block,lo,hi);
+  mkQuiet=false;
+  if(!r){ mkGroup=[]; return; }
+  const gid=mkPaint(r,c,y);
+  mkGroup=mkPieces(String(gid));
+  mkGroup.forEach(function(m){ m.classList.add("sel"); });
+  mkGripsShow();
+}
+function mkGripDrag(e,end){
+  if(!mkGroup||!mkGroup.length) return;
+  e.preventDefault();
+  const sp=mkSpan(mkGroup); if(!sp) return;
+  const c=mkGroup[0].dataset.c, y=mkGroup[0].dataset.y;
+  const anchor=end?sp.from:sp.to;
+  let last=end?sp.to:sp.from, raf=0;
+  const move=function(ev){
+    const p=ev.touches?ev.touches[0]:ev;
+    const r=mkRangeAt(p.clientX,p.clientY); if(!r) return;
+    if(!sp.block.contains(r.startContainer)) return;
+    const off=mkOffsetOf(sp.block,r.startContainer,r.startOffset);
+    if(off===last) return;
+    last=off;
+    if(raf) return;
+    raf=requestAnimationFrame(function(){ raf=0; mkReshape(sp,anchor,last,c,y); });
+  };
+  const up=function(){
+    document.removeEventListener("pointermove",move);
+    document.removeEventListener("pointerup",up);
+    mkStore(); mkGripsShow();
+  };
+  document.addEventListener("pointermove",move,{passive:false});
+  document.addEventListener("pointerup",up);
+}
+mkGripS.addEventListener("pointerdown",function(e){ mkGripDrag(e,false); });
+mkGripE.addEventListener("pointerdown",function(e){ mkGripDrag(e,true); });
+window.addEventListener("scroll",function(){ if(mkGroup&&mkGroup.length) mkGripsShow(); },{passive:true});
 /* recolour the stroke that was clicked — and stay open, so the colours can be
    tried one after another */
 function mkApply(c,s){
@@ -1994,6 +2080,7 @@ document.addEventListener("click",function(e){
   mkGroup=e.target.dataset.g?mkPieces(e.target.dataset.g):[e.target];
   mkGroup.forEach(function(m){ m.classList.add("sel"); });
   mkBubPlace(e.target.getBoundingClientRect());
+  mkGripsShow();
 });
 mkBub.addEventListener("mousedown",function(e){ e.preventDefault(); });
 mkBub.addEventListener("click",function(e){
