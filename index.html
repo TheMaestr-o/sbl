@@ -111,6 +111,18 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
   box-shadow:0 1px 3px rgba(0,0,0,.28);transition:transform .22s cubic-bezier(.3,1.3,.4,1)}
 .sw2.on{background:#34c759}
 .sw2.on i{transform:translateX(17px)}
+/* the list of second translations belongs to the switch above it, so it opens
+   under it without a rule of its own — and folds away when the switch is off */
+.srow.prow{padding-top:0;border-top:none}
+.srow.prow[hidden]{display:none}
+.ssel{flex:1 1 auto;min-width:0;width:100%;font:inherit;font-size:12.5px;font-weight:600;color:#2b2b2b;
+  padding:7px 9px;border:1px solid #e6e6e6;border-radius:9px;background:#fff;cursor:pointer;
+  -webkit-appearance:none;appearance:none;transition:border-color .15s;
+  /* the native arrow differs on every platform; this one matches .lbl above */
+  background-image:linear-gradient(45deg,transparent 50%,#bdbdbd 50%),linear-gradient(135deg,#bdbdbd 50%,transparent 50%);
+  background-position:calc(100% - 15px) calc(50% - 1.5px),calc(100% - 10px) calc(50% - 1.5px);
+  background-size:5px 5px,5px 5px;background-repeat:no-repeat;padding-right:28px}
+.ssel:hover{border-color:#d3d3d3}
 /* the PDF row is the one that does something: its first button says so */
 .sbtn.pri{background:#2b2b2b;color:#fff}
 .sbtn.pri:hover{background:#000}
@@ -238,6 +250,31 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
 .vtext.lines .vn{display:inline-block;min-width:13px;margin-right:4px;text-indent:0;vertical-align:.42em;
   font-weight:700;font-size:11px;color:var(--gray-dk)}   /* same raise as the inline number */
 .vmiss{color:#bbb}
+
+/* Parallel reading — a second translation beside the first. The two columns
+   are not two blocks of text set next to each other: both are laid into one
+   grid and every verse is placed on its own row, so verse 12 on the left and
+   verse 12 on the right always stand on the same line. A verse one edition
+   does not carry leaves an empty cell instead of pushing the rest out of step.
+   The column elements themselves keep no box (`display:contents`) — they stay
+   in the DOM only so that a highlight still has one block with a stable
+   `data-k` to hang on; see `mkRestore()`. */
+.vpair{display:grid;grid-template-columns:1fr 1fr;column-gap:22px;row-gap:6px;align-items:start}
+.vpair>.vtext{display:contents}
+.vpair>.vtext>.v{grid-column:1;grid-row:var(--r)}
+.vpair>.vtext.alt>.v{grid-column:2}
+/* the grid keeps the rows apart — the running margin would only add to it */
+.vpair>.vtext .v + .v{margin-top:0}
+/* the second translation reads a shade quieter, so the eye knows at once
+   which of the two columns is the one it came for */
+.vpair>.vtext.alt>.v{color:#5d5d5d}
+.vpair>.vtext.alt .vn{opacity:.6}
+/* each column says once, quietly, which edition it is */
+.vver{grid-row:1;grid-column:1;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:#adadb2;padding-bottom:4px;border-bottom:1px solid #eee}
+.vpair>.vtext.alt>.vver{grid-column:2}
+/* a note written against a parallel passage belongs to the whole width */
+.vpair>.mynote{grid-column:1/-1}
 .q{font-weight:700;font-size:18px;line-height:1.45;text-align:justify;hyphens:auto;margin:0 0 14px;padding-left:26px;text-indent:-26px}
 .note{font-family:var(--serif);font-size:18px;line-height:1.52;text-align:justify;hyphens:auto;margin:0 0 16px}
 .note i{font-style:italic}
@@ -300,6 +337,8 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
 
   .vgroup{margin:8px 0 14px;padding-left:18px}   /* + 2px rule = the 20px question column */
   .vtext{font-size:15.5px}
+  /* no .vpair rules here on purpose: below 900px, or upright, the parallel is
+     never rendered at all (see PARA_MQ), so there is nothing to lay out */
   .q{font-size:17px;padding-left:20px;text-indent:-20px}
   .note{font-size:16.5px}
   .review{font-size:17px;padding-left:20px;text-indent:-20px}
@@ -719,6 +758,9 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
         <div class="tog ic" id="tog"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M5.6 3.2c-1.9.7-3 2.3-3 4.3 0 1.6 1 2.7 2.4 2.7 1.2 0 2.1-.9 2.1-2.1 0-1.1-.8-2-1.9-2-.2 0-.4 0-.5.1.2-1 .9-1.8 1.9-2.2ZM12.6 3.2c-1.9.7-3 2.3-3 4.3 0 1.6 1 2.7 2.4 2.7 1.2 0 2.1-.9 2.1-2.1 0-1.1-.8-2-1.9-2-.2 0-.4 0-.5.1.2-1 .9-1.8 1.9-2.2Z"/></svg></div>
         <div class="tog vlines" id="vlines"></div>
       </div></div>
+    <div class="srow" id="para-sw-row" hidden><span class="slab" id="lab-para"></span>
+      <div class="sctl"><div class="sw2" id="para-sw"><i></i></div></div></div>
+    <div class="srow prow" id="para-row" hidden><select class="ssel" id="para-sel"></select></div>
     <div class="srow"><span class="slab" id="lab-size"></span>
       <div class="sctl"><div class="zoom" id="zoomout">A&#8722;</div><div class="zoom" id="zoomin">A+</div></div></div>
     <div class="srow"><span class="slab" id="lab-colour"></span><div class="swatches" id="tintpop"></div></div>
@@ -793,6 +835,44 @@ const BIBLE={de:"de-lut",en:"en-kjv",ru:"ru-rst"};
 const bibles={};
 let versesOn=localStorage.getItem("sbl.verses")==="1";
 let versesLines=localStorage.getItem("sbl.verselines")==="1";   /* one verse per line */
+/* Parallel reading: a second translation beside the one the lesson is in.
+   Kept apart from `versesOn` on purpose — the reader turns it on once and it
+   stays on through language changes and reloads, like every other setting. */
+let paraOn=localStorage.getItem("sbl.para")==="1";
+let paraVer=localStorage.getItem("sbl.paraver")||"";
+/* every edition app.sdarm.org serves, in the order the picker lists them:
+   [language tag, file id, the name it is known by] */
+const PARA=[
+  ["DE","de-lut","Luther Bibel"],
+  ["EN","en-kjv","King James Version"],
+  ["EN","en-nkjv","New King James Version"],
+  ["EN","en-esv","English Standard Version"],
+  ["EN","en-niv","New International Version"],
+  ["EN","en-nasb","New American Standard Bible"],
+  ["EN","en-nlt","New Living Translation"],
+  ["EN","en-amp","Amplified Bible"],
+  ["EN","en-web","World English Bible"],
+  ["EN","en-net","New English Translation"],
+  ["EN","en-ylt","Young's Literal Translation"],
+  ["RU","ru-rst","Синодальный перевод"],
+  ["ES","es-rvr1960","Reina Valera 1960"],
+  ["ES","es-nvi","Nueva Versión Internacional"],
+  ["PT","pt-acf","Almeida Corrigida e Fiel"],
+  ["PT","pt-nvi","Nova Versão Internacional"],
+  ["RO","ro-vdc","Dumitru Cornilescu"],
+  ["CS","cs-bkr","Bible Kralická"]
+];
+/* Two columns need the room for two columns. A tablet held upright, or a phone
+   turned on its side, has the pixels but not the shape — a verse would break
+   into three lines a column and the pair would stop reading as a pair. So the
+   parallel is offered only where it works: landscape, and wide enough for it.
+   Everywhere else the page is exactly what it was before this feature existed —
+   and the switch is not shown at all, so nothing promises what it cannot give. */
+const PARA_MQ=matchMedia("(orientation:landscape) and (min-width:900px)");
+function paraFits(){ return PARA_MQ.matches; }
+/* the second column has to be a second translation: whatever the lesson is
+   already set in cannot stand beside itself */
+function paraPick(){ return paraOn&&paraFits()&&paraVer&&paraVer!==BIBLE[lang]?paraVer:""; }
 
 /* band colour themes — first colour matches the quarterly cover (navy + light) */
 const THEMES=[
@@ -857,6 +937,38 @@ function verseHtml(books,sOsis,perLine){let out="";
   }
   return perLine?out:out.trim();
 }
+/* The same passage in two editions, verse by verse. Both columns are handed
+   the same list of verse numbers — so row n is verse n on either side — and a
+   verse one edition does not carry leaves its cell empty instead of pushing
+   everything under it out of line. `--r` is the grid row the pair stands on.
+   Row 1 belongs to the two version labels, so the verses start at 2. */
+function versePair(booksA,booksB,sOsis){
+  const rows=[];
+  for(const raw of String(sOsis).split(",")){
+    const s=parseSeg(raw.trim());
+    const ba=booksA&&booksA[s.book], bb=booksB&&booksB[s.book];
+    for(let c=s.chap;c<=s.echap;c++){
+      const va=ba&&ba[c-1], vb=bb&&bb[c-1];
+      /* the longer of the two settles how far "the whole chapter" reaches */
+      const len=Math.max(va?va.length:0,vb?vb.length:0); if(!len) continue;
+      const from=c===s.chap?s.v1:1, to=Math.min(c===s.echap?s.v2:len,len);
+      for(let n=from;n<=to;n++){
+        const ta=va&&va[n-1]!=null?esc(strip(String(va[n-1])).trim()):"";
+        const tb=vb&&vb[n-1]!=null?esc(strip(String(vb[n-1])).trim()):"";
+        if(ta||tb) rows.push([n,ta,tb]);
+      }
+    }
+  }
+  let a="",b="";
+  for(let i=0;i<rows.length;i++){
+    const r=rows[i], pr=i+2;
+    a+='<span class="v" style="--r:'+pr+'"><span class="vn">'+r[0]+'</span>'+r[1]+'</span>';
+    b+='<span class="v" style="--r:'+pr+'"><span class="vn">'+r[0]+'</span>'+r[2]+'</span>';
+  }
+  return [a,b];
+}
+/* the short name of an edition — "en-nkjv" is read as NKJV over its column */
+function verLabel(id){ return '<span class="vver">'+esc((String(id).split("-")[1]||id).toUpperCase())+'</span>'; }
 /* DE/RU carry the EGW source inside the quote itself ("…wecken.“ – Der Weg zu
    Christus, S. 4."). Find the book title and italicise it, so all three
    languages read the same as English — where the source arrives in `sop`.
@@ -939,6 +1051,7 @@ let vid=0;   /* runs across a whole quarter, so verse ids stay unique */
    key, so it comes back after a reload, after the type is enlarged, after the
    verses are turned on. See `mkRestore()`. */
 function renderLesson(les,tasks){
+  const par=paraPick();          /* "" when the second translation is off */
   let h='<div class="lesson">'+esc(strip(les.header||""))+'</div>'+
         '<div class="top"><div class="date" data-k="dt">'+esc(strip(WORDsab()+", "+fmt(les.date,{month:"long",day:"numeric",year:"numeric"})))+'</div></div>';
   h+='<h1 class="title" data-k="ti">'+esc(les.title||"")+'</h1>';
@@ -969,10 +1082,21 @@ function renderLesson(les,tasks){
       if(versesOn){
         const refs=(sub.q||[]).filter(it=>it&&it.sOsis);
         if(refs.length){ let g='<div class="vgroup">';
-          for(let vi=0;vi<refs.length;vi++){ const it=refs[vi],id="pv"+(vid++); tasks.push([id,it.sOsis]);
+          for(let vi=0;vi<refs.length;vi++){ const it=refs[vi],id="pv"+(vid++);
+            /* with a second translation the passage needs a second box to fill;
+               its key simply carries a "p", so the marks on the first column
+               are the very ones that were there before parallel existed */
+            const id2=par?id+"p":"";
+            tasks.push([id,it.sOsis,id2]);
             const ref=strip(it.text||"").replace(/[;,.\s]+$/,"");
-            g+='<div class="vitem">'+(ref?'<div class="vref">'+esc(ref)+'</div>':'')
-              +'<div class="vtext'+(versesLines?' lines':'')+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div></div>'; }
+            /* set side by side the verses have to be discrete, so a parallel
+               passage is always one verse per line — that is the only shape in
+               which two columns can be held level */
+            const box=par
+              ? '<div class="vpair"><div class="vtext lines" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>'
+                +'<div class="vtext lines alt" id="'+id2+'" data-k="'+kk+'v'+vi+'p"></div></div>'
+              : '<div class="vtext'+(versesLines?' lines':'')+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>';
+            g+='<div class="vitem">'+(ref?'<div class="vref">'+esc(ref)+'</div>':'')+box+'</div>'; }
           blocks.push(g+'</div>'); }
       }
       let ni=0;
@@ -1061,9 +1185,20 @@ async function render(){
   mkPrefetch();
 
   if(versesOn && tasks.length){
-    const bib=await loadBible(BIBLE[lang]);
+    /* both editions are fetched at once — the second must not make the first
+       one wait, and the service worker keeps either of them for next time */
+    const par=paraPick();
+    const got=await Promise.all([loadBible(BIBLE[lang]),par?loadBible(par):null]);
     if(my!==token) return;
+    const bib=got[0], bib2=got[1];
     for(const t of tasks){ const el=document.getElementById(t[0]); if(!el) continue;
+      if(t[2]){
+        const el2=document.getElementById(t[2]);
+        const p=versePair(bib&&bib.books,bib2&&bib2.books,t[1]);
+        el.innerHTML=verLabel(BIBLE[lang])+(p[0]||'<span class="vmiss">—</span>');
+        if(el2) el2.innerHTML=verLabel(par)+(p[1]||'<span class="vmiss">—</span>');
+        continue;
+      }
       const vh=verseHtml(bib&&bib.books,t[1],versesLines); el.innerHTML=vh||'<span class="vmiss">—</span>'; }
     relaxDayStarts();   /* the passage has arrived — the block may have outgrown its keep */
     mkRestore();        /* … and the marks that live inside the passage can go back on */
@@ -1195,6 +1330,37 @@ vlines.onclick=function(){
   localStorage.setItem("sbl.verselines",versesLines?"1":"0");
   paintVerseBtns(); render();
 };
+/* Parallel reading — the switch and the list of second translations. The list
+   never offers the edition the lesson is already set in, and it is rebuilt on
+   every language change, because what counts as "the other one" changes with
+   it. */
+const paraSw=document.getElementById("para-sw"), paraSel=document.getElementById("para-sel");
+function paraDefault(){ return BIBLE[lang]==="en-kjv"?"de-lut":"en-kjv"; }
+function paintPara(){
+  const fits=paraFits();
+  /* the switch keeps its setting while it is away — turning the tablet back
+     brings the parallel back exactly as it was left */
+  document.getElementById("para-sw-row").hidden=!fits;
+  paraSw.classList.toggle("on",paraOn);
+  document.getElementById("para-row").hidden=!paraOn||!fits;
+  if(paraVer===BIBLE[lang]||!PARA.some(p=>p[1]===paraVer)){
+    paraVer=paraDefault(); localStorage.setItem("sbl.paraver",paraVer); }
+  paraSel.innerHTML=PARA.filter(p=>p[1]!==BIBLE[lang])
+    .map(p=>'<option value="'+p[1]+'"'+(p[1]===paraVer?' selected':'')+'>'+esc(p[0]+" · "+p[2])+'</option>').join("");
+}
+paraSw.onclick=function(){
+  paraOn=!paraOn;
+  /* a second Bible text with no first one makes no sense — the same courtesy
+     the layout button does above */
+  if(paraOn&&!versesOn){ versesOn=true; localStorage.setItem("sbl.verses","1"); paintVerseBtns(); }
+  localStorage.setItem("sbl.para",paraOn?"1":"0");
+  paintPara(); render();
+};
+paraSel.onchange=function(){ paraVer=paraSel.value; localStorage.setItem("sbl.paraver",paraVer); render(); };
+/* Turning the tablet is the one gesture that adds or takes away the room for a
+   second column, so it is the one gesture that has to redraw the sheet. Only
+   when the parallel is actually on — otherwise a rotation costs nothing. */
+PARA_MQ.addEventListener("change",function(){ paintPara(); if(paraOn) render(); });
 /* PDF: pick the week or the whole quarter — the choice also switches what the
    page shows, so you can check it before saving */
 
@@ -1209,11 +1375,16 @@ const UI={
   colour:  {de:"Farbe",en:"Colour",ru:"Цвет"},
   pdf:     {de:"Als PDF sichern",en:"Save as PDF",ru:"Сохранить в PDF"},
   show:    {de:"Bibeltext anzeigen",en:"Show the Bible text",ru:"Показывать текст Библии"},
-  perline: {de:"Ein Vers pro Zeile",en:"One verse per line",ru:"Каждый стих строкой"}
+  perline: {de:"Ein Vers pro Zeile",en:"One verse per line",ru:"Каждый стих строкой"},
+  para:    {de:"Parallel",en:"Parallel",ru:"Параллельно"},
+  parahint:{de:"Zweite Übersetzung daneben",en:"A second translation alongside",ru:"Второй перевод рядом"}
 };
 function paintUI(){
   document.getElementById("lab-lang").textContent=UI.lang[lang];
   document.getElementById("lab-verses").textContent=UI.verses[lang];
+  document.getElementById("lab-para").textContent=UI.para[lang];
+  document.getElementById("lab-para").title=UI.parahint[lang];
+  paintPara();       /* "the other translation" is not the same one in every language */
   document.getElementById("lab-size").textContent=UI.size[lang];
   document.getElementById("lab-colour").textContent=UI.colour[lang];
   document.getElementById("lab-pdf").textContent=UI.pdf[lang];
