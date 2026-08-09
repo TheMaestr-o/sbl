@@ -36,6 +36,7 @@
   --ink:#1c1c1c; --gray:#ccd5e2; --gray-dk:#24426e; --box:#e7ecf4; --muted:#666;
   --gold:#c6a15b; --gold-d:#b28e44;
   --mine:#2f5bd0;                       /* everything the reader added himself */
+  --warn:#e5484d; --warnbg:rgba(229,72,77,.10);   /* what is about to be removed */
   --mat:rgba(250,250,252,.76); --hair:rgba(0,0,0,.08);
   --sans:"PT Sans","Segoe UI",-apple-system,sans-serif;
   --serif:"PT Serif",Georgia,"Times New Roman",serif;
@@ -92,6 +93,9 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
   box-shadow:0 16px 44px rgba(0,0,0,.16);padding:6px;z-index:72;width:min(320px,calc(100vw - 24px))}
 .setpop[hidden]{display:none}
 .srow{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:8px 10px;border-radius:9px}
+/* `display:flex` beats the browser's own [hidden] rule, so a row put away has
+   to be told again — otherwise a setting that cannot work here still shows */
+.srow[hidden]{display:none}
 .srow + .srow{border-top:1px solid #f1f1f1}
 /* one quiet line closes the sheet: which version this is, and where the keys
    are written down */
@@ -112,9 +116,15 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .sw2.on{background:#34c759}
 .sw2.on i{transform:translateX(17px)}
 /* the list of second translations belongs to the switch above it, so it opens
-   under it without a rule of its own — and folds away when the switch is off */
+   under it without a rule of its own — and folds away when the switch is off.
+   Where there is no room for a second column there is no switch either: then
+   the list stands on its own line and takes its own label, because it is still
+   the setting that answers a held verse. */
 .srow.prow{padding-top:0;border-top:none}
-.srow.prow[hidden]{display:none}
+.srow.prow .slab{display:none}
+.srow.prow.solo{padding-top:8px;border-top:1px solid #f1f1f1}
+.srow.prow.solo .slab{display:block}
+.srow.prow.solo .ssel{flex:0 1 auto;width:auto;max-width:60%}
 .ssel{flex:1 1 auto;min-width:0;width:100%;font:inherit;font-size:12.5px;font-weight:600;color:#2b2b2b;
   padding:7px 9px;border:1px solid #e6e6e6;border-radius:9px;background:#fff;cursor:pointer;
   -webkit-appearance:none;appearance:none;transition:border-color .15s;
@@ -163,7 +173,11 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .calnav:hover{background:#2b2b2b;color:#fff;border-color:#2b2b2b}
 .calrow{display:flex;align-items:center;gap:8px;padding:2px 0}
 .calrow.head .d{color:#b0b0b0;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;cursor:default}
-.calrow .days{display:flex;gap:2px;flex:none}
+/* the week inside the calendar. It must NOT be called `days`: that name belongs
+   to the fixed strip of the lesson's own days, and a row carrying it inherited
+   `position:fixed`, the pill and the shadow — the week floated out of the
+   calendar and lay over the list of lessons. */
+.calrow .dcells{display:flex;gap:2px;flex:none}
 .calrow .d{width:26px;height:26px;display:flex;align-items:center;justify-content:center;border-radius:7px;
   font-size:11.5px;color:#3a3a3a;cursor:pointer}
 .calrow .d.out{color:#c9c9c9}
@@ -189,8 +203,35 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
   margin:6px auto 44px;background:#fff;zoom:var(--z);
   padding:calc(56px / var(--z)) calc(64px / var(--z)) calc(72px / var(--z))}
 /* the browser tries to keep the old text under your eye when the sheet is
-   replaced, and quietly scrolls back to it — which fought every jump to a day */
-#sheets{overflow-anchor:none}
+   replaced, and quietly scrolls back to it — which fought every jump to a day.
+   The two gutters are the standing rule of this page: a fixed panel does not
+   lie on the lesson, it takes room away from it. Whatever is pinned to an edge
+   sets its own gutter (see `body.railout` and the strip of days), and the sheet
+   is laid inside what is left. Default zero — on a wide screen the panels stand
+   in the margin the window already gives. */
+#sheets{overflow-anchor:none;padding-left:var(--gut-l,0px);padding-bottom:var(--gut-b,0px);
+  transition:padding-left .34s cubic-bezier(.25,1.1,.35,1)}
+/* ——— the lesson twice, in two languages ———
+   Two whole booklets side by side, each in its own column and each scrolling by
+   itself: that is the point of it. One is being read while the other is held on
+   the verse it is being compared with, so a single scrollbar for both would
+   defeat the whole thing. */
+#sheets.dual{display:grid;grid-template-columns:1fr 1fr;gap:14px;padding-bottom:0}
+/* On one sheet the rail and the strip of days stand in the white the window
+   leaves either side of the booklet. Two sheets use that white, so both move to
+   the very edge and the columns are laid between them — the same rule as on a
+   phone: a panel takes room, it does not lie on the text. */
+body.dualview .rail{left:10px}
+body.dualview .days{right:10px}
+body.dualview.railon #sheets.dual{padding-left:calc(var(--railw,96px) + 4px)}
+body.dualview #sheets.dual{padding-right:62px}
+#sheets.dual .pane{overflow-y:auto;overscroll-behavior:contain;
+  height:calc(100dvh - var(--barh,67px) - 12px);padding-bottom:var(--gut-b,24px)}
+#sheets.dual .page{max-width:none;margin:0}
+/* the tag bleeds off the top of the sheet, and in a column it must not bleed
+   into the column above it */
+#sheets.dual .pane>.page:first-child{margin-top:44px}
+@media (prefers-reduced-motion:reduce){ #sheets{transition:none} }
 /* the browser puts a heading under the bar by its own rules, with its own idea
    of where the viewport starts — which is what iOS browsers disagree about */
 .sec,.page{scroll-margin-top:var(--barh,67px)}
@@ -261,20 +302,43 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
    `data-k` to hang on; see `mkRestore()`. */
 .vpair{display:grid;grid-template-columns:1fr 1fr;column-gap:22px;row-gap:6px;align-items:start}
 .vpair>.vtext{display:contents}
+/* set as running text there is nothing to hold level, so each column goes back
+   to being an ordinary block and simply stands beside the other */
+.vpair.flow>.vtext{display:block}
 .vpair>.vtext>.v{grid-column:1;grid-row:var(--r)}
 .vpair>.vtext.alt>.v{grid-column:2}
 /* the grid keeps the rows apart — the running margin would only add to it */
 .vpair>.vtext .v + .v{margin-top:0}
-/* the second translation reads a shade quieter, so the eye knows at once
-   which of the two columns is the one it came for */
-.vpair>.vtext.alt>.v{color:#5d5d5d}
-.vpair>.vtext.alt .vn{opacity:.6}
-/* each column says once, quietly, which edition it is */
-.vver{grid-row:1;grid-column:1;font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
-  color:#adadb2;padding-bottom:4px;border-bottom:1px solid #eee}
-.vpair>.vtext.alt>.vver{grid-column:2}
+/* both columns are set exactly alike: a second translation is a translation,
+   not a footnote to the first, and greying it made it read as the lesser one.
+   The two are told apart by the edition named over each column, nothing else. */
+/* the reference line carries the editions too, one over each column: the same
+   line already stood there, so naming them costs no height at all */
+.vref.pair{display:grid;grid-template-columns:1fr 1fr;column-gap:22px}
 /* a note written against a parallel passage belongs to the whole width */
 .vpair>.mynote{grid-column:1/-1}
+
+/* The same second translation, where a column has nowhere to stand: hold the
+   verse and it comes out under it, let go and it folds. On a phone and on a
+   narrow tablet this is the only shape the other edition can take — and
+   where the pair is actually on screen the card never opens, because the column
+   beside the verse is already the answer (see the guard on `paraPick()`). */
+#vpeek{position:fixed;z-index:61;display:none;width:max-content;
+  max-width:min(430px,calc(100vw - 20px));padding:10px 14px 12px;border-radius:13px;
+  background:#fff;border:1px solid #ececec;box-shadow:0 14px 40px rgba(0,0,0,.2);
+  /* it must never take the touch that is holding the verse underneath it */
+  pointer-events:none;opacity:0;transform:translateY(-5px);
+  transition:opacity .16s,transform .22s cubic-bezier(.2,1.1,.4,1)}
+#vpeek.on{display:block}
+#vpeek.in{opacity:1;transform:none}
+/* the edition names itself in the same small capitals as a parallel column */
+#vpeek .pv{font-size:9px;font-weight:700;letter-spacing:1.2px;text-transform:uppercase;
+  color:#adadb2;padding-bottom:5px;margin-bottom:7px;border-bottom:1px solid #eee}
+#vpeek .pt{font-family:var(--serif);font-size:16px;line-height:1.5;color:#2b2b2b;
+  padding-left:17px;text-indent:-17px}
+#vpeek .pn{display:inline-block;min-width:13px;margin-right:4px;text-indent:0;vertical-align:.42em;
+  font-weight:700;font-size:11px;color:var(--gray-dk)}
+@media (prefers-reduced-motion:reduce){ #vpeek{transition:opacity .16s} }
 .q{font-weight:700;font-size:18px;line-height:1.45;text-align:justify;hyphens:auto;margin:0 0 14px;padding-left:26px;text-indent:-26px}
 .note{font-family:var(--serif);font-size:18px;line-height:1.52;text-align:justify;hyphens:auto;margin:0 0 16px}
 .note i{font-style:italic}
@@ -337,8 +401,8 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
 
   .vgroup{margin:8px 0 14px;padding-left:18px}   /* + 2px rule = the 20px question column */
   .vtext{font-size:15.5px}
-  /* no .vpair rules here on purpose: below 900px, or upright, the parallel is
-     never rendered at all (see PARA_MQ), so there is nothing to lay out */
+  /* no .vpair rules here on purpose: below 1040px the parallel is never
+     rendered at all (see PARA_MQ), so there is nothing to lay out */
   .q{font-size:17px;padding-left:20px;text-indent:-20px}
   .note{font-size:16.5px}
   .review{font-size:17px;padding-left:20px;text-indent:-20px}
@@ -400,10 +464,16 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
    bar of the same shape down the side */
 .mynote{position:relative;margin:14px 0 18px;padding:12px 16px 10px;text-indent:0;
   background:var(--nbg,rgba(47,91,208,.10));border-radius:12px;
-  box-shadow:inset 0 0 0 1px var(--nbd,rgba(47,91,208,.22));
-  font-family:var(--sans);font-size:15.5px;line-height:1.55;color:#22304e;outline:none;text-align:left}
+  font-family:var(--sans);font-size:15.5px;line-height:1.55;color:#22304e;outline:none;text-align:left;
+  transition:background .16s}
+/* The corner belongs to the cross, so the text is not allowed into it: an empty
+   float in the top right ends the first line early and lets every line under it
+   run the full width. Without this the cross sits on the first words. */
+.mynote::before{content:"";float:right;width:30px;height:22px}
 .mynote b,.mynote strong{font-weight:700}
 .mynote i,.mynote em{font-style:italic}
+/* the rule sits a little below the letters, clear of the descenders */
+.mynote u{text-decoration:underline;text-underline-offset:2.5px;text-decoration-thickness:1px}
 /* a quotation inside your own note is set the way the lesson sets its quotes:
    the serif face, a rule of your colour down the side */
 .mynote blockquote{position:relative;margin:9px 0 9px 2px;padding-left:14px;
@@ -411,28 +481,60 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
 .mynote blockquote::before{content:"";position:absolute;left:0;top:2px;bottom:2px;width:2px;
   border-radius:2px;background:var(--nc,var(--mine));opacity:.4}
 .mynote blockquote i,.mynote blockquote em{font-style:italic}
-/* bold · italic · quote, at the head of the note and nowhere else */
-.mynote .fmt{display:none;gap:2px;user-select:none;margin:-4px -4px -4px 0}
-.mynote:hover .fmt,.mynote:focus .fmt{display:flex}
-.mynote .fmt span{width:22px;height:22px;border-radius:6px;display:flex;align-items:center;
-  justify-content:center;font-size:13px;color:var(--nc,var(--mine));opacity:.55;cursor:pointer;
-  font-family:var(--serif);line-height:1}
-.mynote .fmt span:hover{opacity:1;background:rgba(120,120,128,.14)}
-.mynote .fmt span.on{opacity:1;background:var(--nbd,rgba(47,91,208,.22))}
-.mynote .fmt svg{flex:none;width:13px;height:12px}
-.mynote .fmt .b{font-weight:700}
-.mynote .fmt .i{font-style:italic}
-.mynote.blank::after{content:attr(data-ph);color:#9aa7c4}
-/* the foot of the note: whose it is on the left, what it can be set in on the right */
-.mynote .foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
-.mynote .lab{font-size:8.5px;letter-spacing:1.1px;
-  text-transform:uppercase;color:var(--nc,var(--mine));opacity:.6;font-weight:700}
-.mynote:focus{box-shadow:inset 0 0 0 1px var(--nbd,rgba(47,91,208,.22)),0 0 0 3px rgba(47,91,208,.12)}
-.mynote .del{position:absolute;top:6px;right:8px;width:20px;height:20px;border-radius:6px;cursor:pointer;
-  display:none;align-items:center;justify-content:center;color:var(--mine);opacity:.55;font-size:14px}
-.mynote:hover .del{display:flex}
-.mynote .del{color:var(--nc,var(--mine))}
-.mynote .del:hover{opacity:1;background:rgba(120,120,128,.16)}
+/* Bold · italic · underline · quotation. The bar belongs to the page, not to a
+   note: standing free it takes no height from the note, does not move when it
+   comes and goes, and is in reach whatever part of a long note is being
+   written. It only appears while something of the reader's own has the caret. */
+.fmtbar{position:fixed;left:50%;bottom:12px;z-index:64;display:flex;gap:3px;padding:5px 7px;
+  transform:translateX(-50%) translateY(6px);opacity:0;pointer-events:none;
+  background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);
+  border-radius:13px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.18);
+  -webkit-tap-highlight-color:transparent;-webkit-user-select:none;user-select:none;
+  transition:opacity .16s,transform .22s cubic-bezier(.2,1.2,.4,1)}
+.fmtbar[hidden]{display:none}
+.fmtbar.on{opacity:1;transform:translateX(-50%);pointer-events:auto}
+.fmtbar span{width:32px;height:32px;border-radius:9px;display:flex;align-items:center;justify-content:center;
+  font-size:15px;font-family:var(--serif);line-height:1;color:#3a3a3f;cursor:pointer;
+  transition:background .14s,color .14s}
+@media (hover:hover){ .fmtbar span:hover{background:rgba(120,120,128,.16);color:#1c1c1e} }
+.fmtbar span.on{background:#2b2b2b;color:#fff}
+.fmtbar .b{font-weight:700}
+.fmtbar .i{font-style:italic}
+.fmtbar .u{text-decoration:underline;text-underline-offset:2px}
+@media (pointer:coarse){ .fmtbar span{width:40px;height:40px;font-size:17px} }
+@media (prefers-color-scheme:dark){
+  .fmtbar{--mat:rgba(44,44,46,.9);--hair:rgba(255,255,255,.12)}
+  .fmtbar span{color:#c7c7cc}
+  .fmtbar span.on{background:#f2f2f7;color:#1c1c1e}
+}
+@media (prefers-reduced-motion:reduce){ .fmtbar{transition:opacity .16s} }
+/* a note stored before the bar moved out may still carry one of its own: it is
+   not part of the note's text and must never show */
+.mynote .fmt,.mynote .foot{display:none}
+/* the invitation stands exactly where the first letter will go, not on a line
+   of its own below — it is what the caret is sitting on */
+.mynote.blank::after{content:attr(data-ph);position:absolute;left:16px;top:12px;
+  color:#9aa7c4;pointer-events:none}
+/* A note looks the same whether it is being written in or finished: no line
+   around it in any state, and no halo either. The caret is signal enough that
+   it is open; a frame that comes and goes only makes the page restless. */
+/* ——— the cross says what it does ——— */
+.mynote .del{position:absolute;top:7px;right:9px;width:24px;height:24px;border-radius:8px;cursor:pointer;
+  display:none;align-items:center;justify-content:center;line-height:1;font-size:15px;
+  color:var(--nc,var(--mine));opacity:.5;transition:color .16s,background .16s,opacity .16s}
+/* Where a pointer can hover — a mouse, or an Apple Pencil held above the glass —
+   the cross comes out, and taking aim at it turns the whole note red: what is
+   about to go is shown, not only the button that would do it.
+   `any-hover`, not `hover`: on an iPad with a Pencil `hover:hover` is false. */
+@media (any-hover:hover){
+  .mynote:hover .del{display:flex}
+  .mynote .del:hover{opacity:1;color:#fff;background:var(--warn)}
+  .mynote:has(.del:hover){background:var(--warnbg)}
+}
+/* a finger has no hover, so there the cross comes with the note being opened */
+.mynote:focus .del,.mynote:focus-within .del{display:flex}
+.mynote .del:active{opacity:1;color:#fff;background:var(--warn)}
+@media (prefers-reduced-motion:reduce){ .mynote,.mynote .del{transition:none} }
 .legend{display:none}
 
 /* one tap and the room is empty: the rail slides out to the left, the bar
@@ -440,8 +542,12 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
 .bar{transition:transform .3s cubic-bezier(.3,.9,.3,1),opacity .22s}
 .rail{transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
 body.bare .bar{transform:translateY(-110%);opacity:0;pointer-events:none}
-body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(-100% - 22px))}
-@media (max-width:700px){ body.bare .rail{transform:translate(calc(-100% - 14px),-50%)} }
+/* `writing` goes the same way as `bare`, and for the same reason: while the
+   reader is putting down his own words nothing else belongs on the screen.
+   On a phone this is what keeps the strip of days off the note when the
+   keyboard is up and the visible half of the screen is all there is. */
+body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(-100% - 22px))}
+@media (max-width:700px){ body.bare .rail,body.writing .rail{transform:translate(calc(-100% - 14px),-50%)} }
 
 /* ——— THE RAIL ———
    The tools stand beside the sheet and stay there. What is in hand is visible
@@ -499,7 +605,10 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 
 /* ——— the days of the lesson, down the right edge ———
    A lesson is seven days long; this is the thread you pull to get to any of
-   them, and it says which one you are reading now. */
+   them, and it says which one you are reading now.
+   `days` is a LAYER name: everything under it is torn out of the page and made
+   to float. Nothing inside a panel may carry it — the calendar's own week is
+   `dcells` for exactly that reason. */
 .days{position:fixed;right:max(10px,calc((100vw - 900px) / 2));top:50%;transform:translateY(-50%);
   z-index:59;display:flex;flex-direction:column;gap:3px;padding:6px;
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);
@@ -552,13 +661,10 @@ body.bare .rail{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   color:#8a8a8e;text-transform:uppercase;transition:color .16s,background .16s}
 @media (hover:hover){ .dchip:hover{background:rgba(120,120,128,.14);color:#2b2b2b} }
 .dchip.on{color:#fff}
-body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
+body.bare .days,body.writing .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
 @media (max-width:1010px){ .days{right:8px} }
-@media (max-width:700px){
-  .days{right:auto;left:50%;top:auto;bottom:calc(env(safe-area-inset-bottom) + 96px);
-    transform:translateX(-50%);flex-direction:row;border-radius:999px}
-  body.bare .days{transform:translateX(-50%) translateY(140%)}
-}
+/* the phone rules for the strip live in one place, further down with the rest
+   of the phone layout — a second copy here only argued with it */
 @media (pointer:coarse){ .dchip,.days .dpill{width:36px;height:36px} .dchip{font-size:11.5px} }
 
 /* the quiet invitation: shown a few times, never again after that */
@@ -596,7 +702,9 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 .mtool:active{transform:scale(.92)}
 .mtool.own{color:var(--mine)}
 
-.mtoast{position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(8px);opacity:0;z-index:70;
+/* the toast stands above whatever is already pinned to the bottom edge, so it
+   and the strip of days never land in the same place */
+.mtoast{position:fixed;left:50%;bottom:calc(var(--gut-b,0px) + 24px);transform:translateX(-50%) translateY(8px);opacity:0;z-index:70;
   background:rgba(28,28,30,.92);color:#fff;font-size:12.5px;padding:9px 16px;border-radius:12px;pointer-events:none;
   transition:opacity .2s,transform .3s cubic-bezier(.2,1.3,.4,1)}
 .mtoast.on{opacity:1;transform:translateX(-50%)}
@@ -637,9 +745,8 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .mtool{width:38px;height:38px;border-radius:11px}
   .area{width:min(260px,66vw);height:130px} .hue{width:min(260px,66vw);height:20px}
   .area .dot,.hue .dot{width:17px;height:17px}
-  .mynote .del{display:flex;width:26px;height:26px}
-  .mynote .fmt{display:flex}
-  .mynote .fmt span{width:26px;height:26px}
+  /* a finger has no hover, so the cross is simply there on a touch device */
+  .mynote .del{display:flex;width:28px;height:28px}
 }
 /* a tablet: the sheet stays where it is — centred, not nudged aside — and the
    rail goes down to a single narrow column so it fits inside the sheet's own
@@ -663,7 +770,8 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   -webkit-tap-highlight-color:transparent}
 .railtab i{width:4px;height:4px;border-radius:50%;background:#9a9aa0}
 
-/* only a phone has no margin at all: there the rail slides in from the edge */
+/* only a phone has no margin at all: there the rail slides in from the edge,
+   and the sheet gives it the room instead of being covered by it */
 @media (max-width:700px){
   .railtab{display:flex}
   .rail{left:0;top:50%;bottom:auto;transform:translate(calc(-100% - 14px),-50%);
@@ -672,16 +780,33 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
     transition:transform .34s cubic-bezier(.25,1.1,.35,1),opacity .2s}
   body.railout .rail{transform:translate(0,-50%)}
   body.railout .railtab{transform:translateY(-50%) translateX(-24px);opacity:0}
-  .rail .two,.rail .inks{display:flex;flex-direction:column;gap:5px;flex-basis:auto}
-  .rail .sep{width:22px;height:.5px;margin:2px 0}
-  .ink{width:26px;height:26px}
-  .chip{order:0}
+  /* The rail out means a left gutter, and the gutter is the rail's own measured
+     width (`--railw`, set in `mkDrawer`): the buttons grow on a finger device,
+     so any number written here would be wrong on exactly the screens that
+     matter. The sheet is set beside the rail, never under it. */
+  body.railout{--gut-l:var(--railw,106px)}
+  /* One narrow column down the left edge, and everything in it a tenth smaller
+     than anywhere else — on a phone the width taken from the lesson matters
+     more than the size of the target. These sizes deliberately undercut the
+     coarse-pointer block above: it grows the buttons for a finger, which is
+     right on a tablet and too wide here. Small enough that a single column
+     still ends above the bottom edge, which is what put the counter off screen
+     when it was full size. */
+  .rail{padding:7px 6px;gap:4px}
+  .rail .two,.rail .inks{display:flex;flex-direction:column;gap:4px}
+  .rbtn,.mtool{width:27px;height:27px;border-radius:8px}
+  .hand{width:31px;height:31px}
+  .ink{width:20px;height:20px}
+  .rail .sep{width:20px;height:.5px;margin:1px 0}
+  .chip{order:0;font-size:9px;padding:2px 4px}
   .rpick{left:calc(100% + 9px);right:auto;top:50%;bottom:auto;transform:translateY(-50%)}
-}
-@media (max-width:700px){
+  /* the strip of days lies along the bottom, and the sheet ends above it */
   .days{right:auto;left:50%;top:auto;bottom:calc(env(safe-area-inset-bottom) + 12px);
     transform:translateX(-50%);flex-direction:row;border-radius:999px}
-  body.bare .days{transform:translateX(-50%) translateY(140%)}
+  body.bare .days,body.writing .days{transform:translateX(-50%) translateY(140%)}
+  body{--gut-b:calc(env(safe-area-inset-bottom) + 66px)}
+  body.bare,body.writing{--gut-b:0px}
+  body.writing{--gut-l:0px}
 }
 
 @media (prefers-color-scheme:dark){
@@ -706,7 +831,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
     @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.4px; color:#9a9a9a; }
   }
   .bar,footer{display:none} body{background:#fff}
-  #sheets{padding-left:0}   /* the tablet gutter is a screen affair */
+  #sheets{padding-left:0;padding-bottom:0}   /* the gutters are a screen affair */
   /* whatever size the reader chose on screen, the sheet prints at 100%.
      No padding of its own: the top and bottom air comes from @page alone, so
      it matches the left and right margins exactly. */
@@ -733,7 +858,7 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
   .note,.quote,.mem{orphans:2;widows:2}
   .vtext{orphans:3;widows:3}
   /* the pencil work prints with the lesson; the tools themselves never do */
-  .rail,.rpick,.bub,.grip,.days,.hintchip,.mtoast,.keysback,.keyspop,.mynote .del,.myins .del,.mynote .fmt{display:none!important}
+  .rail,.rpick,.bub,.grip,.days,.hintchip,.mtoast,.keysback,.keyspop,#vpeek,.mynote .del,.myins .del,.mynote .foot{display:none!important}
   .mynote,.myins{break-inside:avoid;page-break-inside:avoid}
   .mynote blockquote{break-inside:avoid;page-break-inside:avoid}
   /* whoever picks up the sheet must see at a glance which lines are not
@@ -757,10 +882,13 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
       <div class="sctl">
         <div class="tog ic" id="tog"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M5.6 3.2c-1.9.7-3 2.3-3 4.3 0 1.6 1 2.7 2.4 2.7 1.2 0 2.1-.9 2.1-2.1 0-1.1-.8-2-1.9-2-.2 0-.4 0-.5.1.2-1 .9-1.8 1.9-2.2ZM12.6 3.2c-1.9.7-3 2.3-3 4.3 0 1.6 1 2.7 2.4 2.7 1.2 0 2.1-.9 2.1-2.1 0-1.1-.8-2-1.9-2-.2 0-.4 0-.5.1.2-1 .9-1.8 1.9-2.2Z"/></svg></div>
         <div class="tog vlines" id="vlines"></div>
+        <div class="tog ic" id="paratog" hidden><svg width="16" height="14" viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.4h5M1 5.9h5M1 9.4h3.4"/><path d="M10 2.4h5M10 5.9h5M10 9.4h3.4"/></svg></div>
       </div></div>
-    <div class="srow" id="para-sw-row" hidden><span class="slab" id="lab-para"></span>
-      <div class="sctl"><div class="sw2" id="para-sw"><i></i></div></div></div>
-    <div class="srow prow" id="para-row" hidden><select class="ssel" id="para-sel"></select></div>
+    <div class="srow prow" id="para-row" hidden><span class="slab" id="lab-second"></span><select class="ssel" id="para-sel"></select></div>
+    <div class="srow" id="dual-row" hidden><span class="slab" id="lab-dual"></span>
+      <div class="sctl"><div class="sw2" id="dual-sw"><i></i></div></div></div>
+    <div class="srow prow" id="dual-lang-row" hidden><span class="slab" id="lab-duallang"></span>
+      <div class="langseg" id="dualseg"></div></div>
     <div class="srow"><span class="slab" id="lab-size"></span>
       <div class="sctl"><div class="zoom" id="zoomout">A&#8722;</div><div class="zoom" id="zoomin">A+</div></div></div>
     <div class="srow"><span class="slab" id="lab-colour"></span><div class="swatches" id="tintpop"></div></div>
@@ -805,6 +933,9 @@ body.bare .days{opacity:0;pointer-events:none;transform:translateY(-50%) transla
 <div class="days" id="days"></div>
 
 <div class="hintchip" id="mkhint"></div>
+<div class="hintchip" id="pkhint"></div>
+<div id="vpeek"></div>
+<div class="fmtbar" id="fmtbar" hidden></div>
 
 <div class="railtab" id="railtab" aria-hidden="true"><i></i><i></i><i></i></div>
 <i class="grip" id="gripS"></i><i class="grip" id="gripE"></i>
@@ -835,6 +966,14 @@ const BIBLE={de:"de-lut",en:"en-kjv",ru:"ru-rst"};
 const bibles={};
 let versesOn=localStorage.getItem("sbl.verses")==="1";
 let versesLines=localStorage.getItem("sbl.verselines")==="1";   /* one verse per line */
+/* Two lessons at once: the whole booklet twice, in two languages, side by side.
+   Kept apart from the parallel of verses below — that one sets one passage
+   against another inside a single lesson, this one sets the entire sheet
+   against its own translation, and each side is read, scrolled and marked on
+   its own. */
+let dualOn_=localStorage.getItem("sbl.dual")==="1";
+let dualLang=localStorage.getItem("sbl.duallang")||"";
+
 /* Parallel reading: a second translation beside the one the lesson is in.
    Kept apart from `versesOn` on purpose — the reader turns it on once and it
    stays on through language changes and reloads, like every other setting. */
@@ -862,17 +1001,40 @@ const PARA=[
   ["RO","ro-vdc","Dumitru Cornilescu"],
   ["CS","cs-bkr","Bible Kralická"]
 ];
-/* Two columns need the room for two columns. A tablet held upright, or a phone
-   turned on its side, has the pixels but not the shape — a verse would break
-   into three lines a column and the pair would stop reading as a pair. So the
-   parallel is offered only where it works: landscape, and wide enough for it.
-   Everywhere else the page is exactly what it was before this feature existed —
-   and the switch is not shown at all, so nothing promises what it cannot give. */
-const PARA_MQ=matchMedia("(orientation:landscape) and (min-width:900px)");
+/* Two columns need the room for two columns, and room is width — nothing else.
+   An earlier version asked for landscape instead, and that made the setting
+   impossible to find: on one tablet it was there, on the next it was not, for
+   reasons the reader could not see. Width alone can be explained in one
+   sentence, and the numbers are chosen against real tablets rather than picked
+   round:
+
+     iPad 10.2"  upright  810 · lying 1080
+     iPad Air    upright  820 · lying 1180
+     iPad Pro 13 upright 1024 · lying 1366
+
+   1040 puts every tablet lying down above the line and every one standing up
+   below it — including the big Pro, whose 1024 upright was the width that used
+   to let two columns in and then squeeze them. Two whole lessons need far more
+   than two columns of verses do: a booklet is set for 820, and below 1280 the
+   two of them start eating each other.
+
+   Under the line nothing is lost — the second translation is still one gesture
+   away, under a held verse. */
+const PARA_MQ=matchMedia("(min-width:1040px)");
+const DUAL_MQ=matchMedia("(min-width:1280px)");
 function paraFits(){ return PARA_MQ.matches; }
 /* the second column has to be a second translation: whatever the lesson is
    already set in cannot stand beside itself */
-function paraPick(){ return paraOn&&paraFits()&&paraVer&&paraVer!==BIBLE[lang]?paraVer:""; }
+/* One function, one answer: this says what is actually set beside the verses on
+   screen. It has to know about the two-language view, because that view takes
+   the second column for itself — otherwise the held-verse gesture steps aside
+   for a column that was never drawn, and nothing answers at all. */
+function paraPick(){ return !dualOn()&&paraOn&&paraFits()&&paraVer&&paraVer!==BIBLE[lang]?paraVer:""; }
+/* two full sheets need the width of two — a good deal more than two columns of
+   verses do; below that the setting is kept and simply has nowhere to go */
+function dualFits(){ return DUAL_MQ.matches; }
+function dualOn(){ return dualOn_&&dualFits(); }
+function dualOther(){ return dualLang&&dualLang!==lang?dualLang:LANGS.filter(function(l){return l!==lang;})[0]; }
 
 /* band colour themes — first colour matches the quarterly cover (navy + light) */
 const THEMES=[
@@ -896,7 +1058,13 @@ function strip(s){return String(s==null?"":s).replace(/<[^>]*>/g,"");}
 function cleanMem(t){t=String(t||"").trim();var qi=t.search(/[„“"«]/);if(qi>0&&qi<=42){var ci=t.lastIndexOf(":",qi);if(ci>=0&&ci<qi)t=t.slice(ci+1).trim();}return t;}
 function isJunk(s){return /out of date|install the (new|latest) version|Google Play|App ?store|version installed on your device/i.test(String(s||""));}
 function ymdToDate(s){return new Date(+s.slice(0,4),+s.slice(4,6)-1,+s.slice(6,8));}
-function fmt(dstr,opts){try{return new Intl.DateTimeFormat(LOCALE[lang],opts).format(ymdToDate(dstr));}catch(e){return dstr;}}
+/* The language of the sheet being built at this moment. Everything a lesson
+   sets — the date, the label of the memory verse, which Bible it quotes — reads
+   this and not the setting, so a second sheet in another language can be built
+   beside the first without either knowing about the other. Outside `renderLesson`
+   it is simply the language of the page. */
+let rlang=lang;
+function fmt(dstr,opts){try{return new Intl.DateTimeFormat(LOCALE[rlang],opts).format(ymdToDate(dstr));}catch(e){return dstr;}}
 
 async function loadQuarter(l,y,q){
   const key=l+"-"+y+"-"+q; if(quarters[key]) return quarters[key];
@@ -923,6 +1091,12 @@ function loadBible(v){ if(bibles[v]) return bibles[v];
    where the verses are actually read. */
 function parseSeg(s){const d=s.split("-");const a=d[0].split(".");const b=(d[1]||d[0]).split(".");
   return{book:a[0],chap:+a[1],v1:a[2]!=null?+a[2]:1,echap:+(b[1]||a[1]),v2:b[2]!=null?+b[2]:Infinity};}
+/* Every verse carries its own address — `data-vr="John.3.16"` — so that a finger
+   held on it can be answered with that one verse in the second translation (see
+   `peekOpen`). In running text this needs a wrapper the verse did not have
+   before: `.vr` styles nothing, it only gives the verse an outline to be found
+   by. It is safe for the pencil — marks are stored as character offsets inside
+   the block, counted over text nodes, and a wrapper adds no character. */
 function verseHtml(books,sOsis,perLine){let out="";
   for(const raw of String(sOsis).split(",")){
     const s=parseSeg(raw.trim());const ch=books&&books[s.book];if(!ch)continue;
@@ -930,8 +1104,9 @@ function verseHtml(books,sOsis,perLine){let out="";
       const from=c===s.chap?s.v1:1,to=Math.min(c===s.echap?s.v2:vs.length,vs.length);
       for(let n=from;n<=to;n++) if(vs[n-1]!=null){
         const t=esc(strip(String(vs[n-1])).trim());
-        out+= perLine ? '<span class="v"><span class="vn">'+n+'</span>'+t+'</span>'
-                      : '<span class="vnum">'+n+'</span>'+t+" ";
+        const vr=' data-vr="'+esc(s.book)+"."+c+"."+n+'"';
+        out+= perLine ? '<span class="v"'+vr+'><span class="vn">'+n+'</span>'+t+'</span>'
+                      : '<span class="vr"'+vr+'><span class="vnum">'+n+'</span>'+t+'</span> ';
       }
     }
   }
@@ -942,7 +1117,7 @@ function verseHtml(books,sOsis,perLine){let out="";
    verse one edition does not carry leaves its cell empty instead of pushing
    everything under it out of line. `--r` is the grid row the pair stands on.
    Row 1 belongs to the two version labels, so the verses start at 2. */
-function versePair(booksA,booksB,sOsis){
+function versePair(booksA,booksB,sOsis,perLine){
   const rows=[];
   for(const raw of String(sOsis).split(",")){
     const s=parseSeg(raw.trim());
@@ -960,15 +1135,48 @@ function versePair(booksA,booksB,sOsis){
     }
   }
   let a="",b="";
+  /* Running text in two columns: each side is simply its own paragraph. The
+     verses no longer stand level with each other — that is the price of it —
+     but the passage takes half the height, and for reading straight through
+     rather than comparing word against word this is the shape that is wanted. */
+  if(!perLine){
+    for(const r of rows){
+      if(r[1]) a+='<span class="vnum">'+r[0]+'</span>'+r[1]+" ";
+      if(r[2]) b+='<span class="vnum">'+r[0]+'</span>'+r[2]+" ";
+    }
+    return [a.trim(),b.trim()];
+  }
   for(let i=0;i<rows.length;i++){
-    const r=rows[i], pr=i+2;
+    /* the verses start on row 1: the editions now name themselves up in the
+       reference line, so no row is spent on labels */
+    const r=rows[i], pr=i+1;
     a+='<span class="v" style="--r:'+pr+'"><span class="vn">'+r[0]+'</span>'+r[1]+'</span>';
     b+='<span class="v" style="--r:'+pr+'"><span class="vn">'+r[0]+'</span>'+r[2]+'</span>';
   }
   return [a,b];
 }
-/* the short name of an edition — "en-nkjv" is read as NKJV over its column */
-function verLabel(id){ return '<span class="vver">'+esc((String(id).split("-")[1]||id).toUpperCase())+'</span>'; }
+/* the short name of an edition — "en-nkjv" is read as NKJV */
+function verShort(id){ return String(id).split("-")[1]||String(id); }
+/* The reference over the second column has to read in the language of the
+   edition standing there — "John 3:5-8", not "От Иоанна 3:5-8" over an English
+   text. The Bible files carry no book names, only OSIS codes, and a table of
+   sixty-six names in every language is a table to get wrong. The lesson itself
+   is where those names are already written correctly: the same quarter in that
+   language quotes the same passages under the same `sOsis`, so the reference is
+   looked up by the very key both sides share. Where the page has no lesson in
+   that language — Spanish, Portuguese, Romanian, Czech — the column carries its
+   edition and nothing more, which is honest and costs nothing. */
+const paraRefs={};
+async function paraRefMap(l,y,q){
+  const key=l+"-"+y+"-"+q; if(paraRefs[key]) return paraRefs[key];
+  const data=await loadQuarter(l,y,q), m={};
+  if(data&&data.lessons) for(const les of data.lessons)
+    for(const day of les.dailyLessons||[])
+      for(const sub of day.subsections||[])
+        for(const it of sub.q||[]) if(it&&it.sOsis&&it.text)
+          m[it.sOsis]=strip(it.text).replace(/[;,.\s]+$/,"");
+  return paraRefs[key]=m;
+}
 /* DE/RU carry the EGW source inside the quote itself ("…wecken.“ – Der Weg zu
    Christus, S. 4."). Find the book title and italicise it, so all three
    languages read the same as English — where the source arrives in `sop`.
@@ -1050,14 +1258,19 @@ let vid=0;   /* runs across a whole quarter, so verse ids stay unique */
    whether the Bible text is switched on. A highlight is stored against that
    key, so it comes back after a reload, after the type is enlarged, after the
    verses are turned on. See `mkRestore()`. */
-function renderLesson(les,tasks){
-  const par=paraPick();          /* "" when the second translation is off */
+function renderLesson(les,tasks,lg){
+  /* From here down the sheet speaks `rlang`, not the setting: that is the whole
+     of what lets a second lesson in another language stand beside the first. */
+  rlang=lg||lang;
+  /* two full lessons already are two languages — a second edition inside each
+     of them would make four columns of nothing legible */
+  const par=dualOn()?"":paraPick();          /* "" when the second translation is off */
   let h='<div class="lesson">'+esc(strip(les.header||""))+'</div>'+
         '<div class="top"><div class="date" data-k="dt">'+esc(strip(WORDsab()+", "+fmt(les.date,{month:"long",day:"numeric",year:"numeric"})))+'</div></div>';
   h+='<h1 class="title" data-k="ti">'+esc(les.title||"")+'</h1>';
 
   const kt=les.keyText||{}, kText=cleanMem(strip(kt.text||les.keyTextVerse||"")), kRef=strip((kt.ref&&kt.ref.text)||"");
-  if(kText) h+='<div class="mem" data-k="mem"><b>'+esc(MEMLABEL[lang])+':</b> '+mkGlue(esc(kText))+(kRef?' ('+mkGlue(esc(kRef))+').':'')+'</div>';
+  if(kText) h+='<div class="mem" data-k="mem"><b>'+esc(MEMLABEL[rlang])+':</b> '+mkGlue(esc(kText))+(kRef?' ('+mkGlue(esc(kRef))+').':'')+'</div>';
 
   const rd=les.reading;
   if(rd&&rd.reading&&rd.reading.length)
@@ -1086,17 +1299,30 @@ function renderLesson(les,tasks){
             /* with a second translation the passage needs a second box to fill;
                its key simply carries a "p", so the marks on the first column
                are the very ones that were there before parallel existed */
-            const id2=par?id+"p":"";
-            tasks.push([id,it.sOsis,id2]);
+            const id2=par?id+"p":"", hid=par?id+"h":"";
+            /* the sheet says which edition it quotes: in two languages the two
+               sheets quote two different Bibles, and each task carries its own */
+            tasks.push([id,it.sOsis,id2,hid,BIBLE[rlang]]);
             const ref=strip(it.text||"").replace(/[;,.\s]+$/,"");
-            /* set side by side the verses have to be discrete, so a parallel
-               passage is always one verse per line — that is the only shape in
-               which two columns can be held level */
+            /* Two columns take either shape. Set one verse per line they are
+               laid into a single grid and verse n stands opposite verse n; set
+               as running text each column is its own paragraph and the two only
+               keep their tops together. Both are useful, and which one is asked
+               for is the same setting as everywhere else on the page. */
+            const cl=versesLines?" lines":"";
             const box=par
-              ? '<div class="vpair"><div class="vtext lines" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>'
-                +'<div class="vtext lines alt" id="'+id2+'" data-k="'+kk+'v'+vi+'p"></div></div>'
-              : '<div class="vtext'+(versesLines?' lines':'')+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>';
-            g+='<div class="vitem">'+(ref?'<div class="vref">'+esc(ref)+'</div>':'')+box+'</div>'; }
+              ? '<div class="vpair'+(versesLines?"":" flow")+'">'
+                +'<div class="vtext'+cl+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>'
+                +'<div class="vtext'+cl+' alt" id="'+id2+'" data-k="'+kk+'v'+vi+'p"></div></div>'
+              : '<div class="vtext'+cl+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>';
+            /* with two columns the editions name themselves on the reference
+               line, each over its own column — a row of labels of their own
+               pushed every passage further down the page for nothing */
+            const head=par
+              ? '<div class="vref pair"><span>'+esc(verShort(BIBLE[rlang]))+(ref?' · '+esc(ref):'')+'</span>'
+                +'<span id="'+hid+'">'+esc(verShort(par))+'</span></div>'
+              : (ref?'<div class="vref">'+esc(ref)+'</div>':'');
+            g+='<div class="vitem">'+head+box+'</div>'; }
           blocks.push(g+'</div>'); }
       }
       let ni=0;
@@ -1114,7 +1340,7 @@ function renderLesson(les,tasks){
   }
   return h+'<div class="legend"></div>';
 }
-function WORDsab(){return {de:"Sabbat",en:"Sabbath",ru:"Суббота"}[lang];}
+function WORDsab(){return {de:"Sabbat",en:"Sabbath",ru:"Суббота"}[rlang];}
 
 /* the month view reaches into the quarters on either side. Fetch them quietly
    once the lesson is up: opening the calendar is then instant, and the service
@@ -1128,10 +1354,16 @@ let token=0;
 let scope="week";                        /* "week" | "quarter" */
 /* the sheet carries which lesson it holds: pencil marks are stored per lesson
    and per language, and a quarter puts thirteen sheets on the page at once */
-function sheet(inner,id){
-  return '<div class="page"'+(id?' data-les="'+id+'" data-lang="'+lang+'"':'')+'>'+inner+'</div>'; }
+/* The sheet carries the language it was set in, not the language of the setting.
+   `mkKey` reads it from here, so the marks of the right-hand lesson file
+   themselves under their own key without the pencil knowing two sheets exist. */
+function sheet(inner,id,lg){
+  return '<div class="page"'+(id?' data-les="'+id+'" data-lang="'+(lg||lang)+'"':'')+'>'+inner+'</div>'; }
 /* what the browser will call the saved file — set as the page is built */
 let docName="SBL Edition";
+/* what each side would be called if it were saved on its own — the two-language
+   PDF is two ordinary booklets one after the other, and these are their names */
+let dualNames=[];
 function fileSafe(s){ return String(s||"").replace(/[\\/:*?"<>|]+/g," ").replace(/\s+/g," ").trim(); }
 
 /* An A4 page holds about 1010 px of text. Keeping the opening of a day
@@ -1158,45 +1390,76 @@ async function render(){
   sheets.innerHTML=sheet('<div class="msg">&hellip;</div>');
   const tasks=[]; vid=0;
 
-  if(scope==="quarter"){
-    const data=await loadQuarter(lang,current.getFullYear(),qOf(current));
-    if(my!==token) return;
-    const lessons=(data&&data.lessons)||[];
-    if(!lessons.length){ sheets.innerHTML=sheet('<div class="msg">No lessons for this quarter.</div>');
-      wk.innerHTML=""; mkDaysBuild(); mkLastLes=null; window.scrollTo(0,0); return; }
-    wk.innerHTML='<b>'+esc(strip(data.title||""))+'</b>';
-    docName=fileSafe("SBL "+current.getFullYear()+"-Q"+qOf(current)+" "+strip(data.title||""));
-    sheets.innerHTML=lessons.map(function(les){ return sheet(renderLesson(les,tasks),les.date); }).join("");
-  } else {
-    const les=await findLesson(current,lang);
-    if(my!==token) return;
-    if(!les){ sheets.innerHTML=sheet('<div class="msg">No lesson for this week.</div>');
-      wk.innerHTML=""; mkDaysBuild(); mkLastLes=null; window.scrollTo(0,0); return; }
-    /* the lesson number alone — the date is on the sheet and in the calendar */
-    wk.innerHTML='<b>'+esc(strip(les.header||""))+'</b>';
-    docName=fileSafe("SBL "+String(les.date).replace(/^(\d{4})(\d{2})(\d{2})$/,"$1-$2-$3")
-      +" "+strip(les.header||"")+" "+strip(les.title||""));
-    sheets.innerHTML=sheet(renderLesson(les,tasks),les.date);
+  /* One language, or two side by side. `sideHtml` builds one whole side in the
+     language it is handed, so the second side is the first one over again with
+     a different argument — no branch of its own anywhere below. */
+  const dual=dualOn(), other=dual?dualOther():"";
+  async function sideHtml(lg){
+    if(scope==="quarter"){
+      const data=await loadQuarter(lg,current.getFullYear(),qOf(current));
+      const lessons=(data&&data.lessons)||[];
+      if(!lessons.length) return {html:sheet('<div class="msg">No lessons for this quarter.</div>'),title:"",name:""};
+      return {html:lessons.map(function(les){ return sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
+        title:strip(data.title||""),
+        name:fileSafe("SBL "+current.getFullYear()+"-Q"+qOf(current)+" "+strip(data.title||""))};
+    }
+    const les=await findLesson(current,lg);
+    if(!les) return {html:sheet('<div class="msg">No lesson for this week.</div>'),title:"",name:""};
+    return {html:sheet(renderLesson(les,tasks,lg),les.date,lg),
+      title:strip(les.header||""),
+      name:fileSafe("SBL "+String(les.date).replace(/^(\d{4})(\d{2})(\d{2})$/,"$1-$2-$3")
+        +" "+strip(les.header||"")+" "+strip(les.title||""))};
   }
+
+  const sides=await Promise.all([sideHtml(lang)].concat(dual?[sideHtml(other)]:[]));
+  if(my!==token) return;
+  rlang=lang;                          /* the page is itself again outside a sheet */
+  if(!sides[0].title&&!sides[0].name){
+    sheets.className=""; sheets.innerHTML=sides[0].html;
+    wk.innerHTML=""; mkDaysBuild(); mkLastLes=null; window.scrollTo(0,0); return; }
+  /* the lesson number alone — the date is on the sheet and in the calendar */
+  wk.innerHTML='<b>'+esc(sides[0].title)+'</b>';
+  docName=sides[0].name;
+  dualNames=sides.map(function(s){ return s.name; });
+  sheets.className=dual?"dual":"";
+  document.body.classList.toggle("dualview",dual);
+  sheets.innerHTML=dual
+    ? sides.map(function(s,i){ return '<div class="pane" data-lg="'+(i?other:lang)+'">'+s.html+'</div>'; }).join("")
+    : sides[0].html;
 
   relaxDayStarts();
   mkRestore();
+  mkPanesListen();                     /* the columns are new — so are their scrollbars */
   mkDaysBuild(); mkOpenToday();
   mkPrefetch();
 
   if(versesOn && tasks.length){
-    /* both editions are fetched at once — the second must not make the first
-       one wait, and the service worker keeps either of them for next time */
-    const par=paraPick();
-    const got=await Promise.all([loadBible(BIBLE[lang]),par?loadBible(par):null]);
+    /* Every edition the page needs at once — the second must not make the first
+       one wait, and the service worker keeps each of them for next time. With
+       two lessons on screen that is two Bibles, and each task says which one is
+       its own. */
+    const par=dual?"":paraPick();
+    const pl=par?String(par).split("-")[0]:"";
+    const want=[];
+    for(const t of tasks) if(t[4]&&want.indexOf(t[4])<0) want.push(t[4]);
+    if(par&&want.indexOf(par)<0) want.push(par);
+    const got=await Promise.all(want.map(loadBible).concat([
+      /* the names of the books in the second edition's language, if the page
+         has a lesson in it at all — fetched beside the editions, never after */
+      pl&&pl!==lang&&LANGS.indexOf(pl)>=0
+        ? paraRefMap(pl,current.getFullYear(),qOf(current)) : null ]));
     if(my!==token) return;
-    const bib=got[0], bib2=got[1];
+    const bibs={}; want.forEach(function(v,i){ bibs[v]=got[i]; });
+    const refs2=got[want.length];
     for(const t of tasks){ const el=document.getElementById(t[0]); if(!el) continue;
+      const bib=bibs[t[4]];
       if(t[2]){
-        const el2=document.getElementById(t[2]);
-        const p=versePair(bib&&bib.books,bib2&&bib2.books,t[1]);
-        el.innerHTML=verLabel(BIBLE[lang])+(p[0]||'<span class="vmiss">—</span>');
-        if(el2) el2.innerHTML=verLabel(par)+(p[1]||'<span class="vmiss">—</span>');
+        const el2=document.getElementById(t[2]), bib2=bibs[par];
+        const p=versePair(bib&&bib.books,bib2&&bib2.books,t[1],versesLines);
+        el.innerHTML=p[0]||'<span class="vmiss">—</span>';
+        if(el2) el2.innerHTML=p[1]||'<span class="vmiss">—</span>';
+        const hd=t[3]&&document.getElementById(t[3]), r2=refs2&&refs2[t[1]];
+        if(hd&&r2) hd.textContent=verShort(par)+" · "+r2;
         continue;
       }
       const vh=verseHtml(bib&&bib.books,t[1],versesLines); el.innerHTML=vh||'<span class="vmiss">—</span>'; }
@@ -1274,7 +1537,7 @@ async function buildCal(){
   let h='<div class="calhead"><span class="calnav" data-m="-1">&lsaquo;</span><b>'
       + esc(new Intl.DateTimeFormat(LOCALE[lang],{month:"long",year:"numeric"}).format(first))
       + '</b><span class="calnav" data-m="1">&rsaquo;</span></div>'
-      + '<div class="calrow head"><div class="days">'+dayNames.map(n=>'<div class="d">'+n+'</div>').join("")+'</div><div class="les"></div></div>';
+      + '<div class="calrow head"><div class="dcells">'+dayNames.map(n=>'<div class="d">'+n+'</div>').join("")+'</div><div class="les"></div></div>';
 
   for(let w=0;w<6;w++){
     const sat=new Date(cur.getTime()); sat.setDate(cur.getDate()+6);
@@ -1288,7 +1551,7 @@ async function buildCal(){
       days+='<div class="d'+(d.getMonth()!==m?" out":"")+(k===tKey?" today":"")+'" data-d="'+k+'">'+d.getDate()+'</div>';
     }
     h+='<div class="calrow'+(les?" pick":"")+(inWeek&&les?" on":"")+'"'+(les?' data-d="'+les.date+'"':'')+'>'
-      +'<div class="days">'+days+'</div><div class="les">'
+      +'<div class="dcells">'+days+'</div><div class="les">'
       +(les?'<b>'+esc(strip(les.header||""))+'</b><span>'+esc(strip(les.title||""))+'</span>':'')
       +'</div></div>';
     cur.setDate(cur.getDate()+7);
@@ -1314,53 +1577,202 @@ const tog=document.getElementById("tog"), vlines=document.getElementById("vlines
 /* the icon shows the layout you are in: solid block of text, or a numbered list */
 const ICON_FLOW='<svg width="15" height="12" viewBox="0 0 15 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1 1.6h13M1 6h13M1 10.4h8.5"/></svg>';
 const ICON_LIST='<svg width="15" height="12" viewBox="0 0 15 12" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><circle cx="1.5" cy="1.6" r=".9" fill="currentColor" stroke="none"/><path d="M5 1.6h9"/><circle cx="1.5" cy="6" r=".9" fill="currentColor" stroke="none"/><path d="M5 6h9"/><circle cx="1.5" cy="10.4" r=".9" fill="currentColor" stroke="none"/><path d="M5 10.4h6"/></svg>';
+/* Running text and one verse per line are two answers to one question, so the
+   two buttons are exclusive: exactly one of them is lit while the Bible text is
+   shown, and pressing the lit one puts the text away altogether. The parallel
+   button asks a different question and stands apart — it may be lit with either
+   of them, and both shapes work in two columns. */
+/* The icons are put in once and never touched again. Rewritten on every repaint
+   they destroyed the very node that had just been clicked, and the handler that
+   closes the settings when you press outside them saw a target no longer in the
+   page and closed the sheet under the hand — one press of a layout button and
+   the settings were gone. */
+tog.innerHTML=ICON_FLOW; vlines.innerHTML=ICON_LIST;
 function paintVerseBtns(){
-  tog.classList.toggle("active",versesOn);
+  tog.classList.toggle("active",versesOn&&!versesLines);
   vlines.classList.toggle("active",versesOn&&versesLines);
-  vlines.innerHTML=versesLines?ICON_LIST:ICON_FLOW;
-  vlines.title=versesLines?"One verse per line — click for running text":"Running text — click for one verse per line";
+  tog.title=UI.flow[lang]; vlines.title=UI.perline[lang];
 }
-paintVerseBtns();
-tog.onclick=function(){ versesOn=!versesOn; localStorage.setItem("sbl.verses",versesOn?"1":"0"); paintVerseBtns(); render(); };
-/* pressing the layout button with the verses off turns them on, set one per
-   line — which is what the icon is showing */
-vlines.onclick=function(){
-  if(!versesOn){ versesOn=true; versesLines=true; localStorage.setItem("sbl.verses","1"); }
-  else versesLines=!versesLines;
+/* One press picks a layout and shows the text in it; pressing the layout that
+   is already lit puts the text away. The columns are not touched either way —
+   they take both shapes. */
+function mkVerseLayout(lines){
+  if(versesOn&&versesLines===lines) versesOn=false;      /* the lit one put out */
+  else{ versesOn=true; versesLines=lines; }
+  localStorage.setItem("sbl.verses",versesOn?"1":"0");
   localStorage.setItem("sbl.verselines",versesLines?"1":"0");
-  paintVerseBtns(); render();
-};
+  paintVerseBtns(); paintPara(); render();
+}
+tog.onclick=function(){ mkVerseLayout(false); };
+vlines.onclick=function(){ mkVerseLayout(true); };
 /* Parallel reading — the switch and the list of second translations. The list
    never offers the edition the lesson is already set in, and it is rebuilt on
    every language change, because what counts as "the other one" changes with
    it. */
-const paraSw=document.getElementById("para-sw"), paraSel=document.getElementById("para-sel");
+const paraTog=document.getElementById("paratog"), paraSel=document.getElementById("para-sel");
 function paraDefault(){ return BIBLE[lang]==="en-kjv"?"de-lut":"en-kjv"; }
 function paintPara(){
   const fits=paraFits();
-  /* the switch keeps its setting while it is away — turning the tablet back
-     brings the parallel back exactly as it was left */
-  document.getElementById("para-sw-row").hidden=!fits;
-  paraSw.classList.toggle("on",paraOn);
-  document.getElementById("para-row").hidden=!paraOn||!fits;
+  /* the three buttons in that row all answer one question — how the Bible text
+     is shown — so the second translation stands with them instead of taking a
+     row of its own. It keeps its setting while it is away: narrowing the window
+     hides the button, widening it again brings the columns back as they were. */
+  /* Two whole lessons already occupy the second column, so the button is not
+     shown at all there — a control that cannot act must not sit lit. Its
+     setting is kept: leaving the two-language view brings it back as it was. */
+  paraTog.hidden=!fits||dualOn();
+  /* with no Bible text on the sheet there is nothing to set beside anything, so
+     the button is unlit — its setting is kept, it simply has nothing to do */
+  paraTog.classList.toggle("active",paraOn&&fits&&versesOn&&!dualOn());
+  /* The list is never away: it names the edition for both shapes at once — the
+     column when the column is on, and the verse held under a finger when it is
+     not. Hiding it with the columns would leave the hold with no way to say
+     which translation it should bring. It only changes how it stands: pressed
+     to the button while the columns are on, on its own line with its own label
+     the rest of the time. */
+  const prow=document.getElementById("para-row");
+  prow.hidden=false;
+  prow.classList.toggle("solo",!(fits&&paraOn&&!dualOn()));
   if(paraVer===BIBLE[lang]||!PARA.some(p=>p[1]===paraVer)){
     paraVer=paraDefault(); localStorage.setItem("sbl.paraver",paraVer); }
   paraSel.innerHTML=PARA.filter(p=>p[1]!==BIBLE[lang])
     .map(p=>'<option value="'+p[1]+'"'+(p[1]===paraVer?' selected':'')+'>'+esc(p[0]+" · "+p[2])+'</option>').join("");
 }
-paraSw.onclick=function(){
+paraTog.onclick=function(){
   paraOn=!paraOn;
   /* a second Bible text with no first one makes no sense — the same courtesy
      the layout button does above */
-  if(paraOn&&!versesOn){ versesOn=true; localStorage.setItem("sbl.verses","1"); paintVerseBtns(); }
+  if(paraOn&&!versesOn){ versesOn=true; localStorage.setItem("sbl.verses","1"); }
   localStorage.setItem("sbl.para",paraOn?"1":"0");
-  paintPara(); render();
+  /* the columns and the layout are separate questions, but both buttons must
+     show the truth after either of them moves */
+  paintPara(); paintVerseBtns(); render();
 };
-paraSel.onchange=function(){ paraVer=paraSel.value; localStorage.setItem("sbl.paraver",paraVer); render(); };
+/* ——— the lesson twice ——— */
+const dualSw=document.getElementById("dual-sw"), dualSeg=document.getElementById("dualseg");
+function paintDual(){
+  const fits=dualFits();
+  document.getElementById("dual-row").hidden=!fits;
+  dualSw.classList.toggle("on",dualOn_&&fits);
+  document.getElementById("dual-lang-row").hidden=!fits||!dualOn_;
+  const other=dualOther();
+  if(dualLang!==other){ dualLang=other; localStorage.setItem("sbl.duallang",dualLang); }
+  /* the language the lesson is already in is not on offer: a sheet cannot stand
+     beside itself */
+  dualSeg.innerHTML=LANGS.filter(function(l){ return l!==lang; })
+    .map(function(l){ return '<div class="o'+(l===dualLang?" active":"")+'" data-l="'+l+'">'+l.toUpperCase()+'</div>'; }).join("");
+  dualSeg.querySelectorAll(".o").forEach(function(o){ o.onclick=function(){
+    if(o.dataset.l===dualLang) return;
+    dualLang=o.dataset.l; localStorage.setItem("sbl.duallang",dualLang);
+    paintDual(); render(); }; });
+}
+dualSw.onclick=function(){
+  dualOn_=!dualOn_; localStorage.setItem("sbl.dual",dualOn_?"1":"0");
+  /* two lessons and a second edition inside each of them would be four columns
+     of nothing legible — the wider setting wins */
+  if(dualOn_&&paraOn){ paraOn=false; localStorage.setItem("sbl.para","0"); }
+  paintDual(); paintPara(); paintVerseBtns(); render();
+};
+DUAL_MQ.addEventListener("change",function(){ paintDual(); paintPara(); render(); });
+
+paraSel.onchange=function(){
+  paraVer=paraSel.value; localStorage.setItem("sbl.paraver",paraVer);
+  /* picking a second Bible text with no first one on screen leaves the reader
+     with a setting and nothing to hold — the same courtesy the switch does */
+  let redraw=!!paraPick();
+  if(!versesOn){ versesOn=true; localStorage.setItem("sbl.verses","1"); paintVerseBtns(); redraw=true; }
+
+  /* otherwise only the column has to be set again: a held verse is fetched at
+     the moment it is held, so a phone is not made to redraw the lesson */
+  if(redraw) render();
+};
 /* Turning the tablet is the one gesture that adds or takes away the room for a
    second column, so it is the one gesture that has to redraw the sheet. Only
    when the parallel is actually on — otherwise a rotation costs nothing. */
 PARA_MQ.addEventListener("change",function(){ paintPara(); if(paraOn) render(); });
+
+/* ——— the second translation under a held verse ———
+   Where the pair has no room the other edition is still one gesture away: press
+   a verse and hold, and it comes out under it in the translation picked above;
+   let go and it folds. Two things it never argues with — a tool in hand marks
+   the verse instead (that is what taking a tool means), and where the parallel
+   column is actually on screen the card stays down, because the answer is
+   already standing beside the verse. */
+const vpeek=document.getElementById("vpeek"), pkHintEl=document.getElementById("pkhint");
+let peekTok=0,peekT=0;
+function peekRect(el){ return el.getClientRects()[0]||el.getBoundingClientRect(); }
+function peekPlace(el){
+  const r=peekRect(el),w=vpeek.offsetWidth,h=vpeek.offsetHeight;
+  /* placed in what is on screen, with no scroll position added: that addition
+     is what threw the marker bubble a browser bar's worth off on iOS */
+  const x=Math.max(10,Math.min(r.left+r.width/2-w/2,document.documentElement.clientWidth-w-10));
+  let y=r.bottom+8;
+  if(y+h+10>window.innerHeight) y=Math.max(10,r.top-h-8);
+  vpeek.style.left=Math.round(x)+"px"; vpeek.style.top=Math.round(y)+"px";
+}
+function peekClose(){
+  clearTimeout(peekT); peekTok++;
+  if(!vpeek.classList.contains("on")) return;
+  vpeek.classList.remove("in");
+  const mine=peekTok;
+  setTimeout(function(){ if(mine===peekTok) vpeek.classList.remove("on"); },220);
+}
+async function peekOpen(el){
+  const a=String(el.dataset.vr||"").split("."),ver=paraVer;
+  if(a.length!==3||!ver) return;
+  const my=++peekTok,n=+a[2];
+  /* the card stands up at once, named and empty: the first hold of a session
+     may have a whole edition still to fetch */
+  vpeek.innerHTML='<div class="pv">'+esc((ver.split("-")[1]||ver).toUpperCase())+'</div>'
+    +'<div class="pt"><span class="pn">'+n+'</span><span class="pb">&hellip;</span></div>';
+  vpeek.classList.add("on"); peekPlace(el);
+  requestAnimationFrame(function(){ if(my===peekTok) vpeek.classList.add("in"); });
+  const bib=await loadBible(ver);
+  if(my!==peekTok) return;              /* let go while the edition was still in the air */
+  const ch=bib&&bib.books&&bib.books[a[0]],vs=ch&&ch[+a[1]-1];
+  const t=vs&&vs[n-1]!=null?esc(strip(String(vs[n-1])).trim()):"";
+  vpeek.querySelector(".pb").innerHTML=t||'<span class="vmiss">&mdash;</span>';
+  peekPlace(el);                        /* the verse arrived and the card grew */
+}
+/* Nobody discovers a held verse by looking at one. A short tap on a verse is
+   someone who touched it without knowing — the chip tells them, three times
+   and never again. */
+function peekHint(el){
+  const left=mkGet("pkhint",3); if(left<=0) return;
+  pkHintEl.textContent="☞ "+UI.peek[lang];
+  pkHintEl.classList.add("on");
+  const r=peekRect(el),w=pkHintEl.offsetWidth,h=pkHintEl.offsetHeight;
+  pkHintEl.style.left=Math.round(Math.max(10,Math.min(r.left+window.scrollX+r.width/2-w/2,
+    document.documentElement.clientWidth-w-10)))+"px";
+  pkHintEl.style.top=Math.round(r.bottom+h+16>window.innerHeight
+    ? r.top+window.scrollY-h-10 : r.bottom+window.scrollY+10)+"px";
+  mkSet("pkhint",left-1);
+  clearTimeout(peekHint.t);
+  peekHint.t=setTimeout(function(){ pkHintEl.classList.remove("on"); },4200);
+}
+document.getElementById("sheets").addEventListener("pointerdown",function(e){
+  if(mkMode) return;                    /* something in hand: it marks, it does not ask */
+  if(paraPick()) return;                /* the column beside the verse already answers */
+  const el=e.target.closest&&e.target.closest("[data-vr]"); if(!el) return;
+  const x0=e.clientX,y0=e.clientY,t0=Date.now(); let held=false;
+  clearTimeout(peekT);
+  peekT=setTimeout(function(){ held=true; peekOpen(el); },340);
+  const off=function(){
+    document.removeEventListener("pointermove",move);
+    document.removeEventListener("pointerup",off);
+    document.removeEventListener("pointercancel",off);
+    window.removeEventListener("scroll",off);
+    if(!held&&Date.now()-t0<340) peekHint(el);
+    peekClose();
+  };
+  /* a pointer that travels is turning the page or dragging a selection, and
+     neither of those asked for a translation */
+  const move=function(ev){ if(Math.abs(ev.clientX-x0)>8||Math.abs(ev.clientY-y0)>8) off(); };
+  document.addEventListener("pointermove",move);
+  document.addEventListener("pointerup",off);
+  document.addEventListener("pointercancel",off);
+  window.addEventListener("scroll",off,{passive:true});
+});
 /* PDF: pick the week or the whole quarter — the choice also switches what the
    page shows, so you can check it before saving */
 
@@ -1376,22 +1788,34 @@ const UI={
   pdf:     {de:"Als PDF sichern",en:"Save as PDF",ru:"Сохранить в PDF"},
   show:    {de:"Bibeltext anzeigen",en:"Show the Bible text",ru:"Показывать текст Библии"},
   perline: {de:"Ein Vers pro Zeile",en:"One verse per line",ru:"Каждый стих строкой"},
+  flow:    {de:"Fließtext",en:"Running text",ru:"Сплошным текстом"},
   para:    {de:"Parallel",en:"Parallel",ru:"Параллельно"},
-  parahint:{de:"Zweite Übersetzung daneben",en:"A second translation alongside",ru:"Второй перевод рядом"}
+  parahint:{de:"Zweite Übersetzung daneben",en:"A second translation alongside",ru:"Второй перевод рядом"},
+  second:  {de:"Zweite Übersetzung",en:"Second translation",ru:"Второй перевод"},
+  secondhint:{de:"Kommt unter dem gehaltenen Vers heraus",en:"Comes out under a held verse",ru:"Выходит под удержанным стихом"},
+  peek:    {de:"Vers halten — zweite Übersetzung",en:"Hold a verse — the second translation",ru:"Удержи стих — второй перевод"},
+  dual:    {de:"Zwei Sprachen",en:"Two languages",ru:"Два языка"},
+  dualhint:{de:"Die ganze Lektion zweimal, nebeneinander",en:"The whole lesson twice, side by side",ru:"Весь урок дважды, рядом"},
+  duallang:{de:"Zweite Sprache",en:"Second language",ru:"Второй язык"}
 };
 function paintUI(){
   document.getElementById("lab-lang").textContent=UI.lang[lang];
   document.getElementById("lab-verses").textContent=UI.verses[lang];
-  document.getElementById("lab-para").textContent=UI.para[lang];
-  document.getElementById("lab-para").title=UI.parahint[lang];
-  paintPara();       /* "the other translation" is not the same one in every language */
+  document.getElementById("paratog").title=UI.para[lang]+" — "+UI.parahint[lang];
+  document.getElementById("lab-second").textContent=UI.second[lang];
+  document.getElementById("lab-second").title=UI.secondhint[lang];
+  /* "the other translation" is not the same one in every language, and the row
+     of layouts speaks the language of the lesson too */
+  paintPara(); paintVerseBtns();
+  document.getElementById("lab-dual").textContent=UI.dual[lang];
+  document.getElementById("lab-dual").title=UI.dualhint[lang];
+  document.getElementById("lab-duallang").textContent=UI.duallang[lang];
+  paintDual();       /* "the other language" changes with the language of the lesson */
   document.getElementById("lab-size").textContent=UI.size[lang];
   document.getElementById("lab-colour").textContent=UI.colour[lang];
   document.getElementById("lab-pdf").textContent=UI.pdf[lang];
   document.getElementById("gear").title=UI.settings[lang];
   document.getElementById("wk").title=UI.lesson[lang];
-  document.getElementById("tog").title=UI.show[lang];
-  document.getElementById("vlines").title=UI.perline[lang];
   const w=PDFWORD[lang]||PDFWORD.en;
   document.getElementById("pdf-week").textContent=w[0];
   document.getElementById("pdf-quarter").textContent=w[1];
@@ -1405,24 +1829,66 @@ function paintUI(){
 }
 
 /* what to put back once the print dialog is gone */
-let backScope=null, backTitle=null;
+let backScope=null, backTitle=null, backDual=null, printQueue=null, printGuard=0;
+/* Escape while a print dialog is up means "no more of this": the second
+   language is taken off the queue instead of arriving unasked. */
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") printQueue=null; },true);
 window.addEventListener("afterprint",function(){
+  clearTimeout(printGuard);
   if(backTitle!=null){ document.title=backTitle; backTitle=null; }
+  /* a queued second language: the same booklet again, in the other tongue */
+  if(printQueue){ const q=printQueue; printQueue=null; setTimeout(function(){ printSide(q); },60); return; }
+  if(backDual!=null){ const d=backDual; backDual=null; if(d!==dualOn_){ dualOn_=d; paintDual(); } }
   /* saving a PDF is not a way of navigating: whoever was reading one lesson
      gets that lesson back, not the thirteen of the quarter */
-  if(backScope!=null){ const s=backScope; backScope=null; if(s!==scope){ scope=s; render(); } }
+  if(backScope!=null||backDual===null){ const s=backScope; backScope=null;
+    if(s!=null&&s!==scope) scope=s;
+    render(); }
 });
+/* One side, printed as the ordinary single-language booklet it is. A browser
+   gives one document per `print()`, so two languages are two prints one after
+   the other — which is exactly what was asked for: each translation arrives as
+   its own file, as though it had been saved on its own. */
+async function printSide(lg){
+  const back=lang;
+  lang=lg;
+  document.documentElement.lang=lang;
+  try{ await render(); }catch(e){}
+  try{ await document.fonts.ready; }catch(e){}
+  await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
+  /* the browser names the file after the title — so it says which lesson it is */
+  backTitle=document.title; document.title=docName;
+  lang=back;                      /* the setting was never really changed */
+  /* Some browsers never send `afterprint`. Without a way back the page would be
+     left in its printing state — one language, the scope of the file — until a
+     reload. This puts it back if nothing has been heard for a while. */
+  clearTimeout(printGuard);
+  printGuard=setTimeout(function(){ window.dispatchEvent(new Event("afterprint")); },20000);
+  window.print();
+}
 async function savePdf(which){
   setpop.hidden=true; document.getElementById("gear").classList.remove("open");
   const b=document.getElementById("pdf-"+which),o=b.textContent; b.textContent="…";
   backScope=scope; scope=which;
+  /* the setting itself, not the setting plus the width of the window: each side
+     prints as an ordinary one-column booklet, and a narrow screen is no reason
+     to drop a language out of the file without saying so */
+  const dual=dualOn_&&dualOther();
+  if(dual){
+    /* the booklet prints as a booklet: one language to a sheet. The two columns
+       are a way of reading, not a way of printing. */
+    backDual=dualOn_; dualOn_=false;
+    printQueue=dualOther();
+    b.textContent=o;
+    await printSide(lang);
+    return;
+  }
   try{ await render(); }catch(e){}
   b.textContent=o;
   /* print only once the type is really on the page: the fallback faces carry
      other metrics and would break the lesson onto different sheets */
   try{ await document.fonts.ready; }catch(e){}
   await new Promise(function(r){ requestAnimationFrame(function(){ requestAnimationFrame(r); }); });
-  /* the browser names the file after the title — so it says which lesson it is */
   backTitle=document.title; document.title=docName;
   window.print();
 }
@@ -1506,6 +1972,7 @@ const MKW={
   wave:{de:"Welle",en:"Wave",ru:"Волна"},
   fmtb:{de:"Fett",en:"Bold",ru:"Жирный"},
   fmti:{de:"Kursiv",en:"Italic",ru:"Курсив"},
+  fmtu:{de:"Unterstrichen",en:"Underline",ru:"Подчёркнутый"},
   fmtq:{de:"Zitat",en:"Quotation",ru:"Цитата"}
 };
 function T(k){ const w=MKW[k]||{}; return w[lang]||w.en||""; }
@@ -1915,7 +2382,7 @@ function mkInsert(range,text,quiet,html){
   s.addEventListener("keydown",function(e){
     if(!(e.metaKey||e.ctrlKey)) return;
     const k=e.key.toLowerCase();
-    if(k==="b"||k==="i"){ e.preventDefault(); mkCmd(k==="b"?"bold":"italic"); mkStore(); }
+    if(k==="b"||k==="i"||k==="u"){ e.preventDefault(); mkCmd(k==="b"?"bold":k==="u"?"underline":"italic"); mkStore(); }
   });
   s.addEventListener("blur",function(){ if(!mkInsText(s).trim()) s.remove(); mkStore(); });
   if(!quiet){
@@ -1934,7 +2401,7 @@ function mkNoteBody(d){ const c=d.cloneNode(true);
 /* what may live inside the reader's own text: bold, italic, a quotation, a line
    break. Everything else — a pasted colour, a foreign class — is unwrapped, so
    what is stored is always the same handful of tags */
-const MK_TAGS={B:1,STRONG:1,I:1,EM:1,BLOCKQUOTE:1,DIV:1,BR:1};
+const MK_TAGS={B:1,STRONG:1,I:1,EM:1,U:1,BLOCKQUOTE:1,DIV:1,BR:1};
 function mkAs(el,tag){
   const n=document.createElement(tag);
   while(el.firstChild) n.appendChild(el.firstChild);
@@ -1952,6 +2419,7 @@ function mkClean(html){
         const st=c.getAttribute&&c.getAttribute("style")||"";
         if(/font-weight:\s*(bold|[6-9]00)/i.test(st)) mkAs(c,"b");
         else if(/font-style:\s*italic/i.test(st)) mkAs(c,"i");
+        else if(/text-decoration[^:]*:[^;]*underline/i.test(st)) mkAs(c,"u");
         else mkUnwrap(c);
       }
       else [].slice.call(c.attributes).forEach(function(a){ c.removeAttribute(a.name); });
@@ -2006,33 +2474,64 @@ function mkQuote(d){
   }
   mkCaretEnd(el); mkStore(); mkFmtPaint(d);
 }
-function mkFmtPaint(d){
-  const bar=d.querySelector(".fmt"); if(!bar) return;
-  const n=mkNoteLine(d);
-  let b=false,i=false;
-  try{ b=document.queryCommandState("bold"); i=document.queryCommandState("italic"); }catch(e){}
-  bar.querySelector(".b").classList.toggle("on",b);
-  bar.querySelector(".i").classList.toggle("on",i);
-  bar.querySelector(".q").classList.toggle("on",!!(n&&n.nodeType===1&&n.tagName==="BLOCKQUOTE"));
+/* ——— the bar of settings for the reader's own text ———
+   One bar for the whole page, not one inside every note. It used to sit at the
+   foot of the note it belonged to, and two things were wrong with that: a note
+   two paragraphs long put its own buttons below the fold, so the block had to
+   be scrolled to reach them, and the bar coming and going changed the height of
+   the note under the hand. Standing free it costs the note no height at all and
+   is in the same place whatever is being written. */
+const mkFmt=document.getElementById("fmtbar");
+let mkFmtFor=null;                    /* the note the bar is working on */
+mkFmt.innerHTML='<span class="b">B</span><span class="i">I</span><span class="u">U</span>'+
+  '<span class="q"><svg width="14" height="13" viewBox="0 0 13 12" fill="none" stroke="currentColor" '+
+  'stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5v9"/>'+
+  '<path d="M5 3h6.5M5 6h6.5M5 9h3.8" opacity=".7"/></svg></span>';
+function mkFmtTitles(){
+  mkFmt.querySelector(".b").title=T("fmtb"); mkFmt.querySelector(".i").title=T("fmti");
+  mkFmt.querySelector(".u").title=T("fmtu"); mkFmt.querySelector(".q").title=T("fmtq");
 }
-function mkFmtBar(d){
-  const bar=document.createElement("div");
-  bar.className="fmt"; bar.contentEditable="false";
-  bar.innerHTML='<span class="b" title="'+esc(T("fmtb"))+'">B</span>'+
-                '<span class="i" title="'+esc(T("fmti"))+'">I</span>'+
-                '<span class="q" title="'+esc(T("fmtq"))+'">'+
-                '<svg width="13" height="12" viewBox="0 0 13 12" fill="none" stroke="currentColor" '+
-                'stroke-width="1.5" stroke-linecap="round"><path d="M1.5 1.5v9"/>'+
-                '<path d="M5 3h6.5M5 6h6.5M5 9h3.8" opacity=".7"/></svg></span>';
-  bar.addEventListener("mousedown",function(e){ e.preventDefault(); });
-  bar.addEventListener("click",function(e){
-    const t=e.target.closest("span"); if(!t) return;
-    e.stopPropagation();
-    if(document.activeElement!==d) d.focus();
-    if(t.classList.contains("q")) mkQuote(d);
-    else{ mkCmd(t.classList.contains("b")?"bold":"italic"); mkStore(); mkFmtPaint(d); }
-  });
-  return bar;
+function mkFmtPaint(d){
+  d=d||mkFmtFor; if(!d) return;
+  const n=mkNoteLine(d);
+  let b=false,i=false,u=false;
+  try{ b=document.queryCommandState("bold"); i=document.queryCommandState("italic");
+       u=document.queryCommandState("underline"); }catch(e){}
+  mkFmt.querySelector(".b").classList.toggle("on",b);
+  mkFmt.querySelector(".i").classList.toggle("on",i);
+  mkFmt.querySelector(".u").classList.toggle("on",u);
+  mkFmt.querySelector(".q").classList.toggle("on",!!(n&&n.nodeType===1&&n.tagName==="BLOCKQUOTE"));
+}
+/* a press on the bar must not take the caret out of the text it is about to set */
+mkFmt.addEventListener("mousedown",function(e){ e.preventDefault(); });
+mkFmt.addEventListener("click",function(e){
+  const t=e.target.closest("span"), d=mkFmtFor; if(!t||!d) return;
+  e.stopPropagation();
+  if(document.activeElement!==d) d.focus();
+  if(t.classList.contains("q")) mkQuote(d);
+  else{ mkCmd(t.classList.contains("b")?"bold":t.classList.contains("u")?"underline":"italic");
+        mkStore(); mkFmtPaint(d); }
+});
+/* On a phone the keyboard covers the foot of the window, and a bar pinned to
+   the bottom would go behind it. `visualViewport` is what the keyboard actually
+   moves, so the bar is placed against that and stays in sight. */
+function mkFmtPlace(){
+  if(mkFmt.hidden) return;
+  const v=window.visualViewport;
+  const bottom=v?Math.max(8,window.innerHeight-(v.offsetTop+v.height)+12):12;
+  mkFmt.style.bottom="calc("+Math.round(bottom)+"px + env(safe-area-inset-bottom))";
+}
+function mkFmtShow(d){
+  mkFmtFor=d; mkFmtTitles(); mkFmt.hidden=false; mkFmtPlace(); mkFmtPaint(d);
+  requestAnimationFrame(function(){ mkFmt.classList.add("on"); });
+}
+function mkFmtHide(){
+  mkFmtFor=null; mkFmt.classList.remove("on");
+  setTimeout(function(){ if(!mkFmtFor) mkFmt.hidden=true; },200);
+}
+if(window.visualViewport){
+  window.visualViewport.addEventListener("resize",mkFmtPlace);
+  window.visualViewport.addEventListener("scroll",mkFmtPlace);
 }
 function mkNote(afterEl,html,quiet,colour){
   const d=document.createElement("div");
@@ -2040,15 +2539,12 @@ function mkNote(afterEl,html,quiet,colour){
   d.dataset.ph=T("ph");
   mkNoteTint(d,colour);
   d.innerHTML=mkClean(html||"");
-  /* a note with nothing but its label and its cross has nowhere to put the
-     caret — so an empty note is given one empty line to write on */
+  /* a note with nothing but its cross has nowhere to put the caret — so an
+     empty note is given one empty line to write on */
   if(!d.firstChild){ const ln=document.createElement("div"); ln.appendChild(document.createElement("br")); d.appendChild(ln); }
-  const foot=document.createElement("div");
-  foot.className="foot"; foot.contentEditable="false";
-  const lab=document.createElement("div");
-  lab.className="lab"; lab.textContent=T("note")+" · "+mkStamp();
-  foot.appendChild(lab); foot.appendChild(mkFmtBar(d));
-  d.appendChild(foot);
+  /* no signature, no date and no bar of its own under the note: the colour, the
+     other face and the line at the foot of the printed sheet already say whose
+     these words are, and the settings for them stand free of the note (`mkFmt`) */
   const del=document.createElement("div"); del.className="del"; del.contentEditable="false"; del.textContent="×";
   del.onclick=function(e){ e.stopPropagation(); d.remove(); mkStore(); };
   d.appendChild(del);
@@ -2063,7 +2559,7 @@ function mkNote(afterEl,html,quiet,colour){
   d.addEventListener("keydown",function(e){
     if(!(e.metaKey||e.ctrlKey)) return;
     const k=e.key.toLowerCase();
-    if(k==="b"||k==="i"){ e.preventDefault(); mkCmd(k==="b"?"bold":"italic"); mkStore(); mkFmtPaint(d); }
+    if(k==="b"||k==="i"||k==="u"){ e.preventDefault(); mkCmd(k==="b"?"bold":k==="u"?"underline":"italic"); mkStore(); mkFmtPaint(d); }
     else if(e.shiftKey&&e.code==="Digit9"){ e.preventDefault(); mkQuote(d); }
   });
   d.addEventListener("input",function(){
@@ -2185,6 +2681,10 @@ function mkSetRail(v){
   if(!v){ mkHintLeft=0; mkSet("hint",0); mkHintHide(); }   /* он уже знает, где они */
   if(!v){ mkMode=null; mkBubClose(); }
   mkRail.style.display=v?"":"none";
+  document.body.classList.toggle("railon",v);
+  /* whoever needs to leave room for the rail needs its width, and only the rail
+     knows it — the buttons are wider on a finger device */
+  if(v) document.documentElement.style.setProperty("--railw",(mkRail.offsetWidth+10)+"px");
   document.getElementById("mk-rail").classList.toggle("on",v);
   mkPaintMode();
   mkToast(T(v?"railshown":"railhid"));
@@ -2575,11 +3075,14 @@ let mkAnchors=[];
    leaves the reader where he was. */
 let mkLastLes=null, mkKeepY=0;
 function mkOpenToday(){
-  const pg=document.querySelector(".page[data-les]");
+  const root=mkDaysRoot();
+  const pg=root.querySelector(".page[data-les]");
   const id=scope+"/"+(pg?pg.dataset.les:"");
   const same=mkLastLes===id;
   mkLastLes=id;
-  const sec=!same&&scope==="week"&&pg?document.querySelector('.sec[data-d="'+ymd(new Date())+'"]'):null;
+  /* `mkGoTo` takes both columns there, so today opens on today in each of them
+     instead of leaving the second one standing at the title */
+  const sec=!same&&scope==="week"&&pg?root.querySelector('.sec[data-d="'+ymd(new Date())+'"]'):null;
   /* wait for the sheet to finish laying itself out: a place measured while the
      text is still flowing puts the reader — and the mark — on the wrong day */
   mkAfterLayout(function(){
@@ -2604,18 +3107,26 @@ function mkAfterLayout(fn){
   const tm=setTimeout(fire,220);
   requestAnimationFrame(step);
 }
+/* The sheet is not always what scrolls. With the lesson in two languages each
+   column is its own scroll box, and the strip of days belongs to the left one —
+   it lists that column's seven days and never fourteen — but a day pressed on
+   it moves BOTH columns, because standing on the same day in both is the whole
+   reason for having two. */
+function mkPanes(){ return [].slice.call(document.querySelectorAll("#sheets.dual .pane")); }
+function mkDaysRoot(){ return mkPanes()[0]||document; }
 function mkDaysBuild(){
   mkAnchors=[];
   let html="";
+  const root=mkDaysRoot();
   if(scope==="quarter"){
-    document.querySelectorAll(".page[data-les]").forEach(function(pg){
+    root.querySelectorAll(".page[data-les]").forEach(function(pg){
       const h=pg.querySelector(".lesson"); if(!h) return;
       const n=(strip(h.textContent).match(/\d+/)||[""])[0];
       mkAnchors.push(pg);
       html+='<div class="dchip">'+esc(n)+'</div>';
     });
   } else {
-    document.querySelectorAll(".sec[data-d]").forEach(function(sec){
+    root.querySelectorAll(".sec[data-d]").forEach(function(sec){
       const d=sec.querySelector(".day"); if(!d) return;
       const short=strip(d.textContent).trim().split(/[\s,.]+/)[0];
       mkAnchors.push(sec);
@@ -2626,6 +3137,27 @@ function mkDaysBuild(){
   mkDaysEl.classList.remove("ready");
   mkDaysMark();
 }
+/* ——— writing ———
+   While the reader is putting down his own words the panels get out of the way.
+   On a phone this is not politeness but necessity: the keyboard takes half the
+   screen, and the strip of days would otherwise sit on the very note being
+   written. The class is dropped a tick late on purpose — moving the caret from
+   a note to its own formatting button passes through a moment with nothing
+   focused, and the panels must not flash back in between. */
+function mkWriting(on,el){
+  document.body.classList.toggle("writing",on);
+  const note=on&&el&&el.closest?el.closest(".mynote"):null;
+  if(note) mkFmtShow(note); else mkFmtHide();
+  /* on a phone the drawer is held open by an inline transform, and no class in
+     the stylesheet can argue with that — so it is closed here by hand */
+  if(on&&matchMedia("(max-width:700px)").matches&&document.body.classList.contains("railout")) mkDrawer(false);
+}
+function mkInOwn(n){ return !!(n&&n.closest&&n.closest(".mynote,.myins")); }
+document.addEventListener("focusin",function(e){ if(mkInOwn(e.target)) mkWriting(true,e.target); });
+document.addEventListener("focusout",function(e){
+  if(!mkInOwn(e.target)) return;
+  setTimeout(function(){ if(!mkInOwn(document.activeElement)) mkWriting(false); },0);
+});
 function mkBarH(){
   const b=document.querySelector(".bar");
   const h=(b&&getComputedStyle(b).position==="sticky"?b.getBoundingClientRect().height:0)+10;
@@ -2705,6 +3237,22 @@ function mkAnimTo(el,after){
 }
 function mkGoTo(el,smooth){
   const band=el.classList&&el.classList.contains("sec")?el:el.querySelector(".sec");
+  const panes=mkPanes();
+  if(panes.length){
+    /* Two columns: the same day in each. No travelling animation here — that one
+       is written against `window.scrollY`, and in two columns the window is not
+       what moves. The day is found in each column by its date, which is the one
+       thing about a day that does not change with the language. */
+    const sel=el.dataset.d?'.sec[data-d="'+el.dataset.d+'"]'
+             :el.dataset.les?'.page[data-les="'+el.dataset.les+'"]':"";
+    const go=function(){
+      panes.forEach(function(p){ const t=sel?p.querySelector(sel):null; if(t) mkLand(t); });
+    };
+    go(); requestAnimationFrame(go);
+    setTimeout(function(){ go(); mkDaysMark(); },200);
+    mkFlash(band);
+    return;
+  }
   const land=function(){ mkBarH(); mkLand(el); };
   if(!smooth||matchMedia("(prefers-reduced-motion:reduce)").matches){
     land(); requestAnimationFrame(land);
@@ -2752,11 +3300,14 @@ function mkDaysMark(){
   mkDaysMove(chips[cur]);
 }
 let mkTick=false;
-window.addEventListener("resize",function(){ mkDaysMark(); });
-window.addEventListener("scroll",function(){
+function mkScrolled(){
   if(mkTick) return; mkTick=true;
   requestAnimationFrame(function(){ mkTick=false; if(!mkJumping) mkDaysMark(); });
-},{passive:true});
+}
+window.addEventListener("resize",function(){ mkDaysMark(); });
+window.addEventListener("scroll",mkScrolled,{passive:true});
+/* a column scrolls inside itself, and the window hears nothing of it */
+function mkPanesListen(){ mkPanes().forEach(function(p){ p.addEventListener("scroll",mkScrolled,{passive:true}); }); }
 
 /* ——— two ways in for someone who has never met the tools ———
    A swipe from the left edge pulls the rail out, the way a drawer opens on the
@@ -2809,6 +3360,9 @@ function mkDrawer(open){
   mkRail.style.transform=matchMedia("(max-width:700px)").matches
     ? (open?"translate(0,-50%)":"translate(calc(-100% - 14px),-50%)") : "";
   if(open&&!mkRailOn) mkSetRail(true);
+  /* the sheet's left gutter is the rail measured, not guessed — see the phone
+     block in the stylesheet */
+  if(open) document.documentElement.style.setProperty("--railw",(mkRail.offsetWidth+10)+"px");
 }
 matchMedia("(max-width:700px)").addEventListener("change",function(){
   mkDrawer(document.body.classList.contains("railout"));
@@ -2884,6 +3438,10 @@ document.addEventListener("keydown",function(e){ if(e.key==="Escape") mkKeysClos
 
 document.getElementById("mk-rail").onclick=function(){ mkSetRail(!mkRailOn); };
 mkRail.style.display=mkRailOn?"":"none";
+/* the same two things `mkSetRail` publishes, so the first paint of the page is
+   already the state the rest of the layout is written against */
+document.body.classList.toggle("railon",mkRailOn);
+if(mkRailOn) document.documentElement.style.setProperty("--railw",(mkRail.offsetWidth+10)+"px");
 mkPaintMode(); mkChipPaint();
 
 render();
