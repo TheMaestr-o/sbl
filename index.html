@@ -933,7 +933,6 @@ body.bare .days,body.writing .days{opacity:0;pointer-events:none;transform:trans
 <div class="days" id="days"></div>
 
 <div class="hintchip" id="mkhint"></div>
-<div class="hintchip" id="pkhint"></div>
 <div id="vpeek"></div>
 <div class="fmtbar" id="fmtbar" hidden></div>
 
@@ -1698,7 +1697,7 @@ PARA_MQ.addEventListener("change",function(){ paintPara(); if(paraOn) render(); 
    the verse instead (that is what taking a tool means), and where the parallel
    column is actually on screen the card stays down, because the answer is
    already standing beside the verse. */
-const vpeek=document.getElementById("vpeek"), pkHintEl=document.getElementById("pkhint");
+const vpeek=document.getElementById("vpeek");
 let peekTok=0,peekT=0;
 function peekRect(el){ return el.getClientRects()[0]||el.getBoundingClientRect(); }
 function peekPlace(el){
@@ -1734,22 +1733,6 @@ async function peekOpen(el){
   vpeek.querySelector(".pb").innerHTML=t||'<span class="vmiss">&mdash;</span>';
   peekPlace(el);                        /* the verse arrived and the card grew */
 }
-/* Nobody discovers a held verse by looking at one. A short tap on a verse is
-   someone who touched it without knowing — the chip tells them, three times
-   and never again. */
-function peekHint(el){
-  const left=mkGet("pkhint",3); if(left<=0) return;
-  pkHintEl.textContent="☞ "+UI.peek[lang];
-  pkHintEl.classList.add("on");
-  const r=peekRect(el),w=pkHintEl.offsetWidth,h=pkHintEl.offsetHeight;
-  pkHintEl.style.left=Math.round(Math.max(10,Math.min(r.left+window.scrollX+r.width/2-w/2,
-    document.documentElement.clientWidth-w-10)))+"px";
-  pkHintEl.style.top=Math.round(r.bottom+h+16>window.innerHeight
-    ? r.top+window.scrollY-h-10 : r.bottom+window.scrollY+10)+"px";
-  mkSet("pkhint",left-1);
-  clearTimeout(peekHint.t);
-  peekHint.t=setTimeout(function(){ pkHintEl.classList.remove("on"); },4200);
-}
 /* Once it is up it stays up. Letting go of the verse used to fold it, which
    meant reading a whole verse with a finger held still on the glass — and on a
    phone the finger was standing on the very text being compared. It closes
@@ -1770,7 +1753,7 @@ document.getElementById("sheets").addEventListener("pointerdown",function(e){
   if(mkMode) return;                    /* something in hand: it marks, it does not ask */
   if(paraPick()) return;                /* the column beside the verse already answers */
   const el=e.target.closest&&e.target.closest("[data-vr]"); if(!el) return;
-  const x0=e.clientX,y0=e.clientY,t0=Date.now(); let held=false;
+  const x0=e.clientX,y0=e.clientY; let held=false;
   clearTimeout(peekT);
   peekT=setTimeout(function(){ held=true; peekAt=Date.now(); peekOpen(el); },340);
   const off=function(){
@@ -1778,9 +1761,7 @@ document.getElementById("sheets").addEventListener("pointerdown",function(e){
     document.removeEventListener("pointerup",off);
     document.removeEventListener("pointercancel",off);
     /* the card was never opened — this was a tap, or a finger that travelled */
-    if(held) return;
-    if(Date.now()-t0<340) peekHint(el);
-    peekClose();
+    if(!held) peekClose();
   };
   /* a pointer that travels is turning the page or dragging a selection, and
      neither of those asked for a translation */
@@ -1809,7 +1790,6 @@ const UI={
   parahint:{de:"Zweite Übersetzung daneben",en:"A second translation alongside",ru:"Второй перевод рядом"},
   second:  {de:"Zweite Übersetzung",en:"Second translation",ru:"Второй перевод"},
   secondhint:{de:"Kommt unter dem gehaltenen Vers heraus",en:"Comes out under a held verse",ru:"Выходит под удержанным стихом"},
-  peek:    {de:"Vers halten — zweite Übersetzung",en:"Hold a verse — the second translation",ru:"Удержи стих — второй перевод"},
   dual:    {de:"Zwei Sprachen",en:"Two languages",ru:"Два языка"},
   dualhint:{de:"Die ganze Lektion zweimal, nebeneinander",en:"The whole lesson twice, side by side",ru:"Весь урок дважды, рядом"},
   duallang:{de:"Zweite Sprache",en:"Second language",ru:"Второй язык"}
