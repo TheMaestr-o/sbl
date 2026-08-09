@@ -291,6 +291,13 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
 .vtext.lines .vn{display:inline-block;min-width:13px;margin-right:4px;text-indent:0;vertical-align:.42em;
   font-weight:700;font-size:11px;color:var(--gray-dk)}   /* same raise as the inline number */
 .vmiss{color:#bbb}
+/* A passage still on its way holds its place and shows that it is coming,
+   instead of leaving a hole the reader reads as a page that failed. */
+.vtext:empty{min-height:1.5em;border-radius:4px;
+  background:linear-gradient(90deg,rgba(0,0,0,.04),rgba(0,0,0,.08),rgba(0,0,0,.04));
+  background-size:220% 100%;animation:vwait 1.5s ease-in-out infinite}
+@keyframes vwait{from{background-position:120% 0}to{background-position:-120% 0}}
+@media (prefers-reduced-motion:reduce){ .vtext:empty{animation:none} }
 
 /* Parallel reading — a second translation beside the first. The two columns
    are not two blocks of text set next to each other: both are laid into one
@@ -667,6 +674,16 @@ body.bare .days,body.writing .days{opacity:0;pointer-events:none;transform:trans
    of the phone layout — a second copy here only argued with it */
 @media (pointer:coarse){ .dchip,.days .dpill{width:36px;height:36px} .dchip{font-size:11.5px} }
 
+/* one thin line at the top edge for as long as anything is being fetched: the
+   only honest answer to "is it working or is it stuck" */
+#load{position:fixed;left:0;right:0;top:0;height:2px;z-index:75;overflow:hidden;
+  pointer-events:none;opacity:0;transition:opacity .25s}
+body.loading #load{opacity:1}
+#load i{display:block;width:38%;height:100%;border-radius:0 2px 2px 0;
+  background:var(--gray-dk);animation:loadrun 1.15s cubic-bezier(.5,0,.5,1) infinite}
+@keyframes loadrun{from{transform:translateX(-100%)}to{transform:translateX(365%)}}
+@media print{ #load{display:none} }
+
 /* the quiet invitation: shown a few times, never again after that */
 .hintchip{position:absolute;z-index:61;display:none;align-items:center;gap:6px;
   padding:7px 12px;border-radius:11px;cursor:pointer;
@@ -932,6 +949,7 @@ body.bare .days,body.writing .days{opacity:0;pointer-events:none;transform:trans
 
 <div class="days" id="days"></div>
 
+<div id="load"><i></i></div>
 <div class="hintchip" id="mkhint"></div>
 <div id="vpeek"></div>
 <div class="fmtbar" id="fmtbar" hidden></div>
@@ -1067,8 +1085,10 @@ function fmt(dstr,opts){try{return new Intl.DateTimeFormat(LOCALE[rlang],opts).f
 
 async function loadQuarter(l,y,q){
   const key=l+"-"+y+"-"+q; if(quarters[key]) return quarters[key];
+  busy(true);
   try{const r=await fetch("https://app.sdarm.org/sbl/data/"+l+"/"+l+"-"+y+"-"+q+".json");if(!r.ok)throw 0;return quarters[key]=await r.json();}
   catch(e){return quarters[key]=null;}
+  finally{ busy(false); }
 }
 async function findLesson(d,l){
   const t=ymd(d);
@@ -1083,8 +1103,23 @@ async function findLesson(d,l){
   return null;
 }
 
+/* ——— the page says when it is still waiting ———
+   A Bible edition is four to six megabytes, and the lesson is set long before
+   one arrives: the sheet looks finished, its verse boxes stand empty, and
+   nothing on screen says that anything is still on its way. That silence is
+   what reads as a freeze — and it is worst exactly where the wait is longest,
+   on the whole quarter and on a change of language, which needs a different
+   edition altogether. */
+let busyN=0;
+function busy(on){
+  busyN=Math.max(0,busyN+(on?1:-1));
+  document.body.classList.toggle("loading",busyN>0);
+}
 function loadBible(v){ if(bibles[v]) return bibles[v];
-  return bibles[v]=fetch("https://app.sdarm.org/bible/data/"+v+".json").then(r=>r.json()).catch(function(){bibles[v]=null;return null;}); }
+  busy(true);
+  return bibles[v]=fetch("https://app.sdarm.org/bible/data/"+v+".json").then(r=>r.json())
+    .catch(function(){bibles[v]=null;return null;})
+    .finally(function(){ busy(false); }); }
 /* A reference with no verse number means the whole chapter: "Rev.16", or
    "Rev.2-Rev.3" for a span of them. Infinity is clamped to the chapter length
    where the verses are actually read. */
