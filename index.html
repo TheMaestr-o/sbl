@@ -1750,28 +1750,44 @@ function peekHint(el){
   clearTimeout(peekHint.t);
   peekHint.t=setTimeout(function(){ pkHintEl.classList.remove("on"); },4200);
 }
+/* Once it is up it stays up. Letting go of the verse used to fold it, which
+   meant reading a whole verse with a finger held still on the glass — and on a
+   phone the finger was standing on the very text being compared. It closes
+   when it is dismissed: a tap anywhere, a scroll, or Escape. */
+let peekAt=0;
+function peekDismiss(){
+  if(!vpeek.classList.contains("on")) return;
+  /* a stray scroll event in the same breath as the opening must not take it
+     straight back down again */
+  if(Date.now()-peekAt<400) return;
+  peekClose();
+}
+document.addEventListener("pointerdown",peekDismiss,true);   /* before anything opens a new one */
+window.addEventListener("scroll",peekDismiss,{passive:true});
+document.addEventListener("keydown",function(e){ if(e.key==="Escape") peekDismiss(); },true);
+
 document.getElementById("sheets").addEventListener("pointerdown",function(e){
   if(mkMode) return;                    /* something in hand: it marks, it does not ask */
   if(paraPick()) return;                /* the column beside the verse already answers */
   const el=e.target.closest&&e.target.closest("[data-vr]"); if(!el) return;
   const x0=e.clientX,y0=e.clientY,t0=Date.now(); let held=false;
   clearTimeout(peekT);
-  peekT=setTimeout(function(){ held=true; peekOpen(el); },340);
+  peekT=setTimeout(function(){ held=true; peekAt=Date.now(); peekOpen(el); },340);
   const off=function(){
     document.removeEventListener("pointermove",move);
     document.removeEventListener("pointerup",off);
     document.removeEventListener("pointercancel",off);
-    window.removeEventListener("scroll",off);
-    if(!held&&Date.now()-t0<340) peekHint(el);
+    /* the card was never opened — this was a tap, or a finger that travelled */
+    if(held) return;
+    if(Date.now()-t0<340) peekHint(el);
     peekClose();
   };
   /* a pointer that travels is turning the page or dragging a selection, and
      neither of those asked for a translation */
-  const move=function(ev){ if(Math.abs(ev.clientX-x0)>8||Math.abs(ev.clientY-y0)>8) off(); };
+  const move=function(ev){ if(Math.abs(ev.clientX-x0)>8||Math.abs(ev.clientY-y0)>8){ clearTimeout(peekT); off(); } };
   document.addEventListener("pointermove",move);
   document.addEventListener("pointerup",off);
   document.addEventListener("pointercancel",off);
-  window.addEventListener("scroll",off,{passive:true});
 });
 /* PDF: pick the week or the whole quarter — the choice also switches what the
    page shows, so you can check it before saving */
