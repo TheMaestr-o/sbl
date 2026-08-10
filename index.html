@@ -1532,10 +1532,40 @@ function paintZoom(){
 /* a 320px screen has no room for the booklet's tag and date side by side at
    the largest step, so the top step is only offered where it fits */
 function maxStep(){ return window.innerWidth<400?1:ZOOMS.length-1; }
+/* ——— growing the type must not lose the line ———
+   The sheet scales as a whole, so every line above the reader grows too and the
+   place he was at slides out from under him — the further into the lesson, the
+   further it goes. The pixel he was on is worthless; the line he was reading is
+   not. So the block at the top of the screen is noted down together with where
+   on the screen it stood, and afterwards the page is moved until it stands
+   there again. */
+function zoomAnchor(){
+  const pane=mkPanes()[0]||null;
+  const line=(pane?pane.getBoundingClientRect().top:0)+mkBarH();
+  const blocks=(pane||document).querySelectorAll("#sheets [data-k]");
+  for(const b of blocks){
+    const r=b.getBoundingClientRect();
+    if(r.bottom>line) return {el:b,at:r.top};
+  }
+  return null;
+}
+function zoomRestore(a){
+  if(!a||!a.el.isConnected) return;
+  const d=a.el.getBoundingClientRect().top-a.at;
+  if(Math.abs(d)<1) return;
+  const pane=a.el.closest("#sheets.dual .pane");
+  if(pane) pane.scrollTop+=d; else window.scrollBy(0,d);
+}
 function setZoom(d){
   const n=Math.min(maxStep(),Math.max(0,zi+d));
   if(n===zi) return;
+  const a=zoomAnchor();
   zi=n; localStorage.setItem("sbl.zoom",String(zi)); paintZoom();
+  /* At once, so that a second press lands on a page already put right — two
+     quick presses used to take their bearings from a page still moving. Then
+     again on the next frames, for the reflow further down the sheet. */
+  zoomRestore(a);
+  requestAnimationFrame(function(){ zoomRestore(a); requestAnimationFrame(function(){ zoomRestore(a); }); });
 }
 paintZoom();
 zout.onclick=function(){setZoom(-1);};
