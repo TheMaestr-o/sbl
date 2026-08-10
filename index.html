@@ -1771,7 +1771,11 @@ function peekPlace(el){
      is what threw the marker bubble a browser bar's worth off on iOS */
   const x=Math.max(10,Math.min(r.left+r.width/2-w/2,document.documentElement.clientWidth-w-10));
   let y=r.bottom+8;
-  if(y+h+10>window.innerHeight) y=Math.max(10,r.top-h-8);
+  if(y+h+10>window.innerHeight) y=r.top-h-8;
+  /* and whatever the arithmetic above decided, inside the window: a verse can
+     be off the top of the screen by the time the edition lands, and a card
+     placed against it would be off the screen with it */
+  y=Math.max(10,Math.min(y,window.innerHeight-h-10));
   vpeek.style.left=Math.round(x)+"px"; vpeek.style.top=Math.round(y)+"px";
 }
 function peekClose(){
