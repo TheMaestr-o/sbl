@@ -105,6 +105,10 @@ body{background:var(--paper-tone);color:var(--ink);font-family:var(--sans);font-
 .sfoot span{font-size:10.5px;letter-spacing:.2px;color:#b0b0b4;cursor:pointer;transition:color .15s}
 .sfoot span:hover{color:#2b2b2b}
 .slab{font-size:12.5px;font-weight:600;color:#6f6f6f;white-space:nowrap}
+/* the marking row's label opens the card about where the marks are kept — the
+   counter on the rail used to be that door, and the counter is gone */
+#lab-mark{cursor:pointer}
+#lab-mark:hover{color:#2b2b2b}
 .sctl{display:flex;gap:6px;flex:none}
 .sbtn{padding:7px 11px;font-size:12px;font-weight:700;color:#2b2b2b;background:#f4f4f4;border-radius:8px;
   cursor:pointer;user-select:none;white-space:nowrap;transition:background .15s,color .15s}
@@ -628,6 +632,23 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;transform:trans
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(28px);backdrop-filter:saturate(180%) blur(28px);
   border-radius:19px;box-shadow:0 0 0 .5px var(--hair),0 14px 36px rgba(0,0,0,.15);
   transition:opacity .2s}
+/* ——— it comes when it is called ———
+   Standing in the margin all day, the rail was the darkest thing on a bright
+   page: the eye found it before it found a word, and a tool nobody asked for
+   was guarding the lesson. Now the margin is empty while reading, and the rail
+   appears at the three moments a tool is actually wanted — something is chosen
+   on the page, the hand reaches into the margin where the rail lives, or a mark
+   has just been made and may want changing. Then it goes away again.
+   The margin is its handle: that is what keeps a marker from being trapped in
+   the hand on a tablet, where there is no hover to reach with — after every
+   mark it lingers a moment, long enough to change the colour or put the tool
+   down. A phone never sees this rule: there the rail is a drawer behind a tab
+   (see the narrow block below) and is off screen already. */
+@media (min-width:701px){
+  .rail{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(-7px);
+    transition:opacity .18s ease,transform .24s cubic-bezier(.25,1.1,.35,1)}
+  body.railcall:not(.bare):not(.writing) .rail{opacity:1;pointer-events:auto;transform:translateY(-50%)}
+}
 .rail .sep{width:24px;height:.5px;background:var(--hair);margin:2px 0}
 .rail .two{display:grid;grid-template-columns:repeat(2,30px);gap:4px}
 .rbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px;
@@ -649,11 +670,6 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;transform:trans
 .ink.pin::after{content:"";position:absolute;left:50%;bottom:-1px;transform:translateX(-50%);
   width:4px;height:4px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(0,0,0,.3)}
 .ink.more{background:conic-gradient(from .5turn,#ff6b6b,#ffb35c,#ffe066,#8fe08f,#7fc8f8,#b39ddb,#f48fb1,#ff6b6b)}
-/* the saved mark: how many, and that they are kept at all */
-.chip{font-size:9.5px;font-weight:700;letter-spacing:.2px;color:#9a9a9e;cursor:pointer;
-  padding:3px 6px;border-radius:7px;white-space:nowrap;transition:color .2s,background .2s}
-.chip:hover{color:#2b2b2b;background:rgba(120,120,128,.14)}
-.chip.flash{color:#2f9e56}
 
 /* the gamut opens beside the rail, in the same block — never as a window */
 .rpick{position:absolute;left:calc(100% + 9px);top:50%;transform:translateY(-50%);
@@ -875,7 +891,6 @@ body.loading #load{opacity:1}
   .hand{width:31px;height:31px}
   .ink{width:20px;height:20px}
   .rail .sep{width:20px;height:.5px;margin:1px 0}
-  .chip{order:0;font-size:9px;padding:2px 4px}
   .rpick{left:calc(100% + 9px);right:auto;top:50%;bottom:auto;transform:translateY(-50%)}
   /* the strip of days lies along the bottom, and the sheet ends above it */
   .days{right:auto;left:50%;top:auto;bottom:calc(env(safe-area-inset-bottom) + 12px);
@@ -893,7 +908,6 @@ body.loading #load{opacity:1}
   .hand{background:rgba(120,120,128,.28);color:#c7c7cc}
   .hand.on{box-shadow:0 0 0 2px rgba(255,255,255,.5),0 2px 6px rgba(0,0,0,.4)}
   .ink.on{box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),0 0 0 2px #fff}
-  .chip{color:#8e8e93} .chip:hover{color:#fff;background:rgba(120,120,128,.28)}
   .mtool{color:#c7c7cc} .mtool:hover{background:rgba(120,120,128,.28);color:#fff}
   .mtool.own{color:#83a9ff}
 }
@@ -1005,8 +1019,6 @@ body.loading #load{opacity:1}
     <div class="rbtn" data-mode="erase"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.2h9.5M4.6 9.9 9.2 5.3l3.1 3.1-4.6 4.6H5.9z"/></svg></div>
     <div class="rbtn" data-mode="copy"><svg width="15" height="15" viewBox="0 0 15 15" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="4.6" y="4.6" width="8.8" height="8.8" rx="1.7"/><path d="M10.4 2.6h-8v8"/></svg></div>
   </div>
-  <div class="sep"></div>
-  <div class="chip" id="mkchip">✓ 0</div>
   <div class="rpick" id="rpick" hidden>
     <div class="area" id="mkarea"><i class="dot"></i></div>
     <div class="hue" id="mkhue"><i class="dot"></i></div>
@@ -2001,6 +2013,7 @@ function paintUI(){
   document.getElementById("pdf-quarter").textContent=w[1];
   /* the pencil speaks the language of the lesson too */
   document.getElementById("lab-mark").textContent=T("marking");
+  document.getElementById("lab-mark").title=T("kept");
   document.getElementById("mk-keys").textContent=T("keys");
   document.getElementById("mk-ver").textContent=APP_VERSION+" · "+
     ({de:"Was ist neu",en:"What's new",ru:"Что нового"}[lang]||"What's new");
@@ -2262,7 +2275,7 @@ const MK_STORE=[
 
 const mkRail=document.getElementById("rail"), mkBub=document.getElementById("bub"),
       mkPickBox=document.getElementById("rpick"), mkInks=document.getElementById("inks"),
-      mkChip=document.getElementById("mkchip"), mkArea=document.getElementById("mkarea"),
+      mkArea=document.getElementById("mkarea"),
       mkHue=document.getElementById("mkhue"), mkToastEl=document.getElementById("mtoast");
 
 function mkGet(k,d){ try{ const v=localStorage.getItem("sbl."+k); return v==null?d:JSON.parse(v); }catch(e){ return d; } }
@@ -2890,6 +2903,7 @@ function mkSetRail(v){
   if(v) document.documentElement.style.setProperty("--railw",(mkRail.offsetWidth+10)+"px");
   document.getElementById("mk-rail").classList.toggle("on",v);
   mkPaintMode();
+  if(v){ mkRailEdgeCalc(); mkLinger(2400); } else mkCall(false);
   mkToast(T(v?"railshown":"railhid"));
 }
 function mkSetMode(m){
@@ -2935,7 +2949,7 @@ function mkTakeStyle(y){
   if(mkGroup&&mkGroup.length){ mkApply(mkTool.c,y); mkTool.s=y; mkSet("pen",mkTool); mkPaintMode(); return; }
   /* something is already chosen on the page — paint that, and keep the tool */
   if(mkUseSelection(mkTool.c,y)){
-    mkTool.s=y; mkSet("pen",mkTool); mkMode="mark"; mkPaintMode(); return;
+    mkTool.s=y; mkSet("pen",mkTool); mkMode="mark"; mkPaintMode(); mkLinger(); return;
   }
   if(mkMode==="mark"&&mkTool.s===y) mkMode=null;
   else { mkTool.s=y; mkSet("pen",mkTool); mkMode="mark"; }
@@ -2946,7 +2960,7 @@ function mkTakeColour(c){
   if(mkNoteFocused&&document.body.contains(mkNoteFocused)){   /* a note is open — colour it */
     mkNoteTint(mkNoteFocused,c); mkStore(); return; }
   if(mkGroup&&mkGroup.length){ mkApply(c,mkTool.s); return; }
-  if(mkUseSelection(c,mkTool.s)){ mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode(); return; }
+  if(mkUseSelection(c,mkTool.s)){ mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode(); mkLinger(); return; }
   mkRemember(c,mkTool.s); mkMode="mark"; mkPaintMode();
 }
 /* two fingers of hint: a double click on a desktop, a long press on a screen */
@@ -2974,7 +2988,6 @@ mkRail.addEventListener("click",function(e){
     mkPaintMode(); return;
   }
   const c=e.target.closest("[data-c]"); if(c) return mkTakeColour(c.dataset.c);
-  if(e.target.closest("#mkchip")) mkStoreCard();
 });
 
 /* ——— how many marks are kept, and where ——— */
@@ -2986,13 +2999,11 @@ function mkCount(){
   });
   return n;
 }
-function mkChipPaint(flash){
-  mkChip.textContent="✓ "+mkCount();
-  mkChip.title=T("kept");
-  if(flash){ mkChip.classList.add("flash");
-    clearTimeout(mkChipPaint.t);
-    mkChipPaint.t=setTimeout(function(){ mkChip.classList.remove("flash"); },1300); }
-}
+/* The count used to sit at the foot of the rail. It is gone: a number that
+   goes up while you read is a scoreboard, and nobody marks a lesson to score.
+   The calls are left standing — where the marks are kept, and how to clear
+   them, is now under the "Marking" label in the settings. */
+function mkChipPaint(){}
 let mkWipeArmed=false;
 function mkStoreCard(){
   mkCard(MK_STORE);
@@ -3172,6 +3183,7 @@ document.addEventListener("click",function(e){
   mkBubClose();
   mkGroup=e.target.dataset.g?mkPieces(e.target.dataset.g):[e.target];
   mkGroup.forEach(function(m){ m.classList.add("sel"); });
+  mkCall(true);
   mkBubPlace(e.target.getBoundingClientRect());
   mkGripsShow();
 });
@@ -3217,6 +3229,7 @@ function mkFromSelection(e){
     if(mkMode==="erase") mkEraseRange(keep);
     else if(mkMode==="copy") mkCopyRange(keep);
     else mkPaint(keep,mkTool.c,mkTool.s);
+    mkLinger();
   },mkTouch?120:0);
 }
 document.addEventListener("mouseup",mkFromSelection);
@@ -3553,6 +3566,64 @@ function mkOffer(){
 document.addEventListener("mouseup",mkOffer);
 document.addEventListener("touchend",mkOffer);
 
+/* ——— calling the rail, and letting it go ———
+   Three things hold it out: a live selection, the hand in its margin, and its
+   own parts being used (the gamut open, a stroke picked, the pointer on it).
+   When none of them holds, it leaves after a breath — long enough that walking
+   the mouse across the margin does not make it blink. */
+let mkCallT=null, mkNear=false, mkRailEdge=0, mkLingerTill=0;
+function mkRailEdgeCalc(){ const r=mkRail.getBoundingClientRect(); mkRailEdge=r.width?r.right+26:0; }
+function mkSelLive(){
+  const s=window.getSelection();
+  if(!s||!s.rangeCount||s.isCollapsed) return false;
+  const r=s.getRangeAt(0);
+  const h=r.commonAncestorContainer.nodeType===1?r.commonAncestorContainer:r.commonAncestorContainer.parentElement;
+  return !!(h&&h.closest&&h.closest(".page[data-les]"));
+}
+function mkHolds(){
+  if(Date.now()<mkLingerTill) return true;
+  if(mkNear||mkSelLive()) return true;
+  if(!mkPickBox.hidden) return true;
+  if(mkGroup&&mkGroup.length) return true;
+  try{ if(mkRail.matches(":hover")) return true; }catch(e){}
+  return false;
+}
+function mkCall(on){
+  if(!mkRailOn){ document.body.classList.remove("railcall"); return; }
+  clearTimeout(mkCallT);
+  if(on){ document.body.classList.add("railcall"); return; }
+  mkCallT=setTimeout(function(){ if(!mkHolds()) document.body.classList.remove("railcall"); },320);
+}
+/* after a mark it stays a moment: the colour is most often changed one breath
+   after it was laid down, and on a finger device this is the only way back to
+   the tool that is already in hand */
+/* a linger is a hold, not a timer racing other timers: clearing the selection
+   after a mark asks the rail to go the same instant, and it must lose */
+function mkLinger(ms){
+  ms=ms||1900; mkLingerTill=Date.now()+ms;
+  mkCall(true); clearTimeout(mkLinger.t);
+  mkLinger.t=setTimeout(function(){ mkCall(false); },ms+40);
+}
+/* a finished selection is the moment a tool is wanted — but only when the hand
+   is empty: with a marker already taken the selection is painted where it lies
+   (mkFromSelection) and nothing has to appear at all */
+function mkCallOnSel(){ setTimeout(function(){ if(mkSelLive()) mkCall(true); },mkTouch?200:70); }
+document.addEventListener("mouseup",mkCallOnSel);
+document.addEventListener("touchend",mkCallOnSel);
+document.addEventListener("selectionchange",function(){ if(!mkSelLive()) mkCall(false); });
+/* the margin is the handle: the rect is measured once and on resize, never on
+   the move itself — a pointer handler that reads layout is a stutter */
+if(!mkTouch){
+  mkRailEdgeCalc();
+  window.addEventListener("resize",mkRailEdgeCalc);
+  document.addEventListener("pointermove",function(e){
+    if(!mkRailEdge) return;
+    const near=e.clientX<=mkRailEdge;
+    if(near===mkNear) return;
+    mkNear=near; mkCall(near);
+  },{passive:true});
+}
+
 /* on a phone the rail lives in the edge: the tab pulls it out, a tap anywhere
    else puts it back, and it never starts the day taking half the screen */
 const mkTab=document.getElementById("railtab");
@@ -3640,6 +3711,7 @@ keysBack.onclick=mkKeysClose;
 document.addEventListener("keydown",function(e){ if(e.key==="Escape") mkKeysClose(); },true);
 
 document.getElementById("mk-rail").onclick=function(){ mkSetRail(!mkRailOn); };
+document.getElementById("lab-mark").onclick=mkStoreCard;
 document.getElementById("paper-sel").onchange=function(){ setPaper(this.value); };
 mkRail.style.display=mkRailOn?"":"none";
 /* the same two things `mkSetRail` publishes, so the first paint of the page is
