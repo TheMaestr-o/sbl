@@ -147,7 +147,20 @@ body{background:#fff;color:var(--ink);font-family:var(--sans);font-size:17px;lin
 .sw.active{box-shadow:0 0 0 2px #111}
 /* the colour wheel says "any colour you like" better than a plus sign */
 .sw.custom{background:conic-gradient(from .5turn,#e04b4b,#e0a33c,#d6cf3f,#4fb257,#3f9fd6,#5b57c9,#b950b0,#e04b4b)}
-.swatches input[type=color]{position:absolute;width:1px;height:1px;opacity:0;pointer-events:none}
+/* ——— the hue strip ———
+   The band takes a hue and nothing else. Its lightness is not the reader's to
+   move: the dark tag carries white lettering and the box has to stay light
+   enough to print, so both are fixed and only the hue travels. The system
+   colour dialog offered a whole cube — brightness, saturation, eyedropper —
+   and answered to one axis of it, which reads as a page that ignores you.
+   This strip offers exactly what it can do, and it is drawn in the band's own
+   colours, so the strip is the answer, not a promise about it. */
+.huebar{position:relative;flex:1 1 auto;height:26px;border-radius:9px;cursor:pointer;touch-action:none;
+  border:1px solid rgba(0,0,0,.10);
+  background:linear-gradient(90deg,hsl(0,46%,38%),hsl(40,46%,38%),hsl(80,46%,38%),hsl(120,46%,38%),
+    hsl(160,46%,38%),hsl(200,46%,38%),hsl(240,46%,38%),hsl(280,46%,38%),hsl(320,46%,38%),hsl(360,46%,38%))}
+.huebar i{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
+  background:#fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.22),0 1px 4px rgba(0,0,0,.28);pointer-events:none}
 /* text size — two square buttons cut like the rest */
 .zoom{flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;
   border:1px solid #e6e6e6;border-radius:9px;background:#fff;color:#777;cursor:pointer;user-select:none;
@@ -909,6 +922,7 @@ body.loading #load{opacity:1}
     <div class="srow"><span class="slab" id="lab-size"></span>
       <div class="sctl"><div class="zoom" id="zoomout">A&#8722;</div><div class="zoom" id="zoomin">A+</div></div></div>
     <div class="srow"><span class="slab" id="lab-colour"></span><div class="swatches" id="tintpop"></div></div>
+    <div class="srow prow" id="hue-row" hidden><div class="huebar" id="huebar"><i></i></div></div>
     <div class="srow"><span class="slab" id="lab-mark"></span>
       <div class="sctl"><div class="sw2" id="mk-rail"><i></i></div></div></div>
     <div class="srow"><span class="slab" id="lab-pdf"></span>
@@ -1063,8 +1077,18 @@ const THEMES=[
 ];
 function setTint(t){const R=document.documentElement.style;R.setProperty("--gray-dk",t.dk);R.setProperty("--gray",t.lt);R.setProperty("--box",t.bx);}
 function hexHsl(h){h=h.replace("#","");const r=parseInt(h.slice(0,2),16)/255,g=parseInt(h.slice(2,4),16)/255,b=parseInt(h.slice(4,6),16)/255;const mx=Math.max(r,g,b),mn=Math.min(r,g,b);let hh,s,l=(mx+mn)/2;if(mx===mn){hh=s=0;}else{const d=mx-mn;s=l>.5?d/(2-mx-mn):d/(mx+mn);hh=mx===r?(g-b)/d+(g<b?6:0):mx===g?(b-r)/d+2:(r-g)/d+4;hh/=6;}return[Math.round(hh*360),Math.round(s*100)];}
-function customTint(hex){const a=hexHsl(hex),h=a[0],sd=Math.min(a[1],46),sl=Math.min(a[1],30);return{dk:"hsl("+h+","+sd+"%,38%)",lt:"hsl("+h+","+sl+"%,84%)",bx:"hsl("+h+","+Math.round(sl*0.7)+"%,90%)"};}
-(function(){try{const s=JSON.parse(localStorage.getItem("sbl.tint")||"null");if(s){if(s.c)setTint(customTint(s.c));else if(s.i!=null&&THEMES[s.i])setTint(THEMES[s.i]);}}catch(e){}})();
+/* one hue in, three tones out. The lightnesses are the printed booklet's own:
+   38% carries white lettering on the day tag, 84% and 90% stay light enough to
+   read black type through. Only the hue is the reader's — see .huebar. */
+function hueTint(h){return{dk:"hsl("+h+",46%,38%)",lt:"hsl("+h+",30%,84%)",bx:"hsl("+h+",21%,90%)"};}
+let hueOwn=210;        /* where the strip's dot sits until the reader moves it */
+let hueActive=false;   /* is the page wearing a hue of its own, or a theme */
+(function(){try{const s=JSON.parse(localStorage.getItem("sbl.tint")||"null");if(!s)return;
+  /* {c:"#rrggbb"} is how a custom colour was kept before the strip: the hue of
+     it is all that ever reached the page, so that is what is read back */
+  if(s.h!=null){hueOwn=s.h;hueActive=true;setTint(hueTint(s.h));}
+  else if(s.c){hueOwn=hexHsl(s.c)[0];hueActive=true;setTint(hueTint(hueOwn));}
+  else if(s.i!=null&&THEMES[s.i])setTint(THEMES[s.i]);}catch(e){}})();
 
 function ymd(d){return d.getFullYear()+("0"+(d.getMonth()+1)).slice(-2)+("0"+d.getDate()).slice(-2);}
 function qOf(d){return Math.floor(d.getMonth()/3)+1;}
@@ -1965,14 +1989,37 @@ const tpop=document.getElementById("tintpop");
 function buildPop(){
   let html="";
   THEMES.forEach(function(t,i){ html+='<span class="sw" data-i="'+i+'" title="'+["Grey","Cover","Wine","Forest","Gold"][i]+'" style="background:'+t.dk+'"></span>'; });
-  html+='<span class="sw custom" id="swcustom" title="Any colour you like"></span><input type="color" id="tintcolor" value="#3a6ea5">';
+  html+='<span class="sw custom" id="swcustom"></span>';
   tpop.innerHTML=html;
-  tpop.querySelectorAll(".sw[data-i]").forEach(function(s){ s.onclick=function(){ const i=+s.dataset.i; setTint(THEMES[i]); localStorage.setItem("sbl.tint",JSON.stringify({i:i})); tpop.hidden=true; }; });
-  const ci=document.getElementById("tintcolor");
-  document.getElementById("swcustom").onclick=function(){ ci.click(); };
-  ci.oninput=function(){ setTint(customTint(ci.value)); localStorage.setItem("sbl.tint",JSON.stringify({c:ci.value})); };
+  tpop.querySelectorAll(".sw[data-i]").forEach(function(s){ s.onclick=function(){ const i=+s.dataset.i;
+    setTint(THEMES[i]); localStorage.setItem("sbl.tint",JSON.stringify({i:i}));
+    hueActive=false; hueRow.hidden=true; paintHue(); }; });
+  /* the wheel opens the strip in the panel itself: one row appears under the
+     swatches, and it is the only thing there is to move */
+  document.getElementById("swcustom").onclick=function(){ hueRow.hidden=!hueRow.hidden; if(!hueRow.hidden) paintHue(); };
 }
+const hueRow=document.getElementById("hue-row"), hueBar=document.getElementById("huebar");
+/* the dot sits where the hue is, and the wheel wears the colour it stands for
+   as soon as one is taken — so the row of swatches always shows what is on */
+function paintHue(){
+  hueBar.firstElementChild.style.left=(hueOwn/360*100)+"%";
+  const sc=document.getElementById("swcustom");
+  if(sc) sc.style.background=hueActive?hueTint(hueOwn).dk:"";
+}
+function takeHue(e){
+  const r=hueBar.getBoundingClientRect();
+  const x=Math.min(Math.max(e.clientX-r.left,0),r.width);
+  hueOwn=Math.round(x/r.width*360)%360;
+  hueActive=true;
+  setTint(hueTint(hueOwn)); paintHue();
+  localStorage.setItem("sbl.tint",JSON.stringify({h:hueOwn}));
+}
+/* one gesture, mouse or finger: the bands follow the dot while it is dragged,
+   so the choice is made by looking at the lesson, not at a preview */
+hueBar.addEventListener("pointerdown",function(e){ e.preventDefault(); hueBar.setPointerCapture(e.pointerId); takeHue(e); });
+hueBar.addEventListener("pointermove",function(e){ if(hueBar.hasPointerCapture(e.pointerId)) takeHue(e); });
 buildPop();
+paintHue();
 /* one panel at a time; a click anywhere else closes them */
 const setpop=document.getElementById("setpop"), gear=document.getElementById("gear");
 gear.onclick=function(e){ e.stopPropagation(); calpop.hidden=true;
