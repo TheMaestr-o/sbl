@@ -868,8 +868,8 @@ body.bare .outscrim,body.writing .outscrim{opacity:0;pointer-events:none}
    No card. The list of lessons lies on the paper to the right; this lies on the
    same paper to the left, and a panel tone under either would make it furniture
    standing on the sheet rather than something belonging to it. */
-.aud{position:fixed;left:max(10px,calc(50vw - 700px));top:calc(var(--barh,67px) + 16px);
-  z-index:64;width:220px;display:flex;flex-direction:column;
+.aud{position:fixed;left:max(10px,calc(50vw - 716px));top:calc(var(--barh,67px) + 16px);
+  z-index:64;width:236px;display:flex;flex-direction:column;
   opacity:0;pointer-events:none;transform:translateX(-14px);
   transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
 body.audon .aud{opacity:1;pointer-events:auto;transform:none}
@@ -907,12 +907,15 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
 .alist{max-height:min(46vh,320px);overflow-y:auto;overscroll-behavior:contain;
   margin-top:13px;padding-top:9px;border-top:1px solid var(--hair)}
 .alist[hidden]{display:none}
-.atrk{display:flex;align-items:center;gap:9px;padding:5px 4px;cursor:pointer;
+.atrk{display:flex;align-items:flex-start;gap:9px;padding:6px 4px;cursor:pointer;
   font-size:12px;color:#76767c;transition:color .15s,background .15s}
 @media (hover:hover){ .atrk:hover{background:rgba(120,120,128,.08);color:var(--gray-dk)} }
-.atrk .anum{flex:none;width:15px;text-align:right;font-size:11px;
+.atrk .anum{flex:none;width:15px;text-align:right;font-size:11px;padding-top:1px;
   font-variant-numeric:tabular-nums;color:#c2c2cb}
-.atrk .atit{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atrk .atit{flex:1;min-width:0;line-height:1.3;
+  display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden}
+.atrk .atit i{display:block;font-style:normal;font-size:10px;font-weight:400;
+  letter-spacing:.06em;text-transform:uppercase;color:#b3b3bb;margin-top:1px}
 .atrk.on{color:var(--gray-dk);font-weight:700}
 .atrk.on .anum{color:var(--gray-dk)}
 /* the one playing carries the mark instead of its number */
@@ -3988,6 +3991,10 @@ function audIcon(playing){
     : '<svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><path d="M2 1.4 11.4 7 2 12.6Z"/></svg>';
 }
 /* the day names the page already speaks, so the label says "Sonntag · a" */
+function audDayShort(i){
+  try{ const d=new Date(2026,1,1+i); return new Intl.DateTimeFormat(LOCALE[lang],{weekday:"short"}).format(d); }
+  catch(e){ return ""; }
+}
 function audDayName(i){
   try{ const d=new Date(2026,1,1+i); return new Intl.DateTimeFormat(LOCALE[lang],{weekday:"long"}).format(d); }
   catch(e){ return String(i+1); }
@@ -4003,13 +4010,25 @@ async function audSync(){
   if(!(await audHas(intro))||my!==audToken) return;    /* no recording for this lesson */
   audList.push({u:intro,label:T("aintro")||"Intro"});
 
+  /* A track called "Sunday · a" says only where it sits. The lesson already
+     names each day — "Das Leben und das Licht" — and that name is what the part
+     actually is, so the list reads as the lesson reads. */
+  const days=les.dailyLessons||[];
   for(let d=1;d<=7;d++){
+    const sec=strip((days[d-1]&&days[d-1].sectionTitle)||"").replace(/^\s*\d+\.\s*/,"").trim();
+    const got=[];
     for(let li=0;li<AUD_LETTERS.length;li++){
       const u=base+"-"+d+AUD_LETTERS[li]+".mp3";
       if(!(await audHas(u))){ break; }             /* this day has no more parts */
       if(my!==audToken) return;
-      audList.push({u:u,day:d,letter:AUD_LETTERS[li],label:audDayName(d-1)+" · "+AUD_LETTERS[li]});
+      got.push([u,AUD_LETTERS[li]]);
     }
+    got.forEach(function(g){
+      audList.push({u:g[0],day:d,letter:g[1],
+        /* the letter only earns its place when the day has more than one part */
+        label:(sec||audDayName(d-1))+(got.length>1?" \u00b7 "+g[1]:""),
+        sub:audDayShort(d-1)});
+    });
   }
   alabel.textContent=strip(les.title||"");
   audBuildList(); audLoad(0,false); audShow(true);
@@ -4019,7 +4038,8 @@ function audBuildList(){
   const box=document.getElementById("alist");
   box.innerHTML=audList.map(function(p,i){
     return '<div class="atrk" data-i="'+i+'"><span class="anum">'+(i+1)+'</span>'
-      +'<span class="atit">'+esc(p.label||"")+'</span></div>';
+      +'<span class="atit">'+esc(p.label||"")
+      +(p.sub?'<i>'+esc(p.sub)+'</i>':"")+'</span></div>';
   }).join("");
   box.querySelectorAll("[data-i]").forEach(function(el){
     el.onclick=function(){ audLoad(+el.dataset.i,true); };
