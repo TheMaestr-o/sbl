@@ -876,7 +876,9 @@ body.audon .aud{opacity:1;pointer-events:auto;transform:none}
 body.railout .aud{left:calc(var(--railw,106px) + 16px)}
 body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
 
-/* what is playing, named the way the sheet names it */
+/* The lesson names the whole reading, the way a record is named over its
+   tracks. What is playing is shown by the mark in the list, not by repeating
+   its name here — the same words twice in a panel this small read as a fault. */
 .alabel{font-family:var(--serif);font-size:14px;font-weight:700;line-height:1.3;
   color:var(--gray-dk);padding:0 2px 9px;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -4009,6 +4011,7 @@ async function audSync(){
       audList.push({u:u,day:d,letter:AUD_LETTERS[li],label:audDayName(d-1)+" · "+AUD_LETTERS[li]});
     }
   }
+  alabel.textContent=strip(les.title||"");
   audBuildList(); audLoad(0,false); audShow(true);
 }
 /* the parts as a list: the opening, then each question under the day it opens */
@@ -4033,7 +4036,7 @@ function audMarkList(){
 }
 function audLoad(i,play){
   if(i<0||i>=audList.length) return;
-  audAt=i; audEl.src=audList[i].u; alabel.textContent=audList[i].label||""; audMarkList();
+  audAt=i; audEl.src=audList[i].u; audMarkList();
   if(play){ audEl.play(); audIcon(true); } else audIcon(false);
 }
 document.getElementById("aplay").onclick=function(){
