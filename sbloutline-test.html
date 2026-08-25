@@ -772,21 +772,28 @@ body.bare .days,body.writing .days{opacity:0;pointer-events:none;transform:trans
    over the page it is what keeps the lines from showing through. */
 .outline{position:fixed;z-index:62;right:max(10px,calc(50vw - 676px));
   top:calc(var(--barh,67px) + 10px);width:246px;max-height:calc(100dvh - var(--barh,67px) - 26px);
-  display:flex;flex-direction:column;background:var(--paper-tone,#fff);
+  display:flex;flex-direction:column;
+  /* No ground of its own: the list lies on the same paper as the lesson, and a
+     panel tone over a paper texture reads as a card laid on the sheet. It takes
+     a ground only where it has to cover the text — see the narrow rule below. */
+  background:none;
   opacity:0;pointer-events:none;transform:translateX(14px);
   transition:opacity .24s,transform .3s cubic-bezier(.3,.9,.3,1)}
 body.outlineon .outline{opacity:1;pointer-events:auto;transform:none}
 
-/* the quarter's name, and the two quarters either side reachable from it — set
-   as type, not as buttons: nothing here is a control panel */
-.outhead{flex:none;padding:0 6px 8px;display:flex;align-items:baseline;gap:7px}
-.outhead b{flex:1;min-width:0;font-family:var(--serif);font-size:14px;font-weight:700;
-  line-height:1.3;color:var(--gray-dk)}
-.outhead .oarr{flex:none;color:#b9b9c2;cursor:pointer;font-size:15px;line-height:1;
-  user-select:none;transition:color .15s}
+/* The quarter's name, centred over its own lessons, with the quarters either
+   side a step away. The arrows are set in the lesson's own serif and given room
+   to stand in — pressed against the edge they read as scroll hints rather than
+   as something to press. */
+.outhead{flex:none;padding:2px 4px 6px;display:flex;align-items:center;gap:4px}
+.outhead b{flex:1;min-width:0;text-align:center;
+  font-family:var(--serif);font-size:15px;font-weight:700;line-height:1.3;color:var(--gray-dk)}
+.outhead .oarr{flex:none;width:26px;height:26px;display:flex;align-items:center;
+  justify-content:center;font-family:var(--serif);font-size:19px;line-height:1;
+  color:#c2c2cb;cursor:pointer;user-select:none;transition:color .15s}
 .outhead .oarr:hover{color:var(--gray-dk)}
-.outsub{flex:none;padding:0 6px 8px;font-size:10.5px;letter-spacing:.06em;
-  text-transform:uppercase;color:#a9a9b0}
+.outsub{flex:none;padding:0 6px 10px;text-align:center;
+  font-size:10.5px;letter-spacing:.08em;text-transform:uppercase;color:#a9a9b0}
 
 .outlist{flex:1;overflow-y:auto;overscroll-behavior:contain;padding-bottom:6px}
 
@@ -829,7 +836,8 @@ body.outlineon .days{opacity:0;pointer-events:none;transform:translateY(-50%) tr
 /* Below this the sheet reaches the list, so it stops standing beside the page
    and starts lying on it — which needs an edge and a scrim, and nothing else. */
 @media (max-width:1400px){
-  .outline{right:10px;padding:14px 8px 4px;box-shadow:-14px 0 34px rgba(0,0,0,.10)}
+  .outline{right:10px;padding:14px 8px 4px;background:var(--paper-tone,#fff);
+    box-shadow:-14px 0 34px rgba(0,0,0,.10)}
   .outhead,.outsub{padding-left:8px;padding-right:8px}
 }
 @media (min-width:1401px){ .outscrim{display:none} }
