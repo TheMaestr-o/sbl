@@ -898,21 +898,29 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
 .aseek{margin:11px 2px 0;height:2px;background:rgba(120,120,128,.26);cursor:pointer}
 .aseek i{display:block;height:100%;width:0;background:var(--gray-dk);transition:width .12s linear}
 
-/* Every part of the reading. The day is a heading, its questions are lettered
-   under it — the shape of the lesson, one level finer than the strip of days. */
+/* Every part of the reading, laid out the way the lesson is: a day, and its
+   questions lettered across from it. A column of rows each saying "Frage" told
+   the reader nothing he could not see — the letters alone are the content, and
+   set as marks they can be read at a glance and hit with a finger. */
 .alist{max-height:min(44vh,300px);overflow-y:auto;overscroll-behavior:contain;
   margin-top:13px;padding-top:11px;border-top:1px solid var(--hair)}
 .alist[hidden]{display:none}
-.aday{padding:9px 2px 3px;font-size:10px;letter-spacing:.09em;text-transform:uppercase;
-  color:#b3b3bb}
-.aday:first-child{padding-top:0}
-.apart{display:flex;align-items:baseline;gap:9px;padding:4px 2px 4px 4px;cursor:pointer;
-  font-size:12px;color:#7a7a80;transition:color .15s,background .15s}
-@media (hover:hover){ .apart:hover{background:rgba(120,120,128,.07);color:var(--gray-dk)} }
-.apart b{flex:none;font-weight:800;color:var(--gray);font-size:12.5px}
-.apart span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.apart.on{color:var(--gray-dk);font-weight:700}
-.apart.on b{color:var(--gray-dk)}
+.arow2{display:flex;align-items:center;gap:8px;padding:3px 2px}
+.aday{flex:none;width:64px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
+  color:#b3b3bb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aqs{display:flex;flex-wrap:wrap;gap:4px}
+.aq{width:23px;height:23px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;font-size:11.5px;font-weight:700;color:#8a8a8e;cursor:pointer;
+  user-select:none;transition:background .15s,color .15s}
+@media (hover:hover){ .aq:hover{background:rgba(120,120,128,.14);color:#2b2b2b} }
+.aq.on{background:var(--gray-dk);color:#fff}
+/* the opening stands on its own line above the days — it belongs to no day */
+.aopen{display:flex;align-items:center;gap:8px;padding:2px 2px 8px;cursor:pointer;
+  font-size:12px;color:#7a7a80;transition:color .15s}
+.aopen:hover{color:var(--gray-dk)}
+.aopen b{flex:none;width:23px;text-align:center;color:var(--gray);font-size:13px}
+.aopen span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.aopen.on{color:var(--gray-dk);font-weight:700}
 
 /* one thin line at the top edge for as long as anything is being fetched: the
    only honest answer to "is it working or is it stuck" */
@@ -4004,8 +4012,7 @@ async function audSync(){
       const u=base+"-"+d+AUD_LETTERS[li]+".mp3";
       if(!(await audHas(u))){ break; }             /* this day has no more parts */
       if(my!==audToken) return;
-      audList.push({u:u,day:d,letter:AUD_LETTERS[li],qlabel:T("qword")||"",
-        label:audDayName(d-1)+" · "+AUD_LETTERS[li]});
+      audList.push({u:u,day:d,letter:AUD_LETTERS[li],label:audDayName(d-1)+" · "+AUD_LETTERS[li]});
     }
   }
   audBuildList(); audLoad(0,false); audShow(true);
@@ -4013,22 +4020,26 @@ async function audSync(){
 /* the parts as a list: the opening, then each question under the day it opens */
 function audBuildList(){
   const box=document.getElementById("alist");
-  let h="",lastDay=0;
+  const byDay={};
+  let h="";
   audList.forEach(function(p,i){
-    if(!p.day){ h+='<div class="apart'+(i===audAt?" on":"")+'" data-i="'+i+'">'
-      +'<b>&bull;</b><span>'+esc(p.label||"")+'</span></div>'; return; }
-    if(p.day!==lastDay){ lastDay=p.day; h+='<div class="aday">'+esc(audDayName(p.day-1))+'</div>'; }
-    h+='<div class="apart'+(i===audAt?" on":"")+'" data-i="'+i+'">'
-      +'<b>'+esc(p.letter||"")+'</b><span>'+esc(p.qlabel||"")+'</span></div>';
+    if(!p.day){ h+='<div class="aopen" data-i="'+i+'"><b>&bull;</b><span>'+esc(p.label||"")+'</span></div>'; return; }
+    (byDay[p.day]=byDay[p.day]||[]).push([i,p.letter]);
+  });
+  Object.keys(byDay).sort(function(x,y){return x-y;}).forEach(function(d){
+    h+='<div class="arow2"><div class="aday">'+esc(audDayName(d-1))+'</div><div class="aqs">'
+      +byDay[d].map(function(q){ return '<div class="aq" data-i="'+q[0]+'">'+esc(q[1])+'</div>'; }).join("")
+      +'</div></div>';
   });
   box.innerHTML=h;
   box.querySelectorAll("[data-i]").forEach(function(el){
     el.onclick=function(){ audLoad(+el.dataset.i,true); };
   });
+  audMarkList();
 }
 function audMarkList(){
-  document.querySelectorAll("#alist .apart").forEach(function(el,i){
-    el.classList.toggle("on",i===audAt);
+  document.querySelectorAll("#alist [data-i]").forEach(function(el){
+    el.classList.toggle("on",+el.dataset.i===audAt);
   });
 }
 function audLoad(i,play){
