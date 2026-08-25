@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Mit Jesus wandeln — SBL outline (демо стилей)</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;500;700;800;900&display=swap" rel="stylesheet">
+<style>
+/* ------------------------------------------------------------------
+   Sabbath Bible Lessons — стили страницы урока (outline)
+   Источник: https://sbl.sdarm.org/study/de/2026-3/outline
+   Файл на сайте: /assets/CtJsYeOutline.7ec86916.css   (1 877 байт)
+   Извлечено из DOM 25.08.2026. Правила приведены как есть.
+   ------------------------------------------------------------------ */
+
+/* --- цветовые утилиты темы --------------------------------------- */
+.bg-sdarm-blue-btn-active { background: rgb(47, 63, 109) !important; }
+.bg-primary-0   { background: rgb(249, 250, 252); }
+.bg-primary-1-1 { background: rgb(246, 246, 250); }
+.bg-primary-2-2 { background: rgb(223, 226, 231); }
+.text-primary-7 { color: rgb(81, 101, 156); }
+.text-primary-8 { color: rgb(66, 82, 134); }
+.text-primary-9 { color: rgb(52, 68, 115); }
+
+/* --- страница ----------------------------------------------------- */
+.lesson-outline-page { max-width: 1280px; margin: 0px auto; }
+.lesson-outline-page .lesson-title { font-size: 2rem; line-height: 1.3; display: inline-block; color: rgb(52, 68, 115); }
+.lesson-outline-page .audio-btn { position: relative; top: 3px; }
+.lesson-outline-page .pub-date { font-size: 0.8rem; color: rgb(66, 82, 134); }
+.lesson-outline-page .pub-img { position: relative; right: -14px; width: 220px; height: 338px; cursor: auto; }
+.lesson-outline-page .pub-img:hover { filter: none; }
+.lesson-outline-page .img-small .pub-img { width: 140px; height: 215px; }
+.lesson-outline-page .read-more-link { float: right; }
+
+/* --- мобильная версия --------------------------------------------- */
+.phone .lesson-outline-page { padding-bottom: 8rem; }
+.phone .lesson-outline-page .lesson-title { font-size: 1.5rem; }
+
+/* --- список уроков справа ----------------------------------------- */
+.lesson-outline-list .outline-item {
+  display: grid;
+  grid-template-columns: 3rem 1fr;
+  cursor: pointer;
+  border-radius: 3px;
+  transition: background-color 0.9s;
+}
+.lesson-outline-list .outline-item:hover             { background-color: rgb(249, 249, 252); }
+.lesson-outline-list .outline-item:hover .week-title { color: rgb(66, 82, 134); }
+.lesson-outline-list .outline-item:hover .week-date  { color: rgb(117, 117, 117); }
+
+.lesson-outline-list .week-no {
+  font-size: 1.9rem;
+  text-align: center;
+  margin-right: 0.5rem;
+  font-weight: 900;
+  color: rgb(197, 205, 232);
+}
+.lesson-outline-list .week-title {
+  font-size: 1rem;
+  font-weight: 800;
+  color: rgb(92, 111, 173);
+  transition: color 0.5s;
+}
+.lesson-outline-list .week-date {
+  color: rgb(158, 158, 158);
+  font-size: 0.9rem;
+  transition: color 0.5s;
+}
+
+/* иконка «Erste Sabbatschulgaben» вместо номера */
+.outline-icon { margin: 0px auto; }
+
+/* ==================================================================
+   ДОПОЛНЕНИЕ: то, что на сайте приходит из бандла Quasar
+   (index.bdd853ad.css). Здесь воспроизведено вручную по замеренным
+   computed styles, чтобы разметка работала без фреймворка.
+   ================================================================== */
+
+.lesson-outline-page        { padding: 48px 24px; }
+.lesson-outline-page .row   { display: flex; flex-wrap: wrap; }
+.q-col-gutter-lg            { margin: -24px 0 0 -24px; }
+.q-col-gutter-lg > *        { padding: 24px 0 0 24px; }
+
+.col-md-3 { flex: 0 0 auto; width: 25%; }
+.col-md-4 { flex: 0 0 auto; width: 33.3333%; }
+.col-md-8 { flex: 0 0 auto; width: 66.6667%; }
+.col-lg-9 { flex: 0 0 auto; width: 75%; }
+.text-right  { text-align: right; }
+.text-justify{ text-align: justify; }
+.text-italic { font-style: italic; }
+.q-pr-sm { padding-right: 8px; }
+.q-pl-md { padding-left: 16px; }
+.q-mb-sm { margin-bottom: 8px; }
+.q-mb-md { margin-bottom: 16px; }
+.q-mb-xl { margin-bottom: 48px; }
+.q-my-none { margin-top: 0; margin-bottom: 0; }
+
+/* типографика */
+.content-font { font-family: Georgia, serif; }
+.bold         { font-weight: 900; }
+
+.lesson-outline-page .lesson-title { font-family: Georgia, serif; font-weight: 900; margin: 0; }
+.lesson-outline-page article       { font-family: Georgia, serif; font-size: 16px; line-height: 24px; color: #000; }
+.lesson-outline-page article p     { text-align: justify; margin: 0 0 16px; }
+.lesson-outline-page .pub-date     { font-family: Georgia, serif; font-style: italic; font-weight: 700; text-align: right; }
+
+.lesson-outline-list,
+.lesson-outline-list .week-title,
+.lesson-outline-list .week-date,
+.lesson-outline-list .week-no {
+  font-family: Roboto, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif;
+}
+.lesson-outline-list .week-title { line-height: 24px; }
+.lesson-outline-list .week-no    { line-height: 45.6px; }
+
+/* кнопки Studie / PDF */
+.sbl-btn {
+  display: inline-flex; align-items: center; gap: 6px;
+  min-height: 36px; padding: 4px 16px;
+  border: 0; border-radius: 3px;
+  font: 500 14px/1.715 Roboto, Arial, sans-serif;
+  text-transform: none; text-decoration: none; cursor: pointer;
+}
+.sbl-btn--primary { background: rgb(92, 111, 173); color: #fff; }
+.sbl-btn--flat    { background: transparent;       color: rgb(92, 111, 173); }
+.sbl-btn--flat:hover, .sbl-btn--primary:hover { filter: brightness(0.95); }
+
+/* ==================================================================
+   Только для демо-страницы: базовый сброс, макет обложки-заглушки
+   и центрирование ячейки с номером. В оригинале обложка — <img>.
+   ================================================================== */
+* { box-sizing: border-box; }
+body { margin: 0; background: #fff; color: #000;
+       font-family: Roboto, -apple-system, "Helvetica Neue", Helvetica, Arial, sans-serif; }
+.items-center { align-items: center; }
+.q-mt-xs { margin-top: 4px; }
+.q-pt-sm { padding-top: 8px; }
+.content-center { display: flex; align-items: center; justify-content: center; }
+.week-no > span { display: block; width: 100%; text-align: center; }
+.outline-icon-wrap { color: rgb(197, 205, 232); display: flex; }
+.title-date { min-width: 0; }
+
+/* обложка-заглушка 220×338 в пропорциях оригинала */
+.cover { display: flex; flex-direction: column; overflow: hidden; text-align: left;
+         border-radius: 2px; box-shadow: 0 2px 10px rgba(0,0,0,.18); background: #1d2f5c; }
+.cover__top { flex: 0 0 46px; display: flex; justify-content: space-between;
+              align-items: center; padding: 6px 10px; background: #1d2f5c; color: #fff; }
+.cover__year  { font: 800 15px/1.05 Roboto, Arial, sans-serif; }
+.cover__year span { font-size: 8px; font-weight: 500; letter-spacing: .06em; }
+.cover__brand { font: 700 8.5px/1.25 Roboto, Arial, sans-serif; text-align: right; }
+.cover__brand span { font-weight: 400; font-size: 7px; opacity: .8; }
+.cover__photo { flex: 1 1 auto; background:
+    linear-gradient(180deg,#cfd8c8 0%,#9fb6c6 35%,#7d9fbb 60%,#b8b199 100%); }
+.cover__foot { flex: 0 0 118px; padding: 14px 12px; background: #17539e; color: #fff; }
+.cover__title { font: 700 17px/1.15 Roboto, Arial, sans-serif; }
+.cover__sub   { margin-top: 8px; font: 400 7.5px/1.4 Roboto, Arial, sans-serif; opacity: .85; }
+
+/* адаптив: на узком экране колонки складываются, как в оригинале */
+@media (max-width: 1023px) { .col-lg-9 { width: 100%; } }
+@media (max-width: 991px)  { .col-md-3, .col-md-4, .col-md-8 { width: 100%; }
+                             .text-right { text-align: left; }
+                             .pub-date { text-align: left; } }
+
+</style>
+</head>
+<body>
+<div class="lesson-outline-page">
+  <div class="row q-col-gutter-lg">
+
+    <!-- ЛЕВАЯ КОЛОНКА: обложка + период -->
+    <div class="col-xs-12 col-sm-4 col-md-3 q-pr-sm text-right">
+      <div class="pub-img cover">
+        <div class="cover__top">
+          <div class="cover__year">2026<br><span>JUL - SEP</span></div>
+          <div class="cover__brand">Sabbath Bible Lessons<br><span>Senior Division</span></div>
+        </div>
+        <div class="cover__photo"></div>
+        <div class="cover__foot">
+          <div class="cover__title">Walking<br>With Jesus</div>
+          <div class="cover__sub">A closer walk with God through<br>Steps to Christ</div>
+        </div>
+      </div>
+      <div class="pub-date">JUL-SEPT 2026</div>
+    </div>
+
+    <!-- ПРАВАЯ ЧАСТЬ -->
+    <div class="col-xs-12 col-lg-9">
+
+      <div class="row items-center q-mt-xs q-mb-md">
+        <h1 class="lesson-title content-font bold q-my-none">Mit Jesus wandeln</h1>
+      </div>
+
+      <div class="row q-col-gutter-lg">
+
+        <!-- ПРЕДИСЛОВИЕ -->
+        <article class="col-md-8 justify-center content-font">
+          <p class="text-justify">Die Reihe von Lektionen für das Studium in diesem Quartal „Mit Jesus wandeln“ basiert auf dem Buch „Der Weg zu Christus“. Dieses kann Kapitel für Kapitel als Kommentar zu den Bibelversen der Lektionen gelesen werden.</p>
+          <p class="text-justify">Einige Sabbatschulteilnehmer werden sich daran erinnern, dass dieses Thema zuletzt im ersten Quartal 1980 behandelt wurde. Es ist uns eine Freude, es nun erneut zu präsentieren, mit einem frischen Design und zusätzlichem Material, jedoch mit denselben tiefen Wahrheiten, die schon vor langer Zeit verkündigt wurden.</p>
+          <p class="text-justify">Allzu oft denken Menschen von ihrem himmlischen Vater, er sei kalt und fern, ein strenger und harter Richter. Dabei übersehen sie die Tiefe seiner Liebe zu ihnen und die liebevolle Fürsorge, die er in seinem Herzen für alle seine Kinder trägt.</p>
+          <p class="text-justify">Die Liebe Gottes sollte an erster Stelle stehen. Danach sollte die Tatsache folgen, dass der Sünder hilflos und hoffnungslos ist und einen Erlöser braucht. Das Leben Christi, der kam, um Sünder zu retten, zeigt, dass es einen sicheren Weg gibt, zum himmlischen Vater zurückzukehren.</p>
+          <p class="text-justify">Die Themen, die in diesen Lektionen behandelt werden, befassen sich mit den wesentlichen Erfahrungen des christlichen Lebens und sind besonders geeignet für Gläubige, die neu im Glauben sind und in der Gnade wachsen möchten. Alle Gläubigen sollten diese Themen von Zeit zu Zeit wieder betrachten, nicht nur zu ihrem eigenen Nutzen, sondern auch, um den besten Weg zu erkennen, anderen zu helfen, ebenfalls zu Christus zu kommen.</p>
+          <p class="text-justify">Eine geordnete Darstellung der biblischen Wahrheiten kann zu einem klaren Verständnis und zu ihrer Annahme führen und es einem Menschen ermöglichen, als Gemeindeglied aufgenommen zu werden. Doch wenn ein solcher Mensch nicht in Verbindung mit Christus gebracht wird, hat er kein wirkliches Leben – kein ewiges Leben. Wahrlich, nur wer „an den Sohn glaubt, der hat das ewige Leben“ (Johannes 3, 36).</p>
+          <p class="text-justify">Jedes Sabbatschulglied sollte das Zeugnis des Geistes in seinem eigenen Geist haben, dass es wirklich in die Familie Gottes aufgenommen worden ist. Jeder sollte erkennen, dass sein eigenes Vorbild und seine ständige Abhängigkeit vom himmlischen Vater, zu allen Zeiten und in allen Dingen, echt und praktisch sein müssen. Mehr als schwache, menschliche Liebe ist nötig. Alle brauchen die Liebe Gottes, Gottes selbstlose Liebe, eingepflanzt in Herz und Seele, damit sie lieben können, wie er geliebt hat.</p>
+          <p class="text-justify">Möge dies die Erfahrung jedes einzelnen Sabbatschulgliedes sein.</p>
+          <p class="text-italic text-right">Die Sabbatschulabteilung der Generalkonferenz</p>
+        </article>
+
+        <!-- КНОПКИ + СПИСОК УРОКОВ -->
+        <div class="col-md-4">
+          <div class="q-pl-md q-mb-md q-pt-sm">
+            <a class="sbl-btn sbl-btn--primary" href="#">Studie <span aria-hidden="true">›</span></a>
+            <a class="sbl-btn sbl-btn--flat" href="#">PDF <span aria-hidden="true">⤓</span></a>
+          </div>
+
+          <div class="lesson-outline-list">
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span class="outline-icon-wrap"><svg class="outline-icon" viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 20.7 3.8 13a5 5 0 1 1 7.1-7.1l1.1 1.1 1.1-1.1A5 5 0 1 1 20.2 13Z" opacity=".45"/><path d="M12 21.35 4.2 14.1a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5Zm0-1.9 6.5-6.1a2.9 2.9 0 0 0-4.1-4.1L12 11.65 9.6 9.25a2.9 2.9 0 0 0-4.1 4.1Z"/></svg></span></div>
+              <div class="title-date">
+                <div class="week-title">Erste Sabbatschulgaben</div>
+                <div class="week-date">Sabbat, den 4. Juli 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>1</span></div>
+              <div class="title-date">
+                <div class="week-title">Gottes Liebe zu uns Menschen</div>
+                <div class="week-date">Sabbat, den 4. Juli 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>2</span></div>
+              <div class="title-date">
+                <div class="week-title">Die Erlösungsbedürftigkeit des Sünders</div>
+                <div class="week-date">Sabbat, den 11. Juli 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>3</span></div>
+              <div class="title-date">
+                <div class="week-title">Reue</div>
+                <div class="week-date">Sabbat, den 18. Juli 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>4</span></div>
+              <div class="title-date">
+                <div class="week-title">Bekenntnis der Sünden</div>
+                <div class="week-date">Sabbat, den 25. Juli 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span class="outline-icon-wrap"><svg class="outline-icon" viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 20.7 3.8 13a5 5 0 1 1 7.1-7.1l1.1 1.1 1.1-1.1A5 5 0 1 1 20.2 13Z" opacity=".45"/><path d="M12 21.35 4.2 14.1a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5Zm0-1.9 6.5-6.1a2.9 2.9 0 0 0-4.1-4.1L12 11.65 9.6 9.25a2.9 2.9 0 0 0-4.1 4.1Z"/></svg></span></div>
+              <div class="title-date">
+                <div class="week-title">Erste Sabbatschulgaben</div>
+                <div class="week-date">Sabbat, den 1. August 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>5</span></div>
+              <div class="title-date">
+                <div class="week-title">Hingabe</div>
+                <div class="week-date">Sabbat, den 1. August 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>6</span></div>
+              <div class="title-date">
+                <div class="week-title">Glaube und Annahme</div>
+                <div class="week-date">Sabbat, den 8. August 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>7</span></div>
+              <div class="title-date">
+                <div class="week-title">Beweis der Gotteskindschaft</div>
+                <div class="week-date">Sabbat, den 15. August 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>8</span></div>
+              <div class="title-date">
+                <div class="week-title">Wachstum in Christus</div>
+                <div class="week-date">Sabbat, den 22. August 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span class="outline-icon-wrap"><svg class="outline-icon" viewBox="0 0 24 24" width="26" height="26" fill="currentColor" aria-hidden="true"><path d="M12 20.7 3.8 13a5 5 0 1 1 7.1-7.1l1.1 1.1 1.1-1.1A5 5 0 1 1 20.2 13Z" opacity=".45"/><path d="M12 21.35 4.2 14.1a4.6 4.6 0 0 1 6.5-6.5l1.3 1.3 1.3-1.3a4.6 4.6 0 0 1 6.5 6.5Zm0-1.9 6.5-6.1a2.9 2.9 0 0 0-4.1-4.1L12 11.65 9.6 9.25a2.9 2.9 0 0 0-4.1 4.1Z"/></svg></span></div>
+              <div class="title-date">
+                <div class="week-title">Erste Sabbatschulgaben</div>
+                <div class="week-date">Sabbat, den 29. August 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>9</span></div>
+              <div class="title-date">
+                <div class="week-title">Leben und Wirken</div>
+                <div class="week-date">Sabbat, den 29. August 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>10</span></div>
+              <div class="title-date">
+                <div class="week-title">Erkenntnis Gottes</div>
+                <div class="week-date">Sabbat, den 5. September 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>11</span></div>
+              <div class="title-date">
+                <div class="week-title">Das Gebet als Gnadengabe</div>
+                <div class="week-date">Sabbat, den 12. September 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>12</span></div>
+              <div class="title-date">
+                <div class="week-title">Die Gefahr des Zweifelns</div>
+                <div class="week-date">Sabbat, den 19. September 2026</div>
+              </div>
+            </div>
+            <div class="outline-item q-mb-sm">
+              <div class="week-no content-center"><span>13</span></div>
+              <div class="title-date">
+                <div class="week-title">Die Freude im Herrn</div>
+                <div class="week-date">Sabbat, den 26. September 2026</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+</body>
+</html>
