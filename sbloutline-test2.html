@@ -3984,11 +3984,14 @@ async function outBuild(){
       +'<div><div class="otitle">'+esc(strip(l.title||""))+'</div>'
       +'<div class="odate">'+esc(strip(l.dateLong||""))+'</div></div></div>';
   });
-  /* the strip is a child of this list between renders, and innerHTML would
+  /* The element is a child of this list between renders, and innerHTML would
      destroy it along with everything else — so it is carried out first and put
-     back after. The element is only ever moved, never rebuilt. */
-  const strip=document.getElementById("days");
-  if(strip&&strip.parentNode!==document.body) document.body.appendChild(strip);
+     back after. It is only ever moved, never rebuilt.
+     Named dayStrip, not strip: the page already has a strip() that clears tags,
+     and a const of that name shadowed it for the whole function — every call
+     above threw before a single row was drawn. */
+  const dayStrip=document.getElementById("days");
+  if(dayStrip&&dayStrip.parentNode!==document.body) document.body.appendChild(dayStrip);
   list.innerHTML=h;
   list.querySelectorAll("[data-d]").forEach(function(el){ el.onclick=function(){
     current=ymdToDate(el.dataset.d); outQ=null;      /* follow the lesson home */
@@ -3997,7 +4000,7 @@ async function outBuild(){
   /* the strip goes under the lesson being read; on the whole quarter it has no
      single home, so it stays where it was */
   const cur=list.querySelector(".oitem.on");
-  if(cur&&strip&&scope!=="quarter") cur.insertAdjacentElement("afterend",strip);
+  if(cur&&dayStrip&&scope!=="quarter") cur.insertAdjacentElement("afterend",dayStrip);
   if(cur) cur.scrollIntoView({block:"nearest"});
 }
 function outStep(n){ let[y,q]=outQ||[current.getFullYear(),qOf(current)];
