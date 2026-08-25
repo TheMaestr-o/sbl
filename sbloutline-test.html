@@ -861,6 +861,11 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none;transform:transla
   border-radius:50%;background:var(--gray-dk);color:#fff;cursor:pointer;user-select:none}
 .aseek{width:min(38vw,240px);height:3px;background:rgba(120,120,128,.28);border-radius:999px;cursor:pointer}
 .aseek i{display:block;height:100%;width:0;background:var(--gray-dk);border-radius:999px}
+.astep{flex:none;width:22px;height:22px;display:flex;align-items:center;justify-content:center;
+  color:#8a8a8e;cursor:pointer;font-size:15px;user-select:none;transition:color .15s}
+.astep:hover{color:var(--gray-dk)}
+.acol{display:flex;flex-direction:column;gap:4px}
+.alabel{font-size:11px;color:#6b6b70;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:min(38vw,240px)}
 .atime{font-size:11.5px;font-variant-numeric:tabular-nums;color:#6b6b70;min-width:74px}
 
 /* one thin line at the top edge for as long as anything is being fetched: the
@@ -1141,8 +1146,10 @@ body.loading #load{opacity:1}
 
 <div class="days" id="days"></div>
 <div class="aud" id="aud">
+  <div class="astep" id="aprev">&lsaquo;</div>
   <div class="aplay" id="aplay"><svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><path d="M2 1.4 11.4 7 2 12.6Z"/></svg></div>
-  <div class="aseek" id="aseek"><i></i></div>
+  <div class="astep" id="anext">&rsaquo;</div>
+  <div class="acol"><div class="alabel" id="alabel"></div><div class="aseek" id="aseek"><i></i></div></div>
   <div class="atime" id="atime">0:00</div>
   <audio id="audel" preload="none"></audio>
 </div>
@@ -3902,49 +3909,79 @@ document.getElementById("outnext").onclick=function(){ outStep(1); };
 outSet(outOn);
 
 /* ——— the reading ———
-   Files live beside the page as audio/{lang}-{year}-{quarter}-{NN}.mp3 — the
-   same name the quarter file has, plus the lesson number. Nothing is fetched
-   until the head request says the file is there, so a quarter without
-   recordings costs one small request per lesson and shows nothing. */
+   The parts are uploaded, not described: nothing lists a folder over http, so
+   the page asks for the names it expects and stops at the first miss. One file
+   per question is what the studio records anyway, and it costs nothing to keep
+   them apart — each is its own mark, and a day is simply its first part.
+       audio/de-09-0.mp3    the title and the memory verse
+       audio/de-09-1a.mp3   Sunday, question a
+       audio/de-09-1b.mp3   Sunday, question b   … and so on to 7g
+   A quarter with no recordings answers one 404 and shows nothing. */
 const audEl=document.getElementById("audel"), audBar=document.getElementById("aud");
 const aseek=document.getElementById("aseek"), atime=document.getElementById("atime");
-let audTimes=null;
-function audName(les,data){
-  const n=String(les.no||"").replace(/\D/g,"").padStart(2,"0");
-  return "audio/"+lang+"-"+current.getFullYear()+"-"+qOf(current)+"-"+n+".mp3";
-}
+const alabel=document.getElementById("alabel");
+const AUD_LETTERS="abcdefgh";
+let audList=[], audAt=0, audToken=0;
+function audDir(no){ return "audio/"+lang+"-"+String(no).replace(/\D/g,"").padStart(2,"0"); }
+async function audHas(u){ try{ const r=await fetch(u,{method:"HEAD"}); return r.ok; }catch(e){ return false; } }
 function mmss(t){ t=Math.max(0,Math.floor(t||0)); return Math.floor(t/60)+":"+String(t%60).padStart(2,"0"); }
-function audShow(on){ document.body.classList.toggle("audon",on); if(!on){ audEl.pause(); } }
+function audShow(on){ document.body.classList.toggle("audon",on); if(!on) audEl.pause(); }
+function audIcon(playing){
+  document.getElementById("aplay").innerHTML = playing
+    ? '<svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor"><path d="M1.4 1.4h3v11h-3zM7.6 1.4h3v11h-3z"/></svg>'
+    : '<svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><path d="M2 1.4 11.4 7 2 12.6Z"/></svg>';
+}
+/* the day names the page already speaks, so the label says "Sonntag · a" */
+function audDayName(i){
+  try{ const d=new Date(2026,1,1+i); return new Intl.DateTimeFormat(LOCALE[lang],{weekday:"long"}).format(d); }
+  catch(e){ return String(i+1); }
+}
 async function audSync(){
-  audShow(false); audTimes=null; audEl.removeAttribute("src");
-  if(scope==="quarter") return;                 /* the whole quarter is not one reading */
-  const les=await findLesson(current,lang); if(!les) return;
-  const data=await loadQuarter(lang,current.getFullYear(),qOf(current));
-  const url=audName(les,data);
-  try{ const r=await fetch(url,{method:"HEAD"}); if(!r.ok) return; }catch(e){ return; }
-  const i=((data&&data.lessons)||[]).indexOf(les);
-  audTimes=(data&&data.audioTimes&&i>=0)?data.audioTimes[i]:null;
-  audEl.src=url; audShow(true);
+  const my=++audToken;
+  audShow(false); audList=[]; audAt=0; audEl.removeAttribute("src"); audIcon(false);
+  if(scope==="quarter") return;            /* the whole quarter is not one reading */
+  const les=await findLesson(current,lang); if(!les||my!==audToken) return;
+  const base=audDir(les.no);
+
+  const intro=base+"-0.mp3";
+  if(!(await audHas(intro))||my!==audToken) return;    /* no recording for this lesson */
+  audList.push({u:intro,label:strip(les.title||"")});
+
+  for(let d=1;d<=7;d++){
+    for(let li=0;li<AUD_LETTERS.length;li++){
+      const u=base+"-"+d+AUD_LETTERS[li]+".mp3";
+      if(!(await audHas(u))){ break; }             /* this day has no more parts */
+      if(my!==audToken) return;
+      audList.push({u:u,day:d,label:audDayName(d-1)+" · "+AUD_LETTERS[li]});
+    }
+  }
+  audLoad(0,false); audShow(true);
+}
+function audLoad(i,play){
+  if(i<0||i>=audList.length) return;
+  audAt=i; audEl.src=audList[i].u; alabel.textContent=audList[i].label||"";
+  if(play){ audEl.play(); audIcon(true); } else audIcon(false);
 }
 document.getElementById("aplay").onclick=function(){
-  if(audEl.paused){ audEl.play(); this.innerHTML='<svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor"><path d="M1.4 1.4h3v11h-3zM7.6 1.4h3v11h-3z"/></svg>'; }
-  else { audEl.pause(); this.innerHTML='<svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><path d="M2 1.4 11.4 7 2 12.6Z"/></svg>'; }
+  if(!audList.length) return;
+  if(audEl.paused){ audEl.play(); audIcon(true); } else { audEl.pause(); audIcon(false); }
 };
+/* one part ends, the next begins — the lesson reads straight through */
+audEl.addEventListener("ended",function(){ if(audAt+1<audList.length) audLoad(audAt+1,true); else audIcon(false); });
 audEl.addEventListener("timeupdate",function(){
-  const d=audEl.duration||0, t=audEl.currentTime||0;
+  const d=audEl.duration||0,t=audEl.currentTime||0;
   aseek.firstElementChild.style.width=(d?(t/d*100):0)+"%";
   atime.textContent=mmss(t)+(d?" / "+mmss(d):"");
 });
 aseek.onclick=function(e){ const r=this.getBoundingClientRect();
   if(audEl.duration) audEl.currentTime=(e.clientX-r.left)/r.width*audEl.duration; };
-/* a day is a chapter mark: pressing one moves the recording to where that day
-   begins, which is what audioTimes is for */
+document.getElementById("aprev").onclick=function(){ audLoad(audAt-1,!audEl.paused); };
+document.getElementById("anext").onclick=function(){ audLoad(audAt+1,!audEl.paused); };
+/* a day is where its first part begins */
 function audSeekDay(i){
-  if(!audTimes||!audTimes[i]) return false;
-  const p=String(audTimes[i]).split(":").map(Number);
-  audEl.currentTime=p.length>2?p[0]*3600+p[1]*60+p[2]:p[0]*60+p[1];
-  if(audEl.paused) document.getElementById("aplay").click();
-  return true;
+  const k=audList.findIndex(function(p){ return p.day===i+1; });
+  if(k<0) return false;
+  audLoad(k,true); return true;
 }
 </script>
 </body>
