@@ -783,11 +783,11 @@ body.outlineon .outline{transform:none}
    by being able to walk into them, not by a sentence saying so */
 .outnav{position:absolute;top:16px;right:14px;display:flex;gap:4px}
 .outnav .oarr{width:26px;height:26px;display:flex;align-items:center;justify-content:center;
-  border:1px solid #e9e9e9;border-radius:8px;background:#fff;color:#8a8a8e;cursor:pointer;
+  border:1px solid #e9e9e9;border-radius:0;background:#fff;color:#8a8a8e;cursor:pointer;
   font-size:15px;line-height:1;user-select:none;transition:color .15s,border-color .15s}
 .outnav .oarr:hover{color:#2b2b2b;border-color:#d3d3d3}
 .outclose{position:absolute;top:16px;right:14px;width:26px;height:26px;display:none;
-  align-items:center;justify-content:center;border:1px solid #e9e9e9;border-radius:8px;
+  align-items:center;justify-content:center;border:1px solid #e9e9e9;border-radius:0;
   background:#fff;color:#8a8a8e;cursor:pointer;font-size:16px;line-height:1}
 
 .outlist{flex:1;overflow-y:auto;padding:2px 10px 26px}
@@ -795,10 +795,17 @@ body.outlineon .outline{transform:none}
 /* Number and text, set as the printed page sets them — but tighter: thirteen
    lessons plus three offering Sabbaths have to stand in one screen, or the list
    stops being a view of the quarter and becomes another thing to scroll. */
-.oitem{display:grid;grid-template-columns:2.3rem 1fr;align-items:center;gap:1px;
-  padding:5px 8px;border-radius:6px;cursor:pointer;transition:background .18s}
+/* The sheet has square corners, so the rows beside it do too — a rounded row
+   against a sharp page reads as a control laid on the lesson rather than as
+   part of the same printed thing. */
+.oitem{display:grid;grid-template-columns:2.4rem 1fr;align-items:stretch;gap:1px;
+  padding:5px 8px;border-radius:0;cursor:pointer;transition:background .18s}
 @media (hover:hover){ .oitem:hover{background:#f6f7fa} }
-.oitem .ono{font-size:1.5rem;font-weight:800;line-height:1.15;text-align:center;
+/* The number stands the height of both lines. Its own line-height was leaving
+   air above and below, which set the digit off the rhythm of the two lines it
+   belongs to; at 1 the glyph box is tight and the column reads as one row. */
+.oitem .ono{display:flex;align-items:center;justify-content:center;
+  font-size:1.85rem;font-weight:800;line-height:1;
   color:var(--gray);transition:color .18s}
 /* Two lines and no more. A long title cut short still says which lesson it is,
    and the rows keep their rhythm — one that runs to four lines pushes the rest
