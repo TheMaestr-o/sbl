@@ -898,29 +898,23 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
 .aseek{margin:11px 2px 0;height:2px;background:rgba(120,120,128,.26);cursor:pointer}
 .aseek i{display:block;height:100%;width:0;background:var(--gray-dk);transition:width .12s linear}
 
-/* Every part of the reading, laid out the way the lesson is: a day, and its
-   questions lettered across from it. A column of rows each saying "Frage" told
-   the reader nothing he could not see — the letters alone are the content, and
-   set as marks they can be read at a glance and hit with a finger. */
-.alist{max-height:min(44vh,300px);overflow-y:auto;overscroll-behavior:contain;
-  margin-top:13px;padding-top:11px;border-top:1px solid var(--hair)}
+/* The parts, numbered straight through the way any player lists a record. The
+   first attempt set them as lettered marks under each day — compact, and
+   nobody would have known what to do with it. A track list is understood on
+   sight, and that is worth more here than cleverness. */
+.alist{max-height:min(46vh,320px);overflow-y:auto;overscroll-behavior:contain;
+  margin-top:13px;padding-top:9px;border-top:1px solid var(--hair)}
 .alist[hidden]{display:none}
-.arow2{display:flex;align-items:center;gap:8px;padding:3px 2px}
-.aday{flex:none;width:64px;font-size:10px;letter-spacing:.07em;text-transform:uppercase;
-  color:#b3b3bb;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.aqs{display:flex;flex-wrap:wrap;gap:4px}
-.aq{width:23px;height:23px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;font-size:11.5px;font-weight:700;color:#8a8a8e;cursor:pointer;
-  user-select:none;transition:background .15s,color .15s}
-@media (hover:hover){ .aq:hover{background:rgba(120,120,128,.14);color:#2b2b2b} }
-.aq.on{background:var(--gray-dk);color:#fff}
-/* the opening stands on its own line above the days — it belongs to no day */
-.aopen{display:flex;align-items:center;gap:8px;padding:2px 2px 8px;cursor:pointer;
-  font-size:12px;color:#7a7a80;transition:color .15s}
-.aopen:hover{color:var(--gray-dk)}
-.aopen b{flex:none;width:23px;text-align:center;color:var(--gray);font-size:13px}
-.aopen span{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.aopen.on{color:var(--gray-dk);font-weight:700}
+.atrk{display:flex;align-items:center;gap:9px;padding:5px 4px;cursor:pointer;
+  font-size:12px;color:#76767c;transition:color .15s,background .15s}
+@media (hover:hover){ .atrk:hover{background:rgba(120,120,128,.08);color:var(--gray-dk)} }
+.atrk .anum{flex:none;width:15px;text-align:right;font-size:11px;
+  font-variant-numeric:tabular-nums;color:#c2c2cb}
+.atrk .atit{flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.atrk.on{color:var(--gray-dk);font-weight:700}
+.atrk.on .anum{color:var(--gray-dk)}
+/* the one playing carries the mark instead of its number */
+.atrk.on .anum svg{display:block;margin-left:auto}
 
 /* one thin line at the top edge for as long as anything is being fetched: the
    only honest answer to "is it working or is it stuck" */
@@ -2377,7 +2371,7 @@ const MKW={
   undo:{de:"Zurückholen",en:"Undo",ru:"Вернуть"},
   cleared:{de:"Lektion geleert",en:"Lesson cleared",ru:"Урок очищен"},
   marker:{de:"Marker",en:"Marker",ru:"Маркер"},
-  qword:{de:"Frage",en:"Question",ru:"Вопрос"},
+  aintro:{de:"Einleitung",en:"Opening",ru:"Вступление"},
   mkoff:{de:"Marker aus — Text lässt sich normal markieren",en:"Marker off — the text selects normally",ru:"Маркер выключен — текст выделяется как обычно"},
   mkon:{de:"Marker an",en:"Marker on",ru:"Маркер включён"},
   instant:{de:"Sofort",en:"Instant",ru:"Сразу"},
@@ -4005,7 +3999,7 @@ async function audSync(){
 
   const intro=base+"-0.mp3";
   if(!(await audHas(intro))||my!==audToken) return;    /* no recording for this lesson */
-  audList.push({u:intro,label:strip(les.title||"")});
+  audList.push({u:intro,label:T("aintro")||"Intro"});
 
   for(let d=1;d<=7;d++){
     for(let li=0;li<AUD_LETTERS.length;li++){
@@ -4020,26 +4014,21 @@ async function audSync(){
 /* the parts as a list: the opening, then each question under the day it opens */
 function audBuildList(){
   const box=document.getElementById("alist");
-  const byDay={};
-  let h="";
-  audList.forEach(function(p,i){
-    if(!p.day){ h+='<div class="aopen" data-i="'+i+'"><b>&bull;</b><span>'+esc(p.label||"")+'</span></div>'; return; }
-    (byDay[p.day]=byDay[p.day]||[]).push([i,p.letter]);
-  });
-  Object.keys(byDay).sort(function(x,y){return x-y;}).forEach(function(d){
-    h+='<div class="arow2"><div class="aday">'+esc(audDayName(d-1))+'</div><div class="aqs">'
-      +byDay[d].map(function(q){ return '<div class="aq" data-i="'+q[0]+'">'+esc(q[1])+'</div>'; }).join("")
-      +'</div></div>';
-  });
-  box.innerHTML=h;
+  box.innerHTML=audList.map(function(p,i){
+    return '<div class="atrk" data-i="'+i+'"><span class="anum">'+(i+1)+'</span>'
+      +'<span class="atit">'+esc(p.label||"")+'</span></div>';
+  }).join("");
   box.querySelectorAll("[data-i]").forEach(function(el){
     el.onclick=function(){ audLoad(+el.dataset.i,true); };
   });
   audMarkList();
 }
+const AU_MARK='<svg width="9" height="10" viewBox="0 0 9 10" fill="currentColor"><path d="M1 .8 8 5 1 9.2Z"/></svg>';
 function audMarkList(){
-  document.querySelectorAll("#alist [data-i]").forEach(function(el){
-    el.classList.toggle("on",+el.dataset.i===audAt);
+  document.querySelectorAll("#alist .atrk").forEach(function(el){
+    const i=+el.dataset.i, on=i===audAt;
+    el.classList.toggle("on",on);
+    el.firstElementChild.innerHTML=on?AU_MARK:String(i+1);
   });
 }
 function audLoad(i,play){
