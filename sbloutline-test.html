@@ -840,6 +840,29 @@ body.outlineon .outscrim{opacity:1;pointer-events:auto}
 body.bare .outline,body.writing .outline{opacity:0;pointer-events:none}
 body.bare .outscrim,body.writing .outscrim{opacity:0;pointer-events:none}
 
+
+/* ——— the reading, when there is one ———
+   The button is not drawn unless a file is actually there: an empty player is
+   a promise the page cannot keep, and every quarter that has no recording would
+   otherwise carry a dead control. The file is asked for once per lesson; if it
+   answers, the bar appears.
+   `audioTimes` in the quarter file marks where each day of the lesson begins, so
+   the strip of days doubles as the chapter list — pressing a day moves the
+   recording to it. */
+.aud{position:fixed;left:50%;transform:translateX(-50%) translateY(140%);
+  bottom:calc(env(safe-area-inset-bottom) + 12px);z-index:64;
+  display:flex;align-items:center;gap:10px;padding:7px 8px 7px 7px;
+  background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);
+  border-radius:999px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.1);
+  opacity:0;pointer-events:none;transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
+body.audon .aud{opacity:1;pointer-events:auto;transform:translateX(-50%)}
+body.bare .aud,body.writing .aud{opacity:0;pointer-events:none;transform:translateX(-50%) translateY(140%)}
+.aplay{flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
+  border-radius:50%;background:var(--gray-dk);color:#fff;cursor:pointer;user-select:none}
+.aseek{width:min(38vw,240px);height:3px;background:rgba(120,120,128,.28);border-radius:999px;cursor:pointer}
+.aseek i{display:block;height:100%;width:0;background:var(--gray-dk);border-radius:999px}
+.atime{font-size:11.5px;font-variant-numeric:tabular-nums;color:#6b6b70;min-width:74px}
+
 /* one thin line at the top edge for as long as anything is being fetched: the
    only honest answer to "is it working or is it stuck" */
 #load{position:fixed;left:0;right:0;top:0;height:2px;z-index:75;overflow:hidden;
@@ -1117,6 +1140,12 @@ body.loading #load{opacity:1}
 </div>
 
 <div class="days" id="days"></div>
+<div class="aud" id="aud">
+  <div class="aplay" id="aplay"><svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><path d="M2 1.4 11.4 7 2 12.6Z"/></svg></div>
+  <div class="aseek" id="aseek"><i></i></div>
+  <div class="atime" id="atime">0:00</div>
+  <audio id="audel" preload="none"></audio>
+</div>
 <div class="outscrim" id="outscrim"></div>
 <aside class="outline" id="outline">
   <div class="outhead">
@@ -1684,6 +1713,7 @@ async function render(){
   mkPanesListen();                     /* the columns are new — so are their scrollbars */
   mkDaysBuild(); mkOpenToday();
   outQ=null; if(outOn) outBuild();
+  audSync();
   mkPrefetch();
 
   if(versesOn && tasks.length){
@@ -3870,6 +3900,52 @@ document.getElementById("outscrim").onclick=function(){ outSet(false); };
 document.getElementById("outprev").onclick=function(){ outStep(-1); };
 document.getElementById("outnext").onclick=function(){ outStep(1); };
 outSet(outOn);
+
+/* ——— the reading ———
+   Files live beside the page as audio/{lang}-{year}-{quarter}-{NN}.mp3 — the
+   same name the quarter file has, plus the lesson number. Nothing is fetched
+   until the head request says the file is there, so a quarter without
+   recordings costs one small request per lesson and shows nothing. */
+const audEl=document.getElementById("audel"), audBar=document.getElementById("aud");
+const aseek=document.getElementById("aseek"), atime=document.getElementById("atime");
+let audTimes=null;
+function audName(les,data){
+  const n=String(les.no||"").replace(/\D/g,"").padStart(2,"0");
+  return "audio/"+lang+"-"+current.getFullYear()+"-"+qOf(current)+"-"+n+".mp3";
+}
+function mmss(t){ t=Math.max(0,Math.floor(t||0)); return Math.floor(t/60)+":"+String(t%60).padStart(2,"0"); }
+function audShow(on){ document.body.classList.toggle("audon",on); if(!on){ audEl.pause(); } }
+async function audSync(){
+  audShow(false); audTimes=null; audEl.removeAttribute("src");
+  if(scope==="quarter") return;                 /* the whole quarter is not one reading */
+  const les=await findLesson(current,lang); if(!les) return;
+  const data=await loadQuarter(lang,current.getFullYear(),qOf(current));
+  const url=audName(les,data);
+  try{ const r=await fetch(url,{method:"HEAD"}); if(!r.ok) return; }catch(e){ return; }
+  const i=((data&&data.lessons)||[]).indexOf(les);
+  audTimes=(data&&data.audioTimes&&i>=0)?data.audioTimes[i]:null;
+  audEl.src=url; audShow(true);
+}
+document.getElementById("aplay").onclick=function(){
+  if(audEl.paused){ audEl.play(); this.innerHTML='<svg width="12" height="14" viewBox="0 0 12 14" fill="currentColor"><path d="M1.4 1.4h3v11h-3zM7.6 1.4h3v11h-3z"/></svg>'; }
+  else { audEl.pause(); this.innerHTML='<svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><path d="M2 1.4 11.4 7 2 12.6Z"/></svg>'; }
+};
+audEl.addEventListener("timeupdate",function(){
+  const d=audEl.duration||0, t=audEl.currentTime||0;
+  aseek.firstElementChild.style.width=(d?(t/d*100):0)+"%";
+  atime.textContent=mmss(t)+(d?" / "+mmss(d):"");
+});
+aseek.onclick=function(e){ const r=this.getBoundingClientRect();
+  if(audEl.duration) audEl.currentTime=(e.clientX-r.left)/r.width*audEl.duration; };
+/* a day is a chapter mark: pressing one moves the recording to where that day
+   begins, which is what audioTimes is for */
+function audSeekDay(i){
+  if(!audTimes||!audTimes[i]) return false;
+  const p=String(audTimes[i]).split(":").map(Number);
+  audEl.currentTime=p.length>2?p[0]*3600+p[1]*60+p[2]:p[0]*60+p[1];
+  if(audEl.paused) document.getElementById("aplay").click();
+  return true;
+}
 </script>
 </body>
 </html>
