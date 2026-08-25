@@ -764,9 +764,15 @@ body.bare .days,body.writing .days{opacity:0;pointer-events:none;transform:trans
    Wide windows have margin enough to hold it without touching the sheet.
    Narrower ones do not, so there it lies over the page on a white ground, and
    the scrim says the lesson is not the thing being used. */
-.outline{position:fixed;z-index:62;right:max(10px,calc((100vw - 900px) / 2));
+/* Anchored to the sheet, not to the window: half the page is 410px, the list is
+   246 and wants 20 of air, so it stands 676 in from the middle. Measuring from
+   the window edge instead is what put it on top of the text — the sheet is
+   centred, and its margin is not the window's margin.
+   The ground is always white. Beside the page it is invisible against the paper;
+   over the page it is what keeps the lines from showing through. */
+.outline{position:fixed;z-index:62;right:max(10px,calc(50vw - 676px));
   top:calc(var(--barh,67px) + 10px);width:246px;max-height:calc(100dvh - var(--barh,67px) - 26px);
-  display:flex;flex-direction:column;
+  display:flex;flex-direction:column;background:var(--paper-tone,#fff);
   opacity:0;pointer-events:none;transform:translateX(14px);
   transition:opacity .24s,transform .3s cubic-bezier(.3,.9,.3,1)}
 body.outlineon .outline{opacity:1;pointer-events:auto;transform:none}
@@ -820,12 +826,13 @@ body.outlineon .days{opacity:0;pointer-events:none;transform:translateY(-50%) tr
 
 /* Below this the margin is too narrow to hold the list clear of the sheet, so
    it lies over the page instead — on its own white ground, with the scrim. */
-@media (max-width:1439px){
-  .outline{right:10px;background:#fff;padding:14px 8px 4px;
-    box-shadow:-14px 0 34px rgba(0,0,0,.10)}
+/* Below this the sheet reaches the list, so it stops standing beside the page
+   and starts lying on it — which needs an edge and a scrim, and nothing else. */
+@media (max-width:1400px){
+  .outline{right:10px;padding:14px 8px 4px;box-shadow:-14px 0 34px rgba(0,0,0,.10)}
   .outhead,.outsub{padding-left:8px;padding-right:8px}
 }
-@media (min-width:1440px){ .outscrim{display:none} }
+@media (min-width:1401px){ .outscrim{display:none} }
 .outscrim{position:fixed;inset:0;z-index:61;background:rgba(0,0,0,.22);
   opacity:0;pointer-events:none;transition:opacity .28s}
 body.outlineon .outscrim{opacity:1;pointer-events:auto}
@@ -3852,7 +3859,7 @@ async function outBuild(){
   list.innerHTML=h;
   list.querySelectorAll("[data-d]").forEach(function(el){ el.onclick=function(){
     current=ymdToDate(el.dataset.d); outQ=null;      /* follow the lesson home */
-    if(!matchMedia("(min-width:1440px)").matches||document.body.classList.contains("dualview")) outSet(false);
+    if(!matchMedia("(min-width:1401px)").matches||document.body.classList.contains("dualview")) outSet(false);
     render(); }; });
   const cur=list.querySelector(".oitem.on"); if(cur) cur.scrollIntoView({block:"nearest"});
 }
