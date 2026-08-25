@@ -1155,8 +1155,10 @@ body.loading #load{opacity:1}
     <div class="aplay" id="aplay"><svg width="13" height="14" viewBox="0 0 13 14" fill="currentColor"><path d="M2 1.4 11.4 7 2 12.6Z"/></svg></div>
     <div class="astep" id="anext">&rsaquo;</div>
     <div class="atime" id="atime">0:00</div>
+    <div class="atoggle" id="atoggle" title="">&#9776;</div>
   </div>
   <div class="aseek" id="aseek"><i></i></div>
+  <div class="alist" id="alist" hidden></div>
   <audio id="audel" preload="none"></audio>
 </div>
 <div class="outscrim" id="outscrim"></div>
@@ -3961,11 +3963,31 @@ async function audSync(){
       audList.push({u:u,day:d,label:audDayName(d-1)+" · "+AUD_LETTERS[li]});
     }
   }
-  audLoad(0,false); audShow(true);
+  audBuildList(); audLoad(0,false); audShow(true);
+}
+/* the parts as a list: the opening, then each question under the day it opens */
+function audBuildList(){
+  const box=document.getElementById("alist");
+  let h="",lastDay=0;
+  audList.forEach(function(p,i){
+    const first=p.day&&p.day!==lastDay; if(p.day) lastDay=p.day;
+    const mark=p.day?p.u.slice(p.u.lastIndexOf("-")+1).replace(".mp3",""):"\u2022";
+    h+='<div class="apart'+(first?" dstart":"")+(i===audAt?" on":"")+'" data-i="'+i+'">'
+      +'<b>'+esc(p.day?mark.replace(/^\d/,""):"\u2022")+'</b><span>'+esc(p.label||"")+'</span></div>';
+  });
+  box.innerHTML=h;
+  box.querySelectorAll("[data-i]").forEach(function(el){
+    el.onclick=function(){ audLoad(+el.dataset.i,true); };
+  });
+}
+function audMarkList(){
+  document.querySelectorAll("#alist .apart").forEach(function(el,i){
+    el.classList.toggle("on",i===audAt);
+  });
 }
 function audLoad(i,play){
   if(i<0||i>=audList.length) return;
-  audAt=i; audEl.src=audList[i].u; alabel.textContent=audList[i].label||"";
+  audAt=i; audEl.src=audList[i].u; alabel.textContent=audList[i].label||""; audMarkList();
   if(play){ audEl.play(); audIcon(true); } else audIcon(false);
 }
 document.getElementById("aplay").onclick=function(){
@@ -3984,6 +4006,8 @@ audEl.addEventListener("timeupdate",function(){
 });
 aseek.onclick=function(e){ const r=this.getBoundingClientRect();
   if(audEl.duration) audEl.currentTime=(e.clientX-r.left)/r.width*audEl.duration; };
+document.getElementById("atoggle").onclick=function(){
+  const b=document.getElementById("alist"); b.hidden=!b.hidden; };
 document.getElementById("aprev").onclick=function(){ audLoad(audAt-1,!audEl.paused); };
 document.getElementById("anext").onclick=function(){ audLoad(audAt+1,!audEl.paused); };
 /* a day is where its first part begins */
