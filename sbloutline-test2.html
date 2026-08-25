@@ -694,7 +694,7 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;transform:trans
    `days` is a LAYER name: everything under it is torn out of the page and made
    to float. Nothing inside a panel may carry it — the calendar's own week is
    `dcells` for exactly that reason. */
-.days{position:fixed;right:max(10px,calc((100vw - 900px) / 2));top:50%;transform:translateY(-50%);display:none;
+.days{position:fixed;right:max(10px,calc((100vw - 900px) / 2));top:50%;transform:translateY(-50%);
   z-index:59;display:flex;flex-direction:column;gap:3px;padding:6px;
   background:var(--mat);-webkit-backdrop-filter:saturate(180%) blur(24px);backdrop-filter:saturate(180%) blur(24px);
   border-radius:999px;box-shadow:0 0 0 .5px var(--hair),0 10px 28px rgba(0,0,0,.1);
@@ -837,7 +837,7 @@ body.outlineon .outbtn{background:#2b2b2b;border-color:#2b2b2b;color:#fff}
    both questions at once. Where am I in the quarter, and where am I in the week.
    The element is moved, not rebuilt, so every behaviour it already had comes
    with it. */
-.outline .days{display:flex;position:static;transform:none;flex-direction:row;justify-content:center;
+.outline .days{position:static;transform:none;flex-direction:row;justify-content:center;
   flex-wrap:wrap;gap:2px;margin:1px 0 6px;padding:5px 4px;border-radius:0;
   background:rgba(120,120,128,.05);box-shadow:none;-webkit-backdrop-filter:none;backdrop-filter:none;
   opacity:1;pointer-events:auto}
@@ -1809,7 +1809,7 @@ async function render(){
   mkRestore();
   mkPanesListen();                     /* the columns are new — so are their scrollbars */
   mkDaysBuild(); mkOpenToday();
-  outQ=null; if(outOn) outBuild();
+  outQ=null; if(outOn) await outBuild();
   audSync();
   mkPrefetch();
 
@@ -3984,6 +3984,11 @@ async function outBuild(){
       +'<div><div class="otitle">'+esc(strip(l.title||""))+'</div>'
       +'<div class="odate">'+esc(strip(l.dateLong||""))+'</div></div></div>';
   });
+  /* the strip is a child of this list between renders, and innerHTML would
+     destroy it along with everything else — so it is carried out first and put
+     back after. The element is only ever moved, never rebuilt. */
+  const strip=document.getElementById("days");
+  if(strip&&strip.parentNode!==document.body) document.body.appendChild(strip);
   list.innerHTML=h;
   list.querySelectorAll("[data-d]").forEach(function(el){ el.onclick=function(){
     current=ymdToDate(el.dataset.d); outQ=null;      /* follow the lesson home */
@@ -3992,8 +3997,7 @@ async function outBuild(){
   /* the strip goes under the lesson being read; on the whole quarter it has no
      single home, so it stays where it was */
   const cur=list.querySelector(".oitem.on");
-  const strip=document.getElementById("days");
-  if(cur&&strip&&scope!=="quarter"){ cur.insertAdjacentElement("afterend",strip); }
+  if(cur&&strip&&scope!=="quarter") cur.insertAdjacentElement("afterend",strip);
   if(cur) cur.scrollIntoView({block:"nearest"});
 }
 function outStep(n){ let[y,q]=outQ||[current.getFullYear(),qOf(current)];
