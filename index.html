@@ -429,6 +429,17 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
 /* the "a." / "b." marker owns its own column, so wrapped lines land exactly
    under the first word of the question rather than a few pixels off */
 .q .qm,.review .qm{display:inline-block;width:26px;text-indent:0}
+/* ——— the letter is the address of the question ———
+   A reader points another at one question the way he would in the room: by its
+   letter. Pressing it copies the link, and pressing the day of a band copies the
+   link to the day. Nothing is added to the sheet for this — the two things that
+   already name a place are simply made to answer. */
+.q .qm{cursor:pointer}
+.sec .day{cursor:pointer}
+@media (hover:hover){ .q .qm:hover{color:var(--gray-dk)} .sec .day:hover{filter:brightness(1.16)} }
+/* the question a link points at says so, once, and then lets go */
+.q.lit{animation:qlit 1.8s ease-out}
+@keyframes qlit{from{background:var(--box)}to{background:transparent}}
 /* a reference is one word: it never breaks and it is never hyphenated */
 .ref{white-space:nowrap;-webkit-hyphens:none;hyphens:none}
 
@@ -1068,6 +1079,22 @@ const MEMLABEL={de:"Merktext",en:"Memory verse",ru:"Памятный стих"};
 let lang=localStorage.getItem("sbl.lang")||localStorage.getItem("sbl.left")||"en";
 if(LANGS.indexOf(lang)===-1) lang="en";
 let current=new Date();
+/* ——— a link to exactly this place ———
+   `#de/20260826/b` — the language, the day, and the letter of the question if
+   the finger was that precise. It is read before the first paint, so a lesson
+   opened from someone else's message opens where he was pointing and not at
+   today. Nothing of the reader travels in it: his marks stay on his device, and
+   the link carries only where to look. */
+const LINK_RE=/^#?([a-z]{2})\/(\d{8})(?:\/([a-z]))?$/;
+let linkWant=null;
+function linkRead(){
+  let h=""; try{ h=decodeURIComponent(location.hash||""); }catch(e){ h=location.hash||""; }
+  const m=LINK_RE.exec(h);
+  if(!m||LANGS.indexOf(m[1])<0) return null;
+  const at=ymdToDate(m[2]);
+  return isNaN(at.getTime())?null:{lang:m[1],date:m[2],at:at,q:m[3]||""};
+}
+(function(){ const w=linkRead(); if(w){ lang=w.lang; current=w.at; linkWant=w; } })();
 const quarters={};
 const BIBLE={de:"de-lut",en:"en-kjv",ru:"ru-rst"};
 const bibles={};
@@ -1643,6 +1670,7 @@ async function render(){
     relaxDayStarts();   /* the passage has arrived — the block may have outgrown its keep */
     mkRestore();        /* … and the marks that live inside the passage can go back on */
   }
+  linkStamp(); linkLand();
 }
 /* three languages fit on one button: it shows the one you are reading and
    steps to the next when pressed */
@@ -3411,9 +3439,8 @@ function mkCopyRange(r){
   const t=r.toString().replace(/\u00A0/g," ").trim(); if(!t) return;
   let el=r.commonAncestorContainer;
   if(el.nodeType===3) el=el.parentElement;
-  const item=el.closest?el.closest(".vitem"):null;
-  const ref=item&&item.querySelector(".vref")?item.querySelector(".vref").textContent.replace(/\u00A0/g," ").trim():"";
-  const out="«"+t+"»"+(ref?" ("+ref+")":"");
+  const s=mkSourceFor(el);
+  const out="«"+t+"»"+(s&&s.t&&t.indexOf(s.t)<0?(s.br?" ("+s.t+")":" \u2014 "+s.t):"");
   if(navigator.clipboard) navigator.clipboard.writeText(out);
   mkToast(T("copied"));
 }
@@ -3889,6 +3916,120 @@ if(mkRailOn) document.documentElement.style.setProperty("--railw",(mkRail.offset
 mkPaintMode(); mkChipPaint();
 
 render();
+
+/* ——— the address bar always holds a link worth sending ———
+   The lesson being read is written into the address as it is opened, so a
+   reader who simply copies what the browser shows him copies the right thing.
+   `replaceState` and not a jump: the back button still walks the pages he
+   actually visited, and no hashchange comes back at us for it. */
+function linkStamp(){
+  try{ history.replaceState(null,"","#"+lang+"/"+ymd(current)); }catch(e){}
+  /* the two places that can be pointed at say so under the cursor */
+  document.querySelectorAll(".q .qm").forEach(function(el){ el.title=T("linkq"); });
+  document.querySelectorAll(".sec .day").forEach(function(el){ el.title=T("linkd"); });
+}
+/* the question a link names, found through the band it sits under: the band
+   knows its date, its title knows the index of the day, and the letter is the
+   place of the question inside it */
+function linkBlock(dayYmd,letter){
+  const band=document.querySelector('.sec[data-d="'+dayYmd+'"]');
+  if(!band) return {band:null,q:null};
+  if(!letter) return {band:band,q:null};
+  const t=band.querySelector(".t[data-k]");
+  const di=t&&t.dataset.k;
+  const si=letter.charCodeAt(0)-97;
+  return {band:band,q:(di&&si>=0)?document.querySelector('[data-k="'+di+"s"+si+'q"]'):null};
+}
+function linkLand(){
+  const w=linkWant; if(!w) return;
+  linkWant=null;
+  const hit=linkBlock(w.date,w.q);
+  if(!hit.band) return;
+  const el=hit.q||hit.band;
+  /* the same landing the day strip uses: put down, then put down again once the
+     layout has finished moving under it */
+  const go=function(){ mkBarH(); mkLand(el); };
+  go(); requestAnimationFrame(go); setTimeout(go,220);
+  mkFlash(hit.band);
+  if(hit.q){
+    const q=hit.q;
+    q.classList.remove("lit"); void q.offsetWidth; q.classList.add("lit");
+    setTimeout(function(){ q.classList.remove("lit"); },1900);
+  }
+}
+function linkCopy(dayYmd,letter){
+  const u=location.href.replace(/#.*$/,"")+"#"+lang+"/"+dayYmd+(letter?"/"+letter:"");
+  if(navigator.clipboard) navigator.clipboard.writeText(u);
+  mkToast(T("linked"));
+}
+document.addEventListener("click",function(e){
+  if(mkMode) return;                    /* a tool in hand means the click is the tool's */
+  if(!e.target.closest) return;
+  const day=e.target.closest(".sec .day");
+  if(day){ const b=day.closest(".sec"); if(b&&b.dataset.d) linkCopy(b.dataset.d,""); return; }
+  const qm=e.target.closest(".q .qm");
+  if(!qm) return;
+  const blk=qm.closest("[data-k]"); if(!blk) return;
+  const m=/^d(\d+)s(\d+)q$/.exec(blk.dataset.k||""); if(!m) return;
+  const t=document.querySelector('.sec .t[data-k="d'+m[1]+'"]');
+  const band=t&&t.closest(".sec");
+  if(band&&band.dataset.d) linkCopy(band.dataset.d,String.fromCharCode(97+ +m[2]));
+});
+/* someone pastes a link into the page that is already open */
+addEventListener("hashchange",function(){
+  const w=linkRead(); if(!w) return;
+  linkWant=w;
+  if(w.lang!==lang){ lang=w.lang; try{ localStorage.setItem("sbl.lang",lang); }catch(e){} paintUI(); buildSeg(); }
+  current=w.at;
+  render();
+});
+
+/* ——— what leaves the page keeps its source ———
+   In the booklet the credit stands at the foot of the quote. On a screen it is
+   left behind the moment the text is copied, and the quote turns up in somebody
+   else's chat with no name on it. So a copy takes the source with it: the
+   passage names itself in the line above it, a commentary in the italic at its
+   foot, the memory verse in the brackets that close it. */
+function mkSourceFor(el){
+  if(!el||!el.closest) return null;
+  const item=el.closest(".vitem"), vref=item&&item.querySelector(".vref");
+  if(vref) return {t:vref.textContent.replace(/\u00A0/g," ").trim(),br:true};
+  const blk=el.closest(".quote,.note");
+  if(blk){
+    const is=blk.querySelectorAll(":scope > i"), last=is[is.length-1];
+    if(last){
+      const src=last.textContent.replace(/\u00A0/g," ").trim();
+      /* only if it really is the foot of the block, not an italic mid-sentence */
+      if(src&&blk.textContent.replace(/\u00A0/g," ").trim().slice(-src.length)===src) return {t:src,br:false};
+    }
+  }
+  const mem=el.closest(".mem");
+  if(mem){
+    const m=mem.textContent.replace(/\u00A0/g," ").trim().match(/\(([^()]{2,70})\)\.?$/);
+    if(m) return {t:m[1].trim(),br:true};
+  }
+  return null;
+}
+function mkWithSource(t,el){
+  const s=mkSourceFor(el);
+  if(!s||!s.t||t.indexOf(s.t)>=0) return t;      /* already inside what was taken */
+  return t+(s.br?" ("+s.t+")":" \u2014 "+s.t);
+}
+/* an ordinary Cmd-C, not the tool: a whole thought carries its credit, a word
+   or two stays a word or two */
+document.addEventListener("copy",function(e){
+  const sel=document.getSelection();
+  if(!sel||sel.isCollapsed||!sel.rangeCount) return;
+  const t=sel.toString().replace(/\u00A0/g," ").trim();
+  if(t.length<25) return;
+  let el=sel.getRangeAt(0).commonAncestorContainer;
+  if(el.nodeType===3) el=el.parentElement;
+  if(!el||!el.closest||!el.closest(".page[data-les]")) return;
+  if(el.closest(".myins,.mynote")) return;        /* his own words are his own */
+  const out=mkWithSource(t,el);
+  if(out===t) return;
+  try{ e.clipboardData.setData("text/plain",out); e.preventDefault(); }catch(err){}
+});
 </script>
 </body>
 </html>
