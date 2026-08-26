@@ -316,7 +316,7 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
 
 .mem{background:var(--box);padding:20px 22px;margin-bottom:26px;text-align:justify;hyphens:auto;font-size:18px;line-height:1.5}
 .mem b{font-weight:700}
-.read{margin-bottom:26px;font-size:18px}
+.read{margin-bottom:34px;font-size:18px}
 .read .lbl{font-weight:700}
 .read .val{margin-left:1.6em}
 .read .val i{font-family:var(--serif);font-style:italic}
@@ -1423,11 +1423,14 @@ function renderLesson(les,tasks,lg){
   const kt=les.keyText||{}, kText=cleanMem(strip(kt.text||les.keyTextVerse||"")), kRef=strip((kt.ref&&kt.ref.text)||"");
   if(kText) h+='<div class="mem" data-k="mem"><b>'+esc(MEMLABEL[rlang])+':</b> '+mkGlue(esc(kText))+(kRef?' ('+mkGlue(esc(kRef))+').':'')+'</div>';
 
+  if(les.keyNote&&les.keyNote.text) h+='<div class="quote" data-k="qt">'+mkGlue(inlineSource(esc(strip(les.keyNote.text))))+sopHtml(les.keyNote.sop,les.keyNote.text)+'</div>';
+
+  /* the book to read comes last, as it does in the edition: the lesson opens
+     with the memory verse and the quotation that answers it, and what is left
+     in the hand at the end is where to go on reading */
   const rd=les.reading;
   if(rd&&rd.reading&&rd.reading.length)
     h+='<div class="read" data-k="rd"><b>'+esc(strip(rd.label||""))+'</b> <i>'+rd.reading.map(x=>mkGlue(esc(strip(x.label||"")))).join("; ")+'</i></div>';
-
-  if(les.keyNote&&les.keyNote.text) h+='<div class="quote" data-k="qt">'+mkGlue(inlineSource(esc(strip(les.keyNote.text))))+sopHtml(les.keyNote.sop,les.keyNote.text)+'</div>';
 
   for(let di=0;di<(les.dailyLessons||[]).length;di++){
     const day=les.dailyLessons[di];
