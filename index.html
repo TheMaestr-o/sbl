@@ -1215,7 +1215,18 @@ function fmt(dstr,opts){try{return new Intl.DateTimeFormat(LOCALE[rlang],opts).f
 async function loadQuarter(l,y,q){
   const key=l+"-"+y+"-"+q; if(quarters[key]) return quarters[key];
   busy(true);
-  try{const r=await fetch("https://app.sdarm.org/sbl/data/"+l+"/"+l+"-"+y+"-"+q+".json");if(!r.ok)throw 0;return quarters[key]=await r.json();}
+  /* Our own copy answers first. It is the one that was checked, and it is the
+     one that stays put: the publisher rewrites old quarters years after they
+     end (de-2021-1 was touched in November 2024), and text that moves under a
+     mark takes the mark with it. The publisher is asked only for what we have
+     not got — a quarter that has just appeared, or one nobody froze. */
+  const name=l+"/"+l+"-"+y+"-"+q+".json";
+  try{
+    let r=await fetch("data/"+name);
+    if(!r.ok) r=await fetch("https://app.sdarm.org/sbl/data/"+name);
+    if(!r.ok) throw 0;
+    return quarters[key]=await r.json();
+  }
   catch(e){return quarters[key]=null;}
   finally{ busy(false); }
 }
@@ -2521,8 +2532,9 @@ function mkStore(){
   if(mkQuiet) return;
   document.querySelectorAll(".page[data-les]").forEach(function(pg){
     const out={marks:[],ins:[],notes:[]};
+    const here={};
     pg.querySelectorAll("[data-k]").forEach(function(b){
-      const k=b.dataset.k;
+      const k=b.dataset.k; here[k]=1;
       const w=mkWalk(b); let n,acc=0,cur=null;
       while(n=w.nextNode()){
         const ch=mkChain(n),key=JSON.stringify(ch);
@@ -2546,6 +2558,18 @@ function mkStore(){
     pg.querySelectorAll(".mynote").forEach(function(el){
       const prev=el.previousElementSibling;
       if(prev&&prev.dataset.k) out.notes.push({k:prev.dataset.k,t:mkClean(mkNoteBody(el).innerHTML),c:el.dataset.c});
+    });
+    /* What is not on the sheet is not gone. A verse box exists only while the
+       Bible is switched on, the second column only in two languages, and a
+       question changes its key the day the edition inserts another one before
+       it. Rebuilding the lesson from the page alone would drop every mark whose
+       block is absent — not hide it, drop it, on the very next save. So what
+       has no anchor here is carried over from the last save untouched, and
+       comes back the moment its block does. Erasing still works: an erased mark
+       has its block on the page, and a block on the page is read from the page. */
+    const had=MKALL[mkKey(pg)]||{};
+    ["marks","ins","notes"].forEach(function(kind){
+      (had[kind]||[]).forEach(function(o){ if(!here[o.k]) out[kind].push(o); });
     });
     MKALL[mkKey(pg)]=out;
   });

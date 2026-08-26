@@ -1,0 +1,26 @@
+{
+ "de-2026-3": {
+  "lastModified": "Tue, 30 Jun 2026 21:10:11 GMT",
+  "updated": "2026-06-30 21:10",
+  "lessons": 13,
+  "bytes": 209142,
+  "pulled": "2026-08-26T06:54:03Z",
+  "frozen": false
+ },
+ "en-2026-3": {
+  "lastModified": "Tue, 30 Jun 2026 17:01:23 GMT",
+  "updated": "2026-06-30 17:01",
+  "lessons": 13,
+  "bytes": 255525,
+  "pulled": "2026-08-26T06:54:04Z",
+  "frozen": false
+ },
+ "ru-2026-3": {
+  "lastModified": "Wed, 03 Jun 2026 15:44:44 GMT",
+  "updated": "2026-06-03 15:44",
+  "lessons": 13,
+  "bytes": 394824,
+  "pulled": "2026-08-26T06:54:06Z",
+  "frozen": false
+ }
+}
