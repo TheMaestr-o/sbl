@@ -2436,6 +2436,26 @@ const MKW={
   fmtb:{de:"Fett",en:"Bold",ru:"Жирный"},
   fmti:{de:"Kursiv",en:"Italic",ru:"Курсив"},
   fmtu:{de:"Unterstrichen",en:"Underline",ru:"Подчёркнутый"},
+  linked:{de:"Link kopiert",en:"Link copied",ru:"Ссылка скопирована"},
+  linkq:{de:"Link zu dieser Frage",en:"Link to this question",ru:"Ссылка на этот вопрос"},
+  linkd:{de:"Link zu diesem Tag",en:"Link to this day",ru:"Ссылка на этот день"},
+  carryout:{de:"In eine Datei",en:"To a file",ru:"В файл"},
+  carryin:{de:"Aus einer Datei",en:"From a file",ru:"Из файла"},
+  carryouthint:{de:"Alles Markierte und Notierte in eine Datei — per AirDrop oder Ordner aufs andere Gerät",
+                en:"Everything marked and written into one file — by AirDrop or through a folder",
+                ru:"Всё помеченное и записанное одним файлом — через AirDrop или папку"},
+  carryinhint:{de:"Wird dazugelegt, nicht darübergelegt: was hier steht, bleibt stehen",
+               en:"It is added, not laid over: what is here stays",
+               ru:"Ляжет рядом, а не поверх: что здесь, то и останется"},
+  carryadded:{de:"Dazugelegt",en:"Added",ru:"Добавлено"},
+  carrymarks:{de:"Markierungen",en:"marks",ru:"пометок"},
+  carrynotes:{de:"Notizen",en:"notes",ru:"заметок"},
+  carryins:{de:"Eingefügtes",en:"insertions",ru:"вставок"},
+  carrykept:{de:"hiesige behalten",en:"kept as here",ru:"оставлено здешних"},
+  carrysame:{de:"Alles davon war schon hier",en:"All of it was here already",ru:"Всё это уже было здесь"},
+  carrynone:{de:"Noch nichts zu übertragen",en:"Nothing to carry yet",ru:"Пока нечего переносить"},
+  carrybad:{de:"Das ist keine Datei von hier",en:"Not a file from here",ru:"Это не отсюда"},
+  carryfull:{de:"Kein Platz im Browser — nichts geändert",en:"No room in the browser — nothing changed",ru:"В браузере нет места — ничего не менял"},
   fmtq:{de:"Zitat",en:"Quotation",ru:"Цитата"}
 };
 function T(k){ const w=MKW[k]||{}; return w[lang]||w.en||""; }
@@ -3264,9 +3284,118 @@ function mkCount(){
    The calls are left standing — where the marks are kept, and how to clear
    them, is now under the "Marking" label in the settings. */
 function mkChipPaint(){}
+/* ——— переезд без сервера ———
+   The marks live in this browser and nowhere else — that is the promise of the
+   card above, and it is worth keeping. So the way to the second device is not
+   an account: it is a file the reader carries himself. One tap on a phone hands
+   it to AirDrop; on a desktop it lands in Downloads and travels however he
+   likes. Nothing is uploaded, nothing is registered, and no one but him ever
+   holds it.
+
+   The file is added, never applied over: a mark on the iPad and a mark on the
+   phone are both his, and a transfer that silenced one of them would teach him
+   not to transfer. Two entries are the same entry when they sit on the same
+   block at the same offsets; anything else is new and joins the lesson. Where
+   the same range is coloured differently on the two devices, the device being
+   read wins and the toast says how often that happened. */
+const MK_CARRY_KEY="pencil";     /* всё, что написал читатель, лежит под одним ключом */
+function mkCarryCount(all){
+  const c={lessons:0,marks:0,ins:0,notes:0};
+  for(const k in all){ const d=all[k]||{}; c.lessons++;
+    c.marks+=(d.marks||[]).length; c.ins+=(d.ins||[]).length; c.notes+=(d.notes||[]).length; }
+  return c;
+}
+/* the same entry twice is the same entry: a mark is where it sits, a note is
+   what it says under the block it hangs from */
+const MK_SAME={
+  marks:function(o){ return o.k+"|"+o.s+"|"+o.e; },
+  ins:  function(o){ return o.k+"|"+o.s+"|"+o.t; },
+  notes:function(o){ return o.k+"|"+o.t; }
+};
+function mkCarryOut(){
+  const all=mkGet(MK_CARRY_KEY,{}), c=mkCarryCount(all);
+  if(!c.lessons){ mkToast(T("carrynone")); return; }
+  const box={sbl:"carry",v:1,made:new Date().toISOString(),app:APP_VERSION,work:all};
+  const name="sbl-"+new Date().toISOString().slice(0,10)+".json";
+  const text=JSON.stringify(box);
+  /* on a tablet the file has somewhere to go by hand — the share sheet is the
+     AirDrop the reader already knows; on a desktop it simply saves */
+  try{
+    const file=new File([text],name,{type:"application/json"});
+    if(matchMedia("(pointer:coarse)").matches && navigator.canShare && navigator.canShare({files:[file]})){
+      navigator.share({files:[file],title:name}).catch(function(){});
+      return;
+    }
+  }catch(e){}
+  const a=document.createElement("a");
+  a.href=URL.createObjectURL(new Blob([text],{type:"application/json"}));
+  a.download=name; a.click();
+  setTimeout(function(){ URL.revokeObjectURL(a.href); },4000);
+  mkToast(T("carryout")+" · "+name);
+}
+function mkCarryIn(){
+  const inp=document.createElement("input");
+  inp.type="file"; inp.accept="application/json,.json";
+  inp.onchange=function(){
+    const f=inp.files&&inp.files[0]; if(!f) return;
+    const rd=new FileReader();
+    rd.onload=function(){
+      let box=null;
+      try{ box=JSON.parse(String(rd.result)); }catch(e){}
+      if(!box||box.sbl!=="carry"||!box.work||typeof box.work!=="object"){ mkToast(T("carrybad")); return; }
+      mkCarryMerge(box.work);
+    };
+    rd.readAsText(f);
+  };
+  inp.click();
+}
+function mkCarryMerge(inc){
+  const before=JSON.parse(JSON.stringify(MKALL));
+  const got={lessons:0,marks:0,ins:0,notes:0}, kept={n:0};
+  for(const key in inc){
+    const src=inc[key]; if(!src||typeof src!=="object") continue;
+    if(!MKALL[key]){ MKALL[key]={marks:[],ins:[],notes:[]}; got.lessons++; }
+    const dst=MKALL[key];
+    ["marks","ins","notes"].forEach(function(kind){
+      dst[kind]=dst[kind]||[];
+      const seen={};
+      dst[kind].forEach(function(o){ seen[MK_SAME[kind](o)]=o; });
+      (src[kind]||[]).forEach(function(o){
+        if(!o||typeof o!=="object"||typeof o.k!=="string") return;
+        const s=MK_SAME[kind](o);
+        if(!(s in seen)){ dst[kind].push(o); seen[s]=o; got[kind]++; }
+        else if(JSON.stringify(seen[s])!==JSON.stringify(o)) kept.n++;
+      });
+    });
+  }
+  /* a merge that did not fit is worse than no merge: put it all back and say so */
+  try{ localStorage.setItem("sbl."+MK_CARRY_KEY,JSON.stringify(MKALL)); }
+  catch(e){ MKALL=before; mkToast(T("carryfull")); return; }
+  mkRestore(); mkLegend(); mkKeysClose();
+  if(!got.lessons&&!got.marks&&!got.ins&&!got.notes){ mkToast(T("carrysame")); return; }
+  const said=[];
+  if(got.marks) said.push(T("carrymarks")+": "+got.marks);
+  if(got.notes) said.push(T("carrynotes")+": "+got.notes);
+  if(got.ins)   said.push(T("carryins")+": "+got.ins);
+  if(kept.n)    said.push(T("carrykept")+": "+kept.n);
+  mkToast(T("carryadded")+" — "+said.join(", "),function(){
+    MKALL=before; mkSet(MK_CARRY_KEY,MKALL); mkRestore(); mkLegend();
+  });
+}
 let mkWipeArmed=false;
 function mkStoreCard(){
   mkCard(MK_STORE);
+  /* carrying comes before erasing: the card says the marks are on this device
+     only, and this is the sentence that answers it */
+  [["mk-out","carryout","carryouthint"],["mk-in","carryin","carryinhint"]].forEach(function(r,i){
+    const row=document.createElement("div");
+    row.className="krow"; if(!i) row.style.marginTop="14px";
+    row.innerHTML='<kbd id="'+r[0]+'" style="min-width:auto;cursor:pointer">'+esc(T(r[1]))+'</kbd>'
+                 +'<span>'+esc(T(r[2]))+'</span>';
+    keysPop.appendChild(row);
+  });
+  document.getElementById("mk-out").onclick=mkCarryOut;
+  document.getElementById("mk-in").onclick=mkCarryIn;
   const b=document.createElement("div");
   b.className="krow"; b.style.marginTop="14px";
   b.innerHTML='<kbd id="mk-wipe" style="min-width:auto;cursor:pointer;color:#b3261e">'+esc(T("wipe"))+'</kbd>'
