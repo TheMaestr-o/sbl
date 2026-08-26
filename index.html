@@ -1028,7 +1028,13 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
 .alist{max-height:0;overflow:hidden;opacity:0;
   transition:max-height .34s cubic-bezier(.25,1.1,.35,1),opacity .24s,
              margin-top .34s cubic-bezier(.25,1.1,.35,1),padding-top .34s}
-.alist.open{max-height:min(46vh,320px);overflow-y:auto;overscroll-behavior:contain;
+/* ——— opened means opened ———
+   Three hundred and twenty pixels was a number, not a reason: a lesson of
+   thirteen parts spent most of its list behind a scrollbar while half the
+   margin stood empty beside it. The list now stops where the window stops and
+   nowhere earlier, so on any ordinary screen the whole reading is in sight at
+   once, and only a short window makes it scroll. */
+.alist.open{max-height:calc(100dvh - var(--barh,67px) - 180px);overflow-y:auto;overscroll-behavior:contain;
   opacity:1;margin-top:13px;padding-top:9px;border-top:1px solid var(--hair)}
 /* ——— the list reads as the lesson reads ———
    Every part used to repeat the name of its day: "Teilhaber der Gnade · a",
