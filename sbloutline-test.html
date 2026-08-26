@@ -951,7 +951,7 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
    it knows: which part is sounding now. So the small line names the reading and
    the place in it, and the large line names the part. */
 .ahd{padding:0 2px 11px}
-.akick{font-size:9.5px;letter-spacing:.085em;text-transform:uppercase;color:#b3b3bb;
+.akick{font-size:9.5px;letter-spacing:.085em;text-transform:uppercase;color:#8f8f97;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-bottom:4px}
 .alabel{font-family:var(--serif);font-size:15px;font-weight:700;line-height:1.28;
   color:var(--gray-dk);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -981,7 +981,7 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
 /* the three are one family: the same circle, the middle one larger because it
    is the one pressed most */
 .astep{flex:none;width:30px;height:30px;display:flex;align-items:center;justify-content:center;
-  border-radius:50%;color:#a9a9b0;cursor:pointer;user-select:none;
+  border-radius:50%;color:#7e7e86;cursor:pointer;user-select:none;
   box-shadow:inset 0 0 0 1px var(--hair);
   transition:color .15s,background .15s,box-shadow .15s,transform .1s}
 .astep:active{transform:scale(.94)}
@@ -1011,7 +1011,7 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
   transition:opacity .16s}
 .aud:hover .aseek b{opacity:1}
 .atimes{display:flex;justify-content:space-between;padding:7px 3px 2px;
-  font-size:10.5px;font-variant-numeric:tabular-nums;color:#a9a9b0}
+  font-size:10.5px;font-variant-numeric:tabular-nums;color:#7e7e86}
 
 /* The parts, numbered straight through the way any player lists a record. The
    first attempt set them as lettered marks under each day — compact, and
@@ -1030,7 +1030,7 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
    the part is about. The day now stands once, over its own parts, and each part
    carries the question it actually reads. Choosing by the question is the only
    way anyone ever chooses. */
-.ahead{font-size:9px;letter-spacing:.08em;text-transform:uppercase;color:#c2c2cb;
+.ahead{font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;color:#8f8f97;
   padding:12px 5px 3px;line-height:1.3}
 .alist > .ahead:first-child{padding-top:1px}
 /* ——— one line to a part ———
@@ -1039,14 +1039,14 @@ body.bare .aud,body.writing .aud{opacity:0;pointer-events:none}
    know which question it is, short enough to take in at a glance, with the
    length of the part where the eye expects it — at the right edge. */
 .atrk{display:flex;align-items:center;gap:9px;padding:4px 5px;cursor:pointer;border-radius:7px;
-  font-size:12px;color:#76767c;transition:color .15s,background .15s}
+  font-size:12.5px;color:#54545b;transition:color .15s,background .15s}
 @media (hover:hover){ .atrk:hover{background:rgba(120,120,128,.07);color:#2b2b2b} }
 @media (hover:hover){ .atrk:hover{background:rgba(120,120,128,.08);color:var(--gray-dk)} }
-.atrk .anum{flex:none;width:12px;text-align:center;font-size:10.5px;font-weight:700;
-  color:#c2c2cb}
+.atrk .anum{flex:none;width:12px;text-align:center;font-size:11px;font-weight:700;
+  color:#8f8f97}
 .atrk .atit{flex:1;min-width:0;line-height:1.35;
   white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.atrk .adur{flex:none;font-size:10px;font-variant-numeric:tabular-nums;color:#c2c2cb}
+.atrk .adur{flex:none;font-size:10.5px;font-variant-numeric:tabular-nums;color:#8f8f97}
 .atrk.on .adur{color:var(--gray-dk)}
 .atrk.on{color:var(--gray-dk);font-weight:700}
 .atrk.on .anum{color:var(--gray-dk)}
