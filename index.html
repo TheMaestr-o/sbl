@@ -418,25 +418,37 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
   padding:0 26px;font-weight:700;font-size:18px;white-space:nowrap;clip-path:polygon(0 0,100% 0,calc(100% - 7.5px) 100%,0 100%)}
 
 /* 24px + the 2px rule = 26px, the same column the question text starts in, so
-   reference, verse and question all hang on one vertical line */
+   verse and question hang on one vertical line */
 .vgroup{margin:8px 0 16px;padding:3px 0 4px 24px;border-left:2px solid var(--gray-dk)}
 .vitem{break-inside:avoid}
 .vitem + .vitem{margin-top:12px}
 .vref{font-weight:700;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray-dk);margin-bottom:4px}
+/* Set one verse to a line, the reference stands over the WORDS, not over the
+   figures: the numbers hang out in their own narrow column, and a heading that
+   began above them was a heading to the column of numbers. Indented by the same
+   17px the verse text is, it heads the passage it names. The single reference
+   and the two of a parallel reading take the one rule — in the pair each span
+   is its own grid cell, so the padding stays inside the column and the two
+   labels keep step with the two columns of text below. */
+.vref.lines>span{padding-left:17px}
 .vtext{font-family:var(--serif);font-size:16.5px;line-height:1.5;text-align:justify;hyphens:auto;color:#2b2b2b}
-/* the verse number keeps one look everywhere: same serif, same size, same
-   colour — only a gentle raise, not a full superscript hop */
-.vtext .vnum{font-weight:700;font-size:11px;vertical-align:.42em;line-height:0;margin:0 4px 0 0;color:var(--gray-dk)}
+/* The verse number keeps one look everywhere: same size, same colour, only a
+   gentle raise and not a full superscript hop. It is set in the sans of the
+   reference above it, not in the serif of the verse — a number is apparatus,
+   not text, and cutting it from the same face as the words made it read as a
+   word: a small serif figure inside a serif line is something to be read, and
+   the eye stopped on it. In the label's own face it is plainly a mark. */
+.vtext .vnum{font-family:var(--sans);font-weight:700;font-size:11px;vertical-align:.42em;line-height:0;margin:0 4px 0 0;color:var(--gray-dk)}
 /* one verse per line — number hangs in the margin, wrapped lines align under the text */
 .vtext.lines{text-align:left;hyphens:none}
-/* the number starts the line — flush with the reference above it and with the
-   question text — and the verse hangs off it */
+/* the number starts the line — flush with the rule of the group — and the
+   verse hangs off it, under the reference that names it */
 .vtext.lines .v{display:block;padding-left:17px;text-indent:-17px;break-inside:avoid}
 .vtext.lines .v + .v{margin-top:5px}
 /* min-width, not width: the verse follows the number as closely as it does in
    running text, and a three-digit number simply takes the room it needs */
 .vtext.lines .vn{display:inline-block;min-width:13px;margin-right:4px;text-indent:0;vertical-align:.42em;
-  font-weight:700;font-size:11px;color:var(--gray-dk)}   /* same raise as the inline number */
+  font-family:var(--sans);font-weight:700;font-size:11px;color:var(--gray-dk)}   /* same raise, same face */
 .vmiss{color:#bbb}
 /* A passage still on its way holds its place and shows that it is coming,
    instead of leaving a hole the reader reads as a page that failed. */
@@ -2169,13 +2181,19 @@ function renderLesson(les,tasks,lg){
                 +'<div class="vtext'+cl+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>'
                 +'<div class="vtext'+cl+' alt" id="'+id2+'" data-k="'+kk+'v'+vi+'p"></div></div>'
               : '<div class="vtext'+cl+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>';
-            /* with two columns the editions name themselves on the reference
-               line, each over its own column — a row of labels of their own
-               pushed every passage further down the page for nothing */
+            /* The reference line says which Bible is being quoted, and it
+               says so whether there is one column or two. With two it always
+               did — naming one edition and not the other would have been
+               meaningless — and each name stands over its own column, on the
+               line that was there anyway: a row of labels of their own would
+               have pushed every passage further down the page for nothing.
+               A single column was left unnamed, and it is quoting an edition
+               just as particularly; "ОТ ИОАННА 1:4, 5" over a Russian sheet
+               does not say which Russian text it is. Same shape in both. */
             const head=par
-              ? '<div class="vref pair"><span>'+esc(verShort(bibleOf(rlang)))+(ref?' · '+esc(ref):'')+'</span>'
+              ? '<div class="vref pair'+cl+'"><span>'+esc(verShort(bibleOf(rlang)))+(ref?' · '+esc(ref):'')+'</span>'
                 +'<span id="'+hid+'">'+esc(verShort(par))+'</span></div>'
-              : (ref?'<div class="vref">'+esc(ref)+'</div>':'');
+              : (ref?'<div class="vref'+cl+'"><span>'+esc(verShort(bibleOf(rlang)))+' · '+esc(ref)+'</span></div>':'');
             g+='<div class="vitem" data-os="'+esc(it.sOsis||"")+'">'+head+box+'</div>'; }
           blocks.push(g+'</div>'); }
       }
