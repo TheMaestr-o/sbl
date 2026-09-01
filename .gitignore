@@ -8,6 +8,10 @@ Icon?
 Thumbs.db
 Desktop.ini
 
+# python оставляет свои крошки рядом с инструментами
+__pycache__/
+*.pyc
+
 # редакторы
 .idea/
 *.swp
