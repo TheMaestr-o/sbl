@@ -8,18 +8,23 @@
     текущий квартал  — проверяется, и изменения забираются
     прошедший        — заморожен, сеть к нему больше не трогают
 
+Замороженная копия — первая из двух защит читательских пометок: под пометкой не
+меняется текст, потому что текст берётся отсюда, а не из сети. Вторая защита
+живёт в самой странице: вместе с пометкой хранится подпись блока, и если текст
+всё же изменился (язык не заморожен, квартал не забран), снимается пометка
+только этого блока, а не весь урок.
+
 Проверка стоит ноль байт: HEAD и заголовок Last-Modified. Совпал с прошлым
 разом — файл не качается вовсе. Что забрано и когда, записано в data/index.json.
 
-    python3 tools/pull.py                 текущий квартал, три языка
+    python3 tools/pull.py                 текущий квартал, все языки страницы
     python3 tools/pull.py --quarter 2026-2
     python3 tools/pull.py --all           весь архив, 2020-1 … сегодня
     python3 tools/pull.py --force         не верить отметкам, забрать заново
 """
-import argparse, datetime, json, pathlib, sys, urllib.error, urllib.request
+import argparse, datetime, json, pathlib, re, sys, urllib.error, urllib.request
 
 SRC   = "https://app.sdarm.org/sbl/data/{lang}/{lang}-{year}-{q}.json"
-LANGS = ("de", "en", "ru")
 FIRST = (2020, 1)          # раньше издатель ничего не отдаёт: 2019 — 404
 GRACE = 14                 # дней после конца квартала, пока ещё проверяем
 UA    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " \
@@ -28,6 +33,23 @@ UA    = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 " \
 ROOT  = pathlib.Path(__file__).resolve().parent.parent
 DATA  = ROOT / "data"
 INDEX = DATA / "index.json"
+
+
+def langs_of_page():
+    """Языки берутся из самой страницы, а не переписываются здесь.
+
+    Их было три, потом восемнадцать, теперь двадцать два — и список, живущий в
+    двух местах, однажды разойдётся молча: страница будет предлагать язык,
+    который никто не заморозил, а замороженную копию будет некому спросить.
+    Один источник правды — `LANGS` в index.html."""
+    src = (ROOT / "index.html").read_text(encoding="utf-8")
+    m = re.search(r"const LANGS=\[([^\]]+)\]", src)
+    if not m:
+        return ("de", "en", "ru")
+    return tuple(re.findall(r'"([a-z]{2,3})"', m.group(1)))
+
+
+LANGS = langs_of_page()
 
 
 def quarter_of(d):
@@ -59,7 +81,8 @@ def main():
     p = argparse.ArgumentParser(description=__doc__,
                                 formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--quarter", help="год-квартал, например 2026-2")
-    p.add_argument("--lang", action="append", choices=LANGS)
+    p.add_argument("--lang", action="append", choices=LANGS,
+                   metavar="КОД", help="только эти языки (по умолчанию — все %d)" % len(LANGS))
     p.add_argument("--all", action="store_true", help="весь архив с 2020-1")
     p.add_argument("--force", action="store_true", help="забрать, не глядя на отметки")
     a = p.parse_args()

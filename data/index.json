@@ -1,4 +1,20 @@
 {
+ "bg-2026-3": {
+  "lastModified": "Mon, 15 Jun 2026 22:47:58 GMT",
+  "updated": "2026-06-15 22:47",
+  "lessons": 13,
+  "bytes": 316809,
+  "pulled": "2026-09-01T13:42:14Z",
+  "frozen": false
+ },
+ "cs-2026-3": {
+  "lastModified": "Thu, 11 Jun 2026 23:03:02 GMT",
+  "updated": "2026-06-11 23:02",
+  "lessons": 13,
+  "bytes": 190500,
+  "pulled": "2026-09-01T13:42:19Z",
+  "frozen": false
+ },
  "de-2026-3": {
   "lastModified": "Tue, 30 Jun 2026 21:10:11 GMT",
   "updated": "2026-06-30 21:10",
@@ -15,12 +31,148 @@
   "pulled": "2026-08-26T06:54:04Z",
   "frozen": false
  },
+ "es-2026-3": {
+  "lastModified": "Wed, 03 Jun 2026 15:44:37 GMT",
+  "updated": "2026-06-03 15:44",
+  "lessons": 13,
+  "bytes": 270758,
+  "pulled": "2026-09-01T13:42:40Z",
+  "frozen": false
+ },
+ "fr-2026-3": {
+  "lastModified": "Wed, 03 Jun 2026 16:52:38 GMT",
+  "updated": "2026-06-03 16:52",
+  "lessons": 13,
+  "bytes": 270238,
+  "pulled": "2026-09-01T13:42:21Z",
+  "frozen": false
+ },
+ "hr-2026-3": {
+  "lastModified": "Fri, 24 Jul 2026 20:37:20 GMT",
+  "updated": "2026-07-24 20:37",
+  "lessons": 13,
+  "bytes": 191928,
+  "pulled": "2026-09-01T13:42:17Z",
+  "frozen": false
+ },
+ "hu-2026-3": {
+  "lastModified": "Thu, 18 Jun 2026 19:29:27 GMT",
+  "updated": "2026-06-18 19:29",
+  "lessons": 13,
+  "bytes": 197638,
+  "pulled": "2026-09-01T13:42:23Z",
+  "frozen": false
+ },
+ "id-2026-3": {
+  "lastModified": "Wed, 03 Jun 2026 17:25:10 GMT",
+  "updated": "2026-06-03 17:25",
+  "lessons": 13,
+  "bytes": 210123,
+  "pulled": "2026-09-01T13:42:25Z",
+  "frozen": false
+ },
+ "it-2026-3": {
+  "lastModified": "Tue, 07 Jul 2026 22:20:29 GMT",
+  "updated": "2026-07-07 22:20",
+  "lessons": 13,
+  "bytes": 249239,
+  "pulled": "2026-09-01T13:42:27Z",
+  "frozen": false
+ },
+ "ja-2026-3": {
+  "lastModified": "Wed, 17 Jun 2026 17:10:57 GMT",
+  "updated": "2026-06-17 17:10",
+  "lessons": 13,
+  "bytes": 267893,
+  "pulled": "2026-09-01T13:42:29Z",
+  "frozen": false
+ },
+ "mk-2026-3": {
+  "lastModified": "Mon, 22 Jun 2026 22:36:26 GMT",
+  "updated": "2026-06-22 22:36",
+  "lessons": 13,
+  "bytes": 317895,
+  "pulled": "2026-09-01T13:42:32Z",
+  "frozen": false
+ },
+ "pt-2026-3": {
+  "lastModified": "Tue, 30 Jun 2026 22:03:45 GMT",
+  "updated": "2026-06-30 22:03",
+  "lessons": 13,
+  "bytes": 261990,
+  "pulled": "2026-09-01T13:42:34Z",
+  "frozen": false
+ },
+ "ro-2026-3": {
+  "lastModified": "Wed, 03 Jun 2026 15:44:44 GMT",
+  "updated": "2026-06-03 15:44",
+  "lessons": 13,
+  "bytes": 284982,
+  "pulled": "2026-09-01T13:42:36Z",
+  "frozen": false
+ },
  "ru-2026-3": {
   "lastModified": "Wed, 03 Jun 2026 15:44:44 GMT",
   "updated": "2026-06-03 15:44",
   "lessons": 13,
   "bytes": 394824,
   "pulled": "2026-08-26T06:54:06Z",
+  "frozen": false
+ },
+ "rw-2026-3": {
+  "lastModified": "Tue, 30 Jun 2026 21:54:58 GMT",
+  "updated": "2026-06-30 21:54",
+  "lessons": 13,
+  "bytes": 197919,
+  "pulled": "2026-09-01T13:42:30Z",
+  "frozen": false
+ },
+ "sr-2026-3": {
+  "lastModified": "Mon, 22 Jun 2026 22:36:31 GMT",
+  "updated": "2026-06-22 22:36",
+  "lessons": 13,
+  "bytes": 294041,
+  "pulled": "2026-09-01T13:42:38Z",
+  "frozen": false
+ },
+ "th-2026-3": {
+  "lastModified": "Wed, 01 Jul 2026 19:04:22 GMT",
+  "updated": "2026-07-01 19:04",
+  "lessons": 13,
+  "bytes": 460351,
+  "pulled": "2026-09-01T13:42:44Z",
+  "frozen": false
+ },
+ "tl-2026-3": {
+  "lastModified": "Tue, 30 Jun 2026 21:50:13 GMT",
+  "updated": "2026-06-30 21:50",
+  "lessons": 13,
+  "bytes": 225357,
+  "pulled": "2026-09-01T13:42:42Z",
+  "frozen": false
+ },
+ "uk-2026-3": {
+  "lastModified": "Wed, 17 Jun 2026 18:26:46 GMT",
+  "updated": "2026-06-17 18:26",
+  "lessons": 13,
+  "bytes": 290887,
+  "pulled": "2026-09-01T13:42:45Z",
+  "frozen": false
+ },
+ "zh-2026-3": {
+  "lastModified": "Wed, 17 Jun 2026 18:02:58 GMT",
+  "updated": "2026-06-17 18:02",
+  "lessons": 13,
+  "bytes": 170639,
+  "pulled": "2026-09-01T13:42:15Z",
+  "frozen": false
+ },
+ "zu-2026-3": {
+  "lastModified": "Wed, 17 Jun 2026 17:43:50 GMT",
+  "updated": "2026-06-17 17:43",
+  "lessons": 13,
+  "bytes": 188346,
+  "pulled": "2026-09-01T13:42:47Z",
   "frozen": false
  }
 }

@@ -137,6 +137,18 @@ body{background:var(--paper-tone);color:var(--ink);font-family:var(--sans);font-
 .tog.active{background:var(--on);color:var(--on-t);border-color:var(--on)}
 .tog[hidden]{display:none}
 /* the toolbar carries two things: which lesson, and everything else */
+/* ——— the page belongs to a house, and says so once ———
+   Not a navigation bar: one word at the head of the sheet that leads home, in
+   the tone of the controls rather than of the lesson. On a phone the bar has
+   room for the lesson and the two buttons and nothing else, so it steps out
+   there and the colophon carries the way back instead. */
+.home{flex:none;font-size:11.5px;font-weight:600;letter-spacing:.4px;color:#a0a0a4;
+  text-decoration:none;padding:0 4px;height:34px;display:flex;align-items:center;
+  white-space:nowrap;transition:color .15s}
+.home:hover{color:#6f6f74}
+html.dark .home{color:#6c6b72}
+html.dark .home:hover{color:#9a99a1}
+@media (max-width:700px){ .home{display:none} }
 .gear{flex:none;width:34px;height:34px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--ctl-line);border-radius:10px;background:var(--ctl);color:var(--ctl-t);cursor:pointer;user-select:none;
   transition:background .15s,color .15s,border-color .15s}
@@ -239,8 +251,16 @@ body.setopen .setpop{opacity:1;pointer-events:auto;transform:none}
   border:1px solid rgba(0,0,0,.10);
   background:linear-gradient(90deg,hsl(0,46%,38%),hsl(40,46%,38%),hsl(80,46%,38%),hsl(120,46%,38%),
     hsl(160,46%,38%),hsl(200,46%,38%),hsl(240,46%,38%),hsl(280,46%,38%),hsl(320,46%,38%),hsl(360,46%,38%))}
-.huebar i{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
+.huebar i,.depthbar i{position:absolute;top:50%;width:16px;height:16px;margin:-8px 0 0 -8px;border-radius:50%;
   background:#fff;box-shadow:0 0 0 1.5px rgba(0,0,0,.22),0 1px 4px rgba(0,0,0,.28);pointer-events:none}
+/* ——— how deep, not only which ———
+   The hue strip answers "which colour"; a pale blue and a navy are the same
+   answer to it, and that was the whole of the complaint. This one answers "how
+   deep", from the palest the type still reads on to the deepest white lettering
+   still carries — and it is painted in the hue that is actually taken, so the
+   two strips together are the page, not a description of it. */
+.depthbar{position:relative;flex:0 0 104px;height:26px;border-radius:9px;cursor:pointer;
+  touch-action:none;margin-left:8px;border:1px solid rgba(0,0,0,.10)}
 /* text size — two square buttons cut like the rest */
 .zoom{flex:none;width:32px;height:32px;display:flex;align-items:center;justify-content:center;
   border:1px solid var(--hair);border-radius:9px;background:rgba(120,120,128,.09);color:var(--ctl-t);cursor:pointer;user-select:none;
@@ -397,6 +417,31 @@ html.paper .sec .day{background-image:var(--paper);background-blend-mode:soft-li
 .top .date{font-weight:700;font-size:19px;letter-spacing:.4px;text-transform:uppercase}
 h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;margin:6px 0 30px}
 
+/* ——— the first page of a quarter ———
+   The same furniture as a lesson head, one size down: the range of months
+   where a lesson carries its Sabbath, the quarter's name where a lesson
+   carries its own, and then the thirteen of them with their dates. Set so the
+   numbers line up in their own column and the dates hang together at the
+   right, because a list is read down two edges and not across. */
+.qfront{padding-top:6px}
+.qsub{font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
+h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;margin:22px 0 0}
+.qrule{height:1px;background:var(--hair);margin:34px 0 30px}
+.qcap{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
+.qlist{display:flex;flex-direction:column}
+.qrow{display:grid;grid-template-columns:44px 1fr auto;align-items:baseline;gap:14px;
+  padding:9px 0;border-bottom:1px solid var(--hair)}
+.qrow:last-child{border-bottom:none}
+.qno{font-size:19px;font-weight:700;color:var(--tl-tag);font-variant-numeric:tabular-nums;text-align:right}
+.qrow.gift .qno{font-size:15px;color:var(--gold-d)}
+.qt{font-size:17px;line-height:1.35}
+.qd{font-size:12.5px;color:var(--muted);white-space:nowrap}
+@media (max-width:560px){
+  .qrow{grid-template-columns:32px 1fr;row-gap:2px}
+  .qd{grid-column:2;white-space:normal}
+  h1.qtitle{font-size:36px}
+}
+
 .mem{background:var(--box);padding:20px 22px;margin-bottom:26px;text-align:justify;hyphens:auto;font-size:18px;line-height:1.5}
 .mem b{font-weight:700}
 .read{margin-bottom:34px;font-size:18px}
@@ -534,6 +579,10 @@ footer{max-width:820px;margin:0 auto;text-align:center;padding:20px 22px 58px}
 .fkind{font-size:10px;letter-spacing:2.6px;text-transform:uppercase;color:#b9b9b9;margin-bottom:15px}
 .fnote{font-size:12px;line-height:1.75;color:#9c9c9c}
 .fset{font-size:11px;letter-spacing:.4px;color:#c2c2c2;margin-top:9px}
+/* required of every page in Germany, and reachable from every one of them */
+.flegal{font-size:11px;letter-spacing:.4px;color:#c2c2c2;margin-top:7px}
+.flegal a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(0,0,0,.14)}
+.flegal a:hover{color:#8a8a8a}
 footer a{color:#7a7a7a;text-decoration:none;border-bottom:1px solid #e2e2e2;padding-bottom:1px;transition:color .15s,border-color .15s}
 footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
 
@@ -1189,6 +1238,10 @@ body.loading #load{opacity:1}
 .keysback{position:fixed;inset:0;z-index:78;background:rgba(20,20,22,.28);
   -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px)}
 .keysback[hidden],.keyspop[hidden]{display:none}
+/* the passages put away — the boxes stay in the sheet so that showing them
+   again is a class and not a rebuild, and `display:none` keeps them out of the
+   print as surely as out of the window */
+body.noverses .vgroup{display:none}
 .keyspop{position:fixed;z-index:79;left:50%;top:50%;transform:translate(-50%,-50%);
   width:min(420px,calc(100vw - 32px));max-height:min(80vh,640px);overflow:auto;padding:18px 20px 16px;
   background:var(--mat);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
@@ -1364,6 +1417,9 @@ html.dark .mynote.blank::after{color:#6f7f9e}
 html.dark .fkind{color:#5f5e66}
 html.dark .fnote{color:#7b7a82}
 html.dark .fset{color:#5f5e66}
+html.dark .flegal{color:#5f5e66}
+html.dark .flegal a{border-bottom-color:rgba(255,255,255,.16)}
+html.dark .flegal a:hover{color:#8a8992}
 html.dark footer a{color:#918f99;border-bottom-color:rgba(255,255,255,.15)}
 
 /* the settings sheet and the card of keys */
@@ -1423,7 +1479,7 @@ html.dark .mtoast b:hover{color:#fff}
     margin:15mm;                 /* the same air on all four sides */
     @top-left{ content:"" } @top-center{ content:"" } @top-right{ content:"" }
     @bottom-center{ content:"" }
-    @bottom-left{ content:"themaestr-o.github.io/sbl/"; font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.2px; color:#9a9a9a; }
+    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.2px; color:#9a9a9a; }
     @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.4px; color:#9a9a9a; }
   }
   .bar,footer{display:none} body{background:#fff}
@@ -1493,6 +1549,7 @@ html.dark .mtoast b:hover{color:#fff}
 
 <div class="bar">
   <div class="bar-in">
+    <a class="home" href="https://sdarm.life" title="sdarm.life">sdarm.life</a>
     <div class="lbl" id="wk" title="">&mdash;</div>
     <div class="outbtn" id="outbtn" title=""><svg width="16" height="14" viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><path d="M1.6 2h12.8M1.6 7h12.8M1.6 12h8.4"/></svg></div>
     <div class="gear" id="gear" title=""><svg width="17" height="17" viewBox="0 0 17 17" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"><circle cx="8.5" cy="8.5" r="2.4"/><path d="M13.4 10.6a1.1 1.1 0 0 0 .22 1.22l.04.04a1.34 1.34 0 1 1-1.9 1.9l-.04-.04a1.1 1.1 0 0 0-1.22-.22 1.1 1.1 0 0 0-.67 1v.11a1.34 1.34 0 0 1-2.68 0v-.06a1.1 1.1 0 0 0-.72-1 1.1 1.1 0 0 0-1.22.22l-.04.04a1.34 1.34 0 1 1-1.9-1.9l.04-.04a1.1 1.1 0 0 0 .22-1.22 1.1 1.1 0 0 0-1-.67h-.11a1.34 1.34 0 0 1 0-2.68h.06a1.1 1.1 0 0 0 1-.72 1.1 1.1 0 0 0-.22-1.22l-.04-.04a1.34 1.34 0 1 1 1.9-1.9l.04.04a1.1 1.1 0 0 0 1.22.22h.05a1.1 1.1 0 0 0 .67-1v-.11a1.34 1.34 0 0 1 2.68 0v.06a1.1 1.1 0 0 0 .67 1 1.1 1.1 0 0 0 1.22-.22l.04-.04a1.34 1.34 0 1 1 1.9 1.9l-.4.04a1.1 1.1 0 0 0-.22 1.22v.05a1.1 1.1 0 0 0 1 .67h.11a1.34 1.34 0 0 1 0 2.68h-.06a1.1 1.1 0 0 0-1 .67Z"/></svg></div>
@@ -1561,7 +1618,7 @@ html.dark .mtoast b:hover{color:#fff}
       <div class="sctl"><div class="zoom" id="zoomout">A&#8722;</div><div class="zoom" id="zoomin">A+</div></div></div>
     <div class="srow"><span class="slab" id="lab-theme"></span><select class="ssel short" id="theme-sel"></select></div>
     <div class="srow"><span class="slab" id="lab-colour"></span><div class="swatches" id="tintpop"></div></div>
-    <div class="srow prow" id="hue-row" hidden><div class="huebar" id="huebar"><i></i></div></div>
+    <div class="srow prow" id="hue-row" hidden><div class="huebar" id="huebar"><i></i></div><div class="depthbar" id="depthbar" title=""><i></i></div></div>
     <div class="srow"><span class="slab" id="lab-paper"></span><select class="ssel short" id="paper-sel"></select></div>
     <div class="srow"><span class="slab" id="lab-mark"></span>
       <div class="sctl"><div class="sw2" id="mk-rail"><i></i></div></div></div>
@@ -1597,6 +1654,7 @@ html.dark .mtoast b:hover{color:#fff}
     Bible text from SDARM editions &middot; Luther 1912 &middot; King James &middot; Синодальный</div>
   <div class="fset">Set in PT Serif &amp; PT Sans &middot; built by <a href="https://github.com/TheMaestr-o" target="_blank" rel="noopener">Sergio</a>
     &middot; <a href="https://github.com/TheMaestr-o/sbl" target="_blank" rel="noopener">source on GitHub</a></div>
+  <div class="flegal"><a href="https://sdarm.life">sdarm.life</a> &middot; <a href="impressum.html">Impressum</a> &middot; <a href="datenschutz.html">Datenschutz</a></div>
 </footer>
 
 <script>
@@ -1607,17 +1665,22 @@ if('serviceWorker' in navigator){ navigator.serviceWorker.register('sw.js').catc
    sdarm.org finds his language where he expects it. Four more are printed —
    Amharic, Chichewa, Ewe, Tshiluba — but the old site alone serves them and
    there is nothing here to fetch them with; they are left out rather than
-   offered and found empty. */
-const LANGS=["bg","zh","cs","en","fr","de","hu","id","ja","rw","mk","pt","ru","sr","es","th","uk","zu"];
+   offered and found empty. Croatian, Italian, Romanian and Tagalog stood in
+   that same position and stand there no longer: the server answers for all
+   four, so they take their places in the list. Every code here was asked for
+   and answered before it was written down. */
+const LANGS=["bg","zh","hr","cs","en","fr","de","hu","id","it","ja","rw","mk","pt","ro","ru","sr","es","tl","th","uk","zu"];
 /* each in its own words: a reader looking for his language is not looking for
    the English name of it */
-const LANGNAME={bg:"Български",zh:"中文",cs:"Čeština",en:"English",fr:"Français",
-  de:"Deutsch",hu:"Magyar",id:"Bahasa Indonesia",ja:"日本語",rw:"Kinyarwanda",
-  mk:"Македонски",pt:"Português",ru:"Русский",sr:"Српски",es:"Español",
-  th:"ไทย",uk:"Українська",zu:"isiZulu"};
-const LOCALE={bg:"bg-BG",zh:"zh-CN",cs:"cs-CZ",en:"en-US",fr:"fr-FR",de:"de-DE",
-  hu:"hu-HU",id:"id-ID",ja:"ja-JP",rw:"rw-RW",mk:"mk-MK",pt:"pt-BR",ru:"ru-RU",
-  sr:"sr-RS",es:"es-ES",th:"th-TH",uk:"uk-UA",zu:"zu-ZA"};
+const LANGNAME={bg:"Български",zh:"中文",hr:"Hrvatski",cs:"Čeština",en:"English",
+  fr:"Français",de:"Deutsch",hu:"Magyar",id:"Bahasa Indonesia",it:"Italiano",
+  ja:"日本語",rw:"Kinyarwanda",mk:"Македонски",pt:"Português",ro:"Română",
+  ru:"Русский",sr:"Српски",es:"Español",tl:"Tagalog",th:"ไทย",uk:"Українська",
+  zu:"isiZulu"};
+const LOCALE={bg:"bg-BG",zh:"zh-CN",hr:"hr-HR",cs:"cs-CZ",en:"en-US",fr:"fr-FR",
+  de:"de-DE",hu:"hu-HU",id:"id-ID",it:"it-IT",ja:"ja-JP",rw:"rw-RW",mk:"mk-MK",
+  pt:"pt-BR",ro:"ro-RO",ru:"ru-RU",sr:"sr-RS",es:"es-ES",tl:"fil-PH",th:"th-TH",
+  uk:"uk-UA",zu:"zu-ZA"};
 /* ——— the one label that is printed on the sheet ———
    The lesson already carries it — "LEITTEXT:", "MEMORY VERSE:" — and `cleanMem`
    cuts it off so it can be set in the booklet's own type rather than in the
@@ -1651,7 +1714,7 @@ function linkRead(){
 const quarters={};
 /* ——— which Bible the lesson quotes ———
    This is only where a language starts: the edition the booklet itself is set
-   against. It is not a limit. Most of the eighteen editions of the lesson have
+   against. It is not a limit. Most of the twenty-two editions of the lesson have
    no Bible of their own on this server, and hiding the verses from those
    readers would have been the wrong answer to the wrong question — a reader
    studying the Ukrainian lesson can perfectly well read the passages in Russian
@@ -1659,14 +1722,20 @@ const quarters={};
    answer; empty means "whatever the lesson is set in", which is what everyone
    had before and what everyone keeps until they say otherwise. */
 const BIBLE={de:"de-lut",en:"en-kjv",ru:"ru-rst",es:"es-rvr1960",pt:"pt-acf",
-  cs:"cs-bkr",fr:"fr-ls1910"};
+  cs:"cs-bkr",fr:"fr-ls1910",ro:"ro-vdc"};
 let bibleOwn=localStorage.getItem("sbl.bible")||"";
 /* the edition a sheet in this language should quote: the reader's own choice
    first, then the language's own Bible, and King James for a language that has
    neither — never nothing, because nothing is an empty verse box */
 function bibleOf(l){ return bibleOwn||BIBLE[l]||"en-kjv"; }
 const bibles={};
-let versesOn=localStorage.getItem("sbl.verses")==="1";
+/* ——— the passages are there unless they were put away ———
+   Every other setting here is off until the reader asks for it. This one is
+   not: a lesson is questions and the Scripture that answers them, and a reader
+   who arrives to an empty verse box has to find a switch before he can study
+   at all. So the absence of the key means on, and only his own "0" — the
+   layout button pressed a second time — takes the text away. */
+let versesOn=localStorage.getItem("sbl.verses")!=="0";
 let versesLines=localStorage.getItem("sbl.verselines")==="1";   /* one verse per line */
 /* Parallel reading: a second translation beside the one the lesson is in.
    Kept apart from `versesOn` on purpose — the reader turns it on once and it
@@ -1762,14 +1831,60 @@ function hexHsl(h){h=h.replace("#","");const r=parseInt(h.slice(0,2),16)/255,g=p
 /* one hue in, three tones out. The lightnesses are the printed booklet's own:
    38% carries white lettering on the day tag, 84% and 90% stay light enough to
    read black type through. Only the hue is the reader's — see .huebar. */
-function hueTint(h){return{dk:"hsl("+h+",46%,38%)",lt:"hsl("+h+",30%,84%)",bx:"hsl("+h+",21%,90%)"};}
+/* ——— contrast is checked, not hoped for ———
+   Every reachable pair is measured before it is worn: white on the day tag and
+   black type on the band. Where a lightness would fail it is walked, one point
+   at a time, until it passes — so no combination the two strips can produce is
+   one the lesson cannot be read through. */
+function hsl2rgb(h,s,l){h=((h%360)+360)%360;s/=100;l/=100;
+  const c=(1-Math.abs(2*l-1))*s,x=c*(1-Math.abs((h/60)%2-1)),m=l-c/2;
+  let r=0,g=0,b=0;
+  if(h<60){r=c;g=x;}else if(h<120){r=x;g=c;}else if(h<180){g=c;b=x;}
+  else if(h<240){g=x;b=c;}else if(h<300){r=x;b=c;}else{r=c;b=x;}
+  return[(r+m)*255,(g+m)*255,(b+m)*255];}
+function lumOf(rgb){const f=rgb.map(function(v){v/=255;
+  return v<=.03928?v/12.92:Math.pow((v+.055)/1.055,2.4);});
+  return .2126*f[0]+.7152*f[1]+.0722*f[2];}
+function ratio(a,b){const L1=lumOf(a),L2=lumOf(b);
+  return (Math.max(L1,L2)+.05)/(Math.min(L1,L2)+.05);}
+const INK=[28,28,30], PAPER_W=[255,255,255], INK_D=[233,232,235];
+/* walk the lightness until the pair passes, and no further */
+function fitL(h,s,l,against,want,step,limit){
+  for(let i=0;i<40;i++){
+    if(ratio(hsl2rgb(h,s,l),against)>=want) break;
+    l+=step;
+    if(step>0?l>limit:l<limit){ l=limit; break; }
+  }
+  return l;}
+/* one hue and one depth in, three tones out. Depth .5 is exactly the cut the
+   page wore before this strip existed, so a reader who never touches it never
+   sees it move: dark band 44…32, light band 88…80, box 93…87. */
+function hueTint(h,d){
+  d=d==null?hueDepth:d;
+  const sdk=40+12*d, sl=26+8*d, sbx=18+6*d;
+  let ldk=44-12*d, llt=88-8*d, lbx=93-6*d;
+  ldk=fitL(h,sdk,ldk,PAPER_W,4.5,-1,20);      /* white lettering on the tag */
+  llt=fitL(h,sl,llt,INK,7,1,92);              /* black type through the band */
+  if(lbx<llt+2) lbx=Math.min(94,llt+2);
+  return{dk:"hsl("+h+","+sdk+"%,"+ldk+"%)",
+         lt:"hsl("+h+","+sl+"%,"+llt+"%)",
+         bx:"hsl("+h+","+sbx+"%,"+lbx+"%)"};}
 /* the same hue on dark stock. The roles swap rather than the colour changing:
    the band goes under the type instead of over it, and the day tag becomes the
    light thing on the sheet — so it takes dark lettering (`--onacc`). 68% is
    where a tag still carries a black letter at every hue on the strip. */
-function hueTintDark(h){return{dk:"hsl("+h+",42%,68%)",lt:"hsl("+h+",22%,18%)",bx:"hsl("+h+",20%,14%)",
-                                q:"hsl("+h+",20%,34%)"};}
+function hueTintDark(h,d){
+  d=d==null?hueDepth:d;
+  const sdk=36+12*d, sl=18+8*d, sbx=17+6*d, sq=17+6*d;
+  let ldk=74-12*d, llt=15+6*d;
+  ldk=fitL(h,sdk,ldk,INK,4.5,1,86);           /* the tag carries dark lettering here */
+  llt=fitL(h,sl,llt,INK_D,7,-1,8);            /* light type through the band */
+  return{dk:"hsl("+h+","+sdk+"%,"+ldk+"%)",
+         lt:"hsl("+h+","+sl+"%,"+llt+"%)",
+         bx:"hsl("+h+","+sbx+"%,"+Math.max(6,llt-4)+"%)",
+         q:"hsl("+h+","+sq+"%,"+(llt+16)+"%)"};}
 let hueOwn=210;        /* where the strip's dot sits until the reader moves it */
+let hueDepth=.5;       /* and how deep — .5 is the cut the page wore before */
 let hueActive=false;   /* is the page wearing a hue of its own, or a theme */
 let tintIdx=1;         /* which swatch, when no hue of its own is worn — the cover */
 
@@ -1814,6 +1929,7 @@ function paintTint(){
 (function(){try{const s=JSON.parse(localStorage.getItem("sbl.tint")||"null");if(!s)return;
   /* {c:"#rrggbb"} is how a custom colour was kept before the strip: the hue of
      it is all that ever reached the page, so that is what is read back */
+  if(s.d!=null&&s.d>=0&&s.d<=1)hueDepth=s.d;
   if(s.h!=null){hueOwn=s.h;hueActive=true;}
   else if(s.c){hueOwn=hexHsl(s.c)[0];hueActive=true;}
   else if(s.i!=null&&THEMES[s.i])tintIdx=s.i;}catch(e){}})();
@@ -1837,8 +1953,8 @@ function setPaper(k){
 }
 /* ——— the edition the verses are taken from ———
    A question of its own, and not a consequence of the language. The booklet is
-   published in eighteen tongues; this server carries a Bible in seven of them.
-   Reading that as "eleven languages get no verses" would have been the wrong
+   published in twenty-two tongues; this server carries a Bible in eight of them.
+   Reading that as "fourteen languages get no verses" would have been the wrong
    answer: a reader studying the Ukrainian lesson can read the passages in
    Russian, and a reader of the Zulu one in English, and both would rather have
    the text than a tidy blank. The first entry is what everybody had before —
@@ -2027,8 +2143,9 @@ function verShort(id){ return String(id).split("-")[1]||String(id); }
    language quotes the same passages under the same `sOsis`, so the reference is
    looked up by the very key both sides share. Where the page has no lesson in
    that language the column carries its edition and nothing more, which is honest
-   and costs nothing — Romanian is the only edition left in that position now
-   that the booklet is read in eighteen tongues. */
+   and costs nothing. Romanian used to be the one edition in that position; the
+   Romanian lesson has since appeared, and every edition the picker offers now
+   has a lesson of its own to be read beside. */
 const paraRefs={};
 async function paraRefMap(l,y,q){
   const key=l+"-"+y+"-"+q; if(paraRefs[key]) return paraRefs[key];
@@ -2098,6 +2215,27 @@ function markedHtml(cls,t,k){
 /* Russian Q3 leaves the booklet's own page number at the end of some
    commentaries — "…– С.510. 37", "…к людям 9". Drop a trailing one-to-three
    digit number, unless it continues a page range ("S. 442. 443"). */
+/* ——— the quotation marks the language actually uses ———
+   The Russian file sets its quotations with a double prime — ″Покажи мне славу
+   Твою″ — where Russian uses « ». One character stands for both ends, so which
+   end it is comes from what it stands next to: after a letter or a comma it
+   closes, anywhere else it opens. 258 of them in the quarter, and every one was
+   printing as a stray mark in a booklet that sets « » everywhere else.
+   Nothing but that character and the straight " is touched. */
+const QUOTE={ru:["«","»"],uk:["«","»"],bg:["„","“"],cs:["„","“"],de:["„","“"],
+             mk:["„","“"],sr:["„","“"],hu:["„","”"],pt:["“","”"],es:["“","”"],
+             fr:["«\u00A0","\u00A0»"],en:["“","”"]};
+function typo(t){
+  const pair=QUOTE[rlang]||QUOTE.en;
+  return String(t||"").replace(/[″"]/g,function(m,i,str){
+    const b=str.charAt(i-1);
+    return (b&&!/[\s(\[{«„“—–-]/.test(b))?pair[1]:pair[0];
+  });
+}
+/* what a paragraph that has finished ends on. A closing bracket or quote is in
+   the set on purpose: "(Lukas 2, 48. 49.)" and "[Lukas 15, 18-20 zitiert.]" are
+   how the booklet ends a paragraph, and neither is a sentence cut in half. */
+const NOTE_END=/[.!?…:;»”″"'’)\]]\s*$/;
 function dropPageNo(t){
   const s=String(t||"");
   /* the number either stands off on a space, or sits glued to the punctuation
@@ -2112,7 +2250,7 @@ function questionLine(sub){
   /* a few Russian entries hold nothing but a page number */
   const parts=(sub.q||[]).map(x=>(x.text||"").trim()).filter(function(t){return t&&!isJunk(t)&&!/^\d{1,3}[.;:]?$/.test(t);});
   for(const q of (sub.question||[])) if(q&&q.text&&!isJunk(q.text)) parts.push(q.text.trim());
-  return parts.join(" ");
+  return typo(parts.join(" "));
 }
 
 let vid=0;   /* runs across a whole quarter, so verse ids stay unique */
@@ -2129,7 +2267,7 @@ function renderLesson(les,tasks,lg){
      of them would make four columns of nothing legible */
   const par=paraPick();                     /* "" when the second translation is off */
   let h='<div class="lesson">'+esc(strip(les.header||""))+'</div>'+
-        '<div class="top"><div class="date" data-k="dt">'+esc(strip(WORDsab()+", "+fmt(les.date,{month:"long",day:"numeric",year:"numeric"})))+'</div></div>';
+        '<div class="top"><div class="date" data-k="dt">'+esc(sabLine(les))+'</div></div>';
   h+='<h1 class="title" data-k="ti">'+esc(les.title||"")+'</h1>';
 
   const kRaw=strip(kt0(les)), kt=les.keyText||{}, kText=cleanMem(kRaw), kRef=strip((kt.ref&&kt.ref.text)||"");
@@ -2158,7 +2296,13 @@ function renderLesson(les,tasks,lg){
       const sub=subs[si], kk="d"+di+"s"+si;
       const q=questionLine(sub);
       if(q) blocks.push(markedHtml("q",q,kk+"q"));
-      if(versesOn){
+      /* The passage boxes are built whether or not the passages are being
+         shown. They were built only when they were wanted, which is why turning
+         the verses on had to build the whole sheet again — and a sheet built
+         again is a sheet that flickers, loses the reader's place and puts every
+         mark back afterwards. Empty boxes cost nothing: `body.noverses` takes
+         them off the screen and out of the print with one rule. */
+      {
         const refs=(sub.q||[]).filter(it=>it&&it.sOsis);
         if(refs.length){ let g='<div class="vgroup">';
           for(let vi=0;vi<refs.length;vi++){ const it=refs[vi],id="pv"+(vid++);
@@ -2197,9 +2341,30 @@ function renderLesson(les,tasks,lg){
             g+='<div class="vitem" data-os="'+esc(it.sOsis||"")+'">'+head+box+'</div>'; }
           blocks.push(g+'</div>'); }
       }
+      /* ——— a paragraph broken over the booklet's page turn ———
+         The publisher's file ends a note where the printed page ended and opens
+         another on the far side of the turn, so a quotation arrives as two
+         notes with the break falling mid-sentence — and the sheet sets it as
+         two paragraphs with air between them: "…Согрешив, сыны человеческие" /
+         "стали подданными сатаны."
+         Two notes are one note when the first does not end where a sentence
+         ends. A note carrying its source is never joined forward: the source is
+         the end of the quotation, whatever follows it.
+         The key of the first fragment is kept and the second's text is added to
+         its end — a mark laid inside the first is laid inside it still, because
+         offsets are counted from the start of the block. */
       let ni=0;
-      for(const n of sub.note||[]) if(n&&n.text&&!isJunk(n.text))
-        blocks.push('<div class="note" data-k="'+kk+'n'+(ni++)+'">'+mkGlue(inlineSource(esc(dropPageNo(strip(n.text)))))+sopHtml(n.sop,n.text)+'</div>');
+      const notes=[];
+      for(const n of sub.note||[]) if(n&&n.text&&!isJunk(n.text)){
+        const t=typo(dropPageNo(strip(n.text)));
+        const prev=notes[notes.length-1];
+        if(prev&&!prev.sop&&!NOTE_END.test(prev.text)){
+          prev.text=(prev.text+" "+t).trim(); prev.sop=n.sop; prev.raw=n.text;
+        } else notes.push({text:t,sop:n.sop,raw:n.text,k:kk+"n"+ni});
+        ni++;
+      }
+      for(const r of notes)
+        blocks.push('<div class="note" data-k="'+r.k+'">'+mkGlue(inlineSource(esc(r.text)))+sopHtml(r.sop,r.raw)+'</div>');
     }
     /* the heading of the day, the question it opens with and the beginning of
        the text that answers it are one block: a day heading left at the foot of
@@ -2208,11 +2373,26 @@ function renderLesson(les,tasks,lg){
        would cost more than a page break is worth. */
     h+='<div class="daystart">'+band+blocks.slice(0,2).join("")+'</div>'+blocks.slice(2).join("");
     let ri=0;
-    for(const rq of day.reviewQuestions||[]) if(rq) h+=markedHtml("review",dropPageNo(strip(rq)),"d"+di+"r"+(ri++));
+    for(const rq of day.reviewQuestions||[]) if(rq) h+=markedHtml("review",typo(dropPageNo(strip(rq))),"d"+di+"r"+(ri++));
   }
   return h+'<div class="legend"></div>';
 }
-function WORDsab(){return {de:"Sabbat",en:"Sabbath",ru:"Суббота"}[rlang];}
+/* ——— the line that says which Sabbath this is ———
+   It used to be built here: a table of the word "Sabbath" and a date formatted
+   by the browser. The table held three languages, so the other nineteen read
+   "UNDEFINED, 5. RUJNA 2026." — and even where it held the word, the browser's
+   date is not the booklet's: Croatian declines the month, French leaves out the
+   comma, German writes "den".
+   The publisher already prints the line, correctly, in every language and for
+   every lesson — 22 of 22, 13 of 13, checked against the server. So the line is
+   taken and not made. The table stays as the fallback for the day a lesson
+   arrives without one. */
+function WORDsab(){return {de:"Sabbat",en:"Sabbath",ru:"Суббота"}[rlang]||"Sabbath";}
+function sabLine(les){
+  const own=strip((les&&les.dateLong)||"");
+  if(own) return own;
+  return strip(WORDsab()+", "+fmt(les.date,{month:"long",day:"numeric",year:"numeric"}));
+}
 
 /* the month view reaches into the quarters on either side. Fetch them quietly
    once the lesson is up: opening the calendar is then instant, and the service
@@ -2239,10 +2419,36 @@ function fileSafe(s){ return String(s||"").replace(/[\\/:*?"<>|]+/g," ").replace
    together is worth a page break; keeping half a page of commentary together
    is not — past that the last piece is let out of the block again. */
 const KEEPMAX=420;
+/* Called again after every change to the sheet, so it starts by undoing itself:
+   whatever it pulled in last time goes back where the sheet was built with it,
+   and the shape is worked out afresh. Without that, showing the passages after
+   hiding them would leave the commentary inside a keep it was never part of. */
 function relaxDayStarts(){
+  document.querySelectorAll(".daystart > .pulledin").forEach(function(el){
+    const d=el.parentNode;
+    el.classList.remove("pulledin");
+    d.parentNode.insertBefore(el,d.nextSibling);
+  });
   document.querySelectorAll(".daystart").forEach(function(d){
-    while(d.children.length>2 && d.offsetHeight>KEEPMAX)
+    while(d.children.length>2 && d.offsetHeight>KEEPMAX){
+      d.lastElementChild.classList.remove("pulledin");
       d.parentNode.insertBefore(d.lastElementChild,d.nextSibling);
+    }
+    /* A hollow keep is as wrong as an overgrown one. With the passages put away
+       the day heading and its question hold nothing but themselves, and a page
+       break under them leaves the heading alone at the foot — the very thing
+       the keep exists to prevent. So the block that answers the question comes
+       in instead, exactly as it did when the sheet was built without passages. */
+    let shown=0;
+    for(const c of d.children) if(c.offsetHeight>0) shown++;
+    const nx=d.nextElementSibling;
+    if(shown<3 && nx && !nx.classList.contains("daystart") && d.offsetHeight<KEEPMAX){
+      nx.classList.add("pulledin"); d.appendChild(nx);
+      if(d.offsetHeight>KEEPMAX){                  /* too much: put it back out */
+        nx.classList.remove("pulledin");
+        d.parentNode.insertBefore(nx,d.nextSibling);
+      }
+    }
   });
 }
 
@@ -2263,12 +2469,39 @@ async function render(){
      shape when the second language went: a function that takes its language as
      an argument is what lets the PDF be printed in one while the page is read in
      another, and that is still done below. */
+  /* ——— a quarter opens like a book ———
+     A hundred and twenty pages arriving with no first page and no list of what
+     is in them is a stack, not a booklet: the reader who saves the quarter has
+     no way of finding the sixth lesson except by scrolling for it. So the
+     quarter gets what the printed one has — a title page, and the thirteen
+     lessons listed with their dates. The First Sabbath Offering keeps its place
+     in the list, because it keeps it in the booklet. */
+  function quarterFront(data,lessons,lg){
+    const was=rlang; rlang=lg;
+    let rows="";
+    lessons.forEach(function(l){
+      if(l.fso) rows+='<div class="qrow gift"><span class="qno">♥</span>'
+        +'<span class="qt">'+esc(strip(l.fso.title||""))+'</span>'
+        +'<span class="qd">'+esc(strip(l.fso.dateLong||l.dateLong||""))+'</span></div>';
+      rows+='<div class="qrow"><span class="qno">'+esc(l.no)+'</span>'
+        +'<span class="qt">'+esc(strip(l.title||""))+'</span>'
+        +'<span class="qd">'+esc(strip(l.dateLong||""))+'</span></div>';
+    });
+    const h='<div class="qfront">'
+      +'<div class="qsub">'+esc(strip(data.publicationDateLong||""))+'</div>'
+      +'<h1 class="qtitle">'+esc(strip(data.title||""))+'</h1>'
+      +'<div class="qrule"></div>'
+      +'<div class="qcap">'+esc(T("contents"))+'</div>'
+      +'<div class="qlist">'+rows+'</div></div>';
+    rlang=was;
+    return sheet(h,"",lg);
+  }
   async function sideHtml(lg){
     if(scope==="quarter"){
       const data=await loadQuarter(lg,current.getFullYear(),qOf(current));
       const lessons=(data&&data.lessons)||[];
       if(!lessons.length) return {html:sheet('<div class="msg">No lessons for this quarter.</div>'),title:"",name:""};
-      return {html:lessons.map(function(les){ return sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
+      return {html:quarterFront(data,lessons,lg)+lessons.map(function(les){ return sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
         title:strip(data.title||""),
         name:fileSafe("SBL "+current.getFullYear()+"-Q"+qOf(current)+" "+strip(data.title||""))};
     }
@@ -2298,7 +2531,28 @@ async function render(){
   audSync();
   mkPrefetch();
 
-  if(versesOn && tasks.length){
+  vtasks=tasks;
+  document.body.classList.toggle("noverses",!versesOn);
+  if(versesOn && tasks.length) await fillVerses(my);
+  linkStamp(); linkLand();
+}
+
+/* ——— the passages, set into boxes that are already there ———
+   Called from `render` when the sheet is new, and from the layout buttons when
+   only the shape of the passages changed. Nothing is rebuilt either way: the
+   boxes were built with the sheet, and this puts text into them. */
+let vtasks=[];
+async function fillVerses(my){
+  my=my==null?token:my;
+  const tasks=vtasks;
+  if(!tasks.length) return;
+  /* the boxes take the shape asked for — one verse to a line, or running text.
+     The class is on the box, the markup inside differs too, so both are set */
+  document.querySelectorAll(".vtext,.vref").forEach(function(el){
+    el.classList.toggle("lines",versesLines); });
+  document.querySelectorAll(".vpair").forEach(function(el){
+    el.classList.toggle("flow",!versesLines); });
+  {
     /* Every edition the page needs at once — the second must not make the first
        one wait, and the service worker keeps each of them for next time. Each
        task says which edition is its own. */
@@ -2307,15 +2561,25 @@ async function render(){
     const want=[];
     for(const t of tasks) if(t[4]&&want.indexOf(t[4])<0) want.push(t[4]);
     if(par&&want.indexOf(par)<0) want.push(par);
-    const got=await Promise.all(want.map(loadBible).concat([
-      /* the names of the books in the second edition's language, if the page
-         has a lesson in it at all — fetched beside the editions, never after */
+    const bibs={};
+    /* One promise to an edition, and a passage is set the moment *its own*
+       edition is in. An edition is four to six megabytes; waiting for the last
+       of them before showing the first meant a sheet full of empty boxes while
+       a second Bible nobody had asked to read yet came down the wire. Now the
+       first arrival is already being read while the rest are still travelling. */
+    const editionP={};
+    want.forEach(function(v){
+      editionP[v]=Promise.resolve(loadBible(v)).then(function(b){ bibs[v]=b; return b; }); });
+    /* the names of the books in the second edition's language, if the page has
+       a lesson in it at all — fetched beside the editions, never after */
+    let refs2=null;
+    const refsP=Promise.resolve(
       pl&&pl!==lang&&LANGS.indexOf(pl)>=0
-        ? paraRefMap(pl,current.getFullYear(),qOf(current)) : null ]));
-    if(my!==token) return;
-    const bibs={}; want.forEach(function(v,i){ bibs[v]=got[i]; });
-    const refs2=got[want.length];
-    for(const t of tasks){ const el=document.getElementById(t[0]); if(!el) continue;
+        ? paraRefMap(pl,current.getFullYear(),qOf(current)) : null
+    ).then(function(r){ refs2=r; return r; });
+
+    const setPassage=function(t){
+      const el=document.getElementById(t[0]); if(!el) return;
       const bib=bibs[t[4]];
       if(t[2]){
         const el2=document.getElementById(t[2]), bib2=bibs[par];
@@ -2324,18 +2588,32 @@ async function render(){
         if(el2) el2.innerHTML=p[1]||'<span class="vmiss">—</span>';
         const hd=t[3]&&document.getElementById(t[3]), r2=refs2&&refs2[t[1]];
         if(hd&&r2) hd.textContent=verShort(par)+" · "+r2;
-        continue;
+        return;
       }
-      const vh=verseHtml(bib&&bib.books,t[1],versesLines); el.innerHTML=vh||'<span class="vmiss">—</span>'; }
-    relaxDayStarts();   /* the passage has arrived — the block may have outgrown its keep */
-    mkRestore();        /* … and the marks that live inside the passage can go back on */
+      const vh=verseHtml(bib&&bib.books,t[1],versesLines);
+      el.innerHTML=vh||'<span class="vmiss">—</span>';
+    };
+
+    const done=tasks.map(function(t){
+      /* a plain passage waits on one edition; a parallel one on both, and on
+         the book names that go over the second column */
+      const need=[editionP[t[4]]||Promise.resolve(null)];
+      if(t[2]){ need.push(editionP[par]||Promise.resolve(null)); need.push(refsP); }
+      return Promise.all(need).then(function(){
+        if(my!==token) return;              /* the reader has turned the page */
+        setPassage(t);
+      });
+    });
+    await Promise.all(done);
+    if(my!==token) return;
+    relaxDayStarts();   /* the passages have arrived — a block may have outgrown its keep */
+    mkRestore();        /* … and the marks that live inside them can go back on */
   }
-  linkStamp(); linkLand();
 }
-/* ——— eighteen languages are a list, not a row of buttons ———
+/* ——— twenty-two languages are a list, not a row of buttons ———
    Three fitted across a panel and could be shown all at once, which was the
-   right shape for three. Eighteen cannot be, and a row that scrolls sideways is
-   a row nobody reads to the end of. Each stands in its own words — a reader
+   right shape for three. Twenty-two cannot be, and a row that scrolls sideways
+   is a row nobody reads to the end of. Each stands in its own words — a reader
    looking for his language is not looking for the English name of it, still
    less for two letters of it. */
 function buildSeg(){
@@ -2465,7 +2743,11 @@ async function buildCal(){
     current=ymdToDate(el.dataset.d); render(); }; });
   calpop.querySelector("[data-today]").onclick=function(){ calpop.hidden=true; current=new Date(); render(); };
 }
-function WORDtoday(){ return {de:"Diese Woche",en:"This week",ru:"Эта неделя"}[lang]; }
+/* the same three-language table that put "UNDEFINED" on the date line stood
+   here too: nineteen of the twenty-two read it and got nothing. There is no
+   published wording for this one to take, so it falls back to English — a word
+   the reader can act on beats a word that says `undefined`. */
+function WORDtoday(){ return {de:"Diese Woche",en:"This week",ru:"Эта неделя"}[lang]||"This week"; }
 document.getElementById("wk").onclick=function(e){
   e.stopPropagation(); setpopSet(false);
   if(calpop.hidden){ calMonth=new Date(current.getFullYear(),current.getMonth(),1); buildCal(); calpop.hidden=false; }
@@ -2496,11 +2778,24 @@ function paintVerseBtns(){
    is already lit puts the text away. The columns are not touched either way —
    they take both shapes. */
 function mkVerseLayout(lines){
+  const wasLines=versesLines;
   if(versesOn&&versesLines===lines) versesOn=false;      /* the lit one put out */
   else{ versesOn=true; versesLines=lines; }
   localStorage.setItem("sbl.verses",versesOn?"1":"0");
   localStorage.setItem("sbl.verselines",versesLines?"1":"0");
-  paintVerseBtns(); paintPara(); render();
+  paintVerseBtns(); paintPara();
+  /* The sheet is not built again. It used to be, and that is what the reader
+     saw as a reload: his place lost, the marks put back, the whole lesson
+     redrawn to show text that was always going to sit in boxes already on the
+     page. Now the boxes are simply shown or put away, and filled if they are
+     empty or if the shape they were filled in has changed. */
+  document.body.classList.toggle("noverses",!versesOn);
+  if(versesOn){
+    const empty=vtasks.some(function(t){
+      const el=document.getElementById(t[0]); return el&&!el.firstChild; });
+    if(empty||versesLines!==wasLines) fillVerses();
+    else { relaxDayStarts(); mkRestore(); }
+  } else { relaxDayStarts(); mkRestore(); }
 }
 tog.onclick=function(){ mkVerseLayout(false); };
 vlines.onclick=function(){ mkVerseLayout(true); };
@@ -2707,6 +3002,8 @@ const UI={
   lang:    {de:"Sprache",en:"Language",ru:"Язык",bg:"Език",cs:"Jazyk",es:"Idioma",fr:"Langue",hu:"Nyelv",id:"Bahasa",ja:"言語",mk:"Јазик",pt:"Idioma",sr:"Језик",th:"ภาษา",uk:"Мова",zh:"语言"},
   verses:  {de:"Bibeltext",en:"Bible text",ru:"Текст Библии",bg:"Библейски текст",cs:"Biblický text",es:"Texto bíblico",fr:"Texte biblique",hu:"Bibliai szöveg",id:"Teks Alkitab",ja:"聖書本文",mk:"Библиски текст",pt:"Texto bíblico",sr:"Библијски текст",th:"ข้อพระคัมภีร์",uk:"Текст Біблії",zh:"圣经经文"},
   size:    {de:"Schriftgröße",en:"Text size",ru:"Размер текста",bg:"Размер на текста",cs:"Velikost písma",es:"Tamaño del texto",fr:"Taille du texte",hu:"Betűméret",id:"Ukuran teks",ja:"文字の大きさ",mk:"Големина на текстот",pt:"Tamanho do texto",sr:"Величина текста",th:"ขนาดตัวอักษร",uk:"Розмір тексту",zh:"文字大小"},
+  contents:{de:"Inhalt",en:"Contents",ru:"Содержание",bg:"Съдържание",cs:"Obsah",es:"Índice",fr:"Sommaire",hu:"Tartalom",id:"Daftar isi",ja:"目次",mk:"Содржина",pt:"Índice",sr:"Садржај",th:"สารบัญ",uk:"Зміст",zh:"目录"},
+  depth:   {de:"Tiefe",en:"Depth",ru:"Глубина",bg:"Дълбочина",cs:"Hloubka",es:"Profundidad",fr:"Profondeur",hu:"Mélység",id:"Kedalaman",ja:"濃さ",mk:"Длабочина",pt:"Profundidade",sr:"Дубина",th:"ความเข้ม",uk:"Глибина",zh:"深浅"},
   colour:  {de:"Farbe",en:"Colour",ru:"Цвет",bg:"Цвят",cs:"Barva",es:"Color",fr:"Couleur",hu:"Szín",id:"Warna",ja:"色",mk:"Боја",pt:"Cor",sr:"Боја",th:"สี",uk:"Колір",zh:"颜色"},
   pdf:     {de:"Als PDF sichern",en:"Save as PDF",ru:"Сохранить в PDF",bg:"Запази като PDF",cs:"Uložit jako PDF",es:"Guardar como PDF",fr:"Enregistrer en PDF",hu:"Mentés PDF-be",id:"Simpan sebagai PDF",ja:"PDF で保存",mk:"Зачувај како PDF",pt:"Salvar como PDF",sr:"Сачувај као PDF",th:"บันทึกเป็น PDF",uk:"Зберегти у PDF",zh:"保存为 PDF"},
   show:    {de:"Bibeltext anzeigen",en:"Show the Bible text",ru:"Показывать текст Библии",bg:"Показвай библейския текст",cs:"Zobrazit biblický text",es:"Mostrar el texto bíblico",fr:"Afficher le texte biblique",hu:"Bibliai szöveg mutatása",id:"Tampilkan teks Alkitab",ja:"聖書本文を表示",mk:"Прикажи го библискиот текст",pt:"Mostrar o texto bíblico",sr:"Прикажи библијски текст",th:"แสดงข้อพระคัมภีร์",uk:"Показувати текст Біблії",zh:"显示圣经经文"},
@@ -2884,24 +3181,40 @@ function paintPop(){
   if(sc) sc.style.background=hueActive?(d?hueTintDark(hueOwn):hueTint(hueOwn)).dk:"";
 }
 const hueRow=document.getElementById("hue-row"), hueBar=document.getElementById("huebar");
-/* the dot sits where the hue is, and the wheel wears the colour it stands for
-   as soon as one is taken — so the row of swatches always shows what is on */
+const depthBar=document.getElementById("depthbar");
+/* the dots sit where the choice is, and both strips wear what they stand for —
+   the depth strip is painted in the hue actually taken, pale end to deep end,
+   so moving one dot repaints the other and the row of swatches shows what is on */
 function paintHue(){
   hueBar.firstElementChild.style.left=(hueOwn/360*100)+"%";
+  depthBar.firstElementChild.style.left=(hueDepth*100)+"%";
+  depthBar.style.background="linear-gradient(90deg,"+hueTint(hueOwn,0).dk+","+hueTint(hueOwn,1).dk+")";
+  depthBar.title=T("depth");
   paintPop();
+}
+function keepTint(){
+  try{ localStorage.setItem("sbl.tint",JSON.stringify({h:hueOwn,d:hueDepth})); }catch(e){}
 }
 function takeHue(e){
   const r=hueBar.getBoundingClientRect();
   const x=Math.min(Math.max(e.clientX-r.left,0),r.width);
   hueOwn=Math.round(x/r.width*360)%360;
   hueActive=true;
-  paintTint(); paintHue();
-  try{ localStorage.setItem("sbl.tint",JSON.stringify({h:hueOwn})); }catch(e){}
+  paintTint(); paintHue(); keepTint();
+}
+function takeDepth(e){
+  const r=depthBar.getBoundingClientRect();
+  const x=Math.min(Math.max(e.clientX-r.left,0),r.width);
+  hueDepth=Math.round(x/r.width*100)/100;
+  hueActive=true;
+  paintTint(); paintHue(); keepTint();
 }
 /* one gesture, mouse or finger: the bands follow the dot while it is dragged,
    so the choice is made by looking at the lesson, not at a preview */
 hueBar.addEventListener("pointerdown",function(e){ e.preventDefault(); hueBar.setPointerCapture(e.pointerId); takeHue(e); });
 hueBar.addEventListener("pointermove",function(e){ if(hueBar.hasPointerCapture(e.pointerId)) takeHue(e); });
+depthBar.addEventListener("pointerdown",function(e){ e.preventDefault(); depthBar.setPointerCapture(e.pointerId); takeDepth(e); });
+depthBar.addEventListener("pointermove",function(e){ if(depthBar.hasPointerCapture(e.pointerId)) takeDepth(e); });
 buildPop();
 paintHue();
 /* one panel at a time; a click anywhere else closes them */
@@ -2998,6 +3311,9 @@ const MKW={
   pinned:{de:"Farbe festgehalten",en:"Colour pinned",ru:"Цвет закреплён"},
   unpinned:{de:"Farbe losgelassen",en:"Colour unpinned",ru:"Цвет откреплён"},
   markit:{de:"Markieren?",en:"Mark it?",ru:"Разметить?"},
+  edited:{de:"Der Verlag hat diese Stelle geändert — die Markierungen darin sind fort",
+          en:"The publisher revised this passage — the marks in it are gone",
+          ru:"Издатель поправил это место — пометки в нём сняты"},
   railon:{de:"An",en:"On",ru:"Вкл"},
   railoff:{de:"Aus",en:"Off",ru:"Выкл"},
   railshown:{de:"Das Etui steht links",en:"The rail stands on the left",ru:"Пенал стоит слева"},
@@ -3367,6 +3683,33 @@ function mkChain(n){ const out=[]; let p=n.parentNode;
    save (a note losing focus while the language is already switching) must not
    file German marks under the Russian lesson */
 function mkKey(pg){ return (pg.dataset.lang||lang)+"/"+pg.dataset.les; }
+
+/* ——— пометка знает, под каким текстом она легла ———
+   Пометка хранится как ключ блока и смещения в символах. Пока текст блока тот
+   же, это точный адрес. Но издатель правит вышедшие кварталы — исправляет
+   опечатку, склеивает абзац, вставляет слово, — и смещения начинают показывать
+   на соседние буквы: пометка тихо переезжает на чужие слова. Тихо — хуже
+   всего: читатель не знает, что его подчёркивание уже не его.
+   Поэтому вместе с пометкой кладётся короткая подпись текста блока. При
+   восстановлении подпись сверяется: совпала — пометка ложится как лежала;
+   не совпала — снимаются пометки *этого* блока и только его, а весь остальной
+   урок остаётся нетронутым. Работает во всех языках одинаково, потому что
+   считает буквы, а не понимает их.
+   Стихи не подписываются: их текст приходит из библейского издания, а не из
+   урока, и меняет вид от раскладки — «стих на строку» и «сплошняком» это одни
+   и те же слова в разной разметке. Издатель правит урок, а не Писание. */
+const MK_VERSE=/v\d+p?$/;
+function mkSig(b){
+  const w=mkWalk(b); let n,t="";
+  while(n=w.nextNode()) t+=n.nodeValue;
+  t=t.replace(/\s+/g," ").trim();
+  if(!t) return "";
+  /* FNV-1a на 32 битах, и длина рядом: коротко, стабильно и с запасом хватает,
+     чтобы заметить правку в один символ */
+  let h=0x811c9dc5;
+  for(let i=0;i<t.length;i++){ h^=t.charCodeAt(i); h=Math.imul(h,0x01000193)>>>0; }
+  return t.length.toString(36)+"."+h.toString(36);
+}
 function mkStore(){
   if(mkQuiet) return;
   document.querySelectorAll(".page[data-les]").forEach(function(pg){
@@ -3410,6 +3753,22 @@ function mkStore(){
     ["marks","ins","notes"].forEach(function(kind){
       (had[kind]||[]).forEach(function(o){ if(!here[o.k]) out[kind].push(o); });
     });
+    /* подписываются только те блоки, на которых что-то лежит: подпись пустого
+       блока никого не защищает и занимает место */
+    const used={}, sig={};
+    ["marks","ins","notes"].forEach(function(kind){
+      out[kind].forEach(function(o){ used[o.k]=1; });
+    });
+    pg.querySelectorAll("[data-k]").forEach(function(b){
+      const k=b.dataset.k;
+      if(!used[k]||MK_VERSE.test(k)) return;
+      const t=mkSig(b); if(t) sig[k]=t;
+    });
+    /* блока сейчас нет на листе — его подпись переносится как есть, вместе с
+       пометкой, которая его ждёт */
+    const hadSig=had.sig||{};
+    for(const k in hadSig) if(!here[k]&&used[k]) sig[k]=hadSig[k];
+    out.sig=sig;
     MKALL[mkKey(pg)]=out;
   });
   mkSet("pencil",MKALL);
@@ -3427,26 +3786,59 @@ function mkLegend(){
    it and lay the stored marks down again from the anchors */
 function mkRestore(){
   mkQuiet=true;
+  let dropped=0;
   document.querySelectorAll(".page[data-les]").forEach(function(pg){
     pg.querySelectorAll("mark").forEach(mkUnwrap);
     pg.querySelectorAll(".myins,.mynote").forEach(function(e){ e.remove(); });
     const d=MKALL[mkKey(pg)]; if(!d) return;
+
+    /* ——— что под пометкой изменилось ———
+       Судим только о том, что можем прочесть: блок, которого нет на листе, и
+       блок, который ещё пуст (стихи не пришли), не судим — их черёд настанет
+       при следующем вызове, когда лист полон. Записи без подписи — сделанные
+       до того, как подпись появилась, — восстанавливаются как раньше и
+       получают подпись при первом же сохранении. */
+    const sig=d.sig||{}, gone={};
+    for(const k in sig){
+      if(MK_VERSE.test(k)) continue;
+      const b=pg.querySelector('[data-k="'+k+'"]'); if(!b) continue;
+      const now=mkSig(b);
+      if(now&&now!==sig[k]) gone[k]=1;
+    }
+
     (d.marks||[]).forEach(function(o){
+      if(gone[o.k]) return;
       const b=pg.querySelector('[data-k="'+o.k+'"]'); if(!b) return;
       (o.ch||[]).forEach(function(step){
         const r=mkOffsets(b,o.s,o.e); if(r) mkPaint(r,step.c,step.y);
       });
     });
     (d.ins||[]).forEach(function(o){
+      if(gone[o.k]) return;
       const b=pg.querySelector('[data-k="'+o.k+'"]'); if(!b) return;
       const r=mkOffsets(b,o.s,o.s+1); if(!r) return;
       r.collapse(true); mkInsert(r,o.h||o.t,true,!!o.h);
     });
     (d.notes||[]).forEach(function(o){
+      if(gone[o.k]) return;
       const b=pg.querySelector('[data-k="'+o.k+'"]'); if(!b) return;
       mkNote(b,o.t,true,o.c);
     });
+
+    /* снято — значит снято: запись, которая показывает не туда, не должна
+       ждать своего часа в хранилище */
+    const keys=Object.keys(gone);
+    if(keys.length){
+      ["marks","ins","notes"].forEach(function(kind){
+        const before=(d[kind]||[]).length;
+        d[kind]=(d[kind]||[]).filter(function(o){ return !gone[o.k]; });
+        dropped+=before-d[kind].length;
+      });
+      keys.forEach(function(k){ delete sig[k]; });
+      d.sig=sig;
+    }
   });
+  if(dropped){ mkSet("pencil",MKALL); mkToast(T("edited")); }
   mkQuiet=false; mkLegend(); mkChipPaint();
 }
 
@@ -4748,6 +5140,13 @@ outSet(outOn);
        audio/de-09-1a.mp3   Sunday, question a
        audio/de-09-1b.mp3   Sunday, question b   … and so on to 7g
    A quarter with no recordings answers one 404 and shows nothing. */
+/* ——— the player is off ———
+   One word decides it. Off, nothing is drawn, nothing is asked for and no part
+   is looked for; the recordings are not carried in the repository at present.
+   Everything below is left exactly where it is: turning `AUDIO` back on is the
+   whole way back. */
+const AUDIO=false;
+
 const audEl=document.getElementById("audel"), audBar=document.getElementById("aud");
 const aseek=document.getElementById("aseek"), atime=document.getElementById("atime");
 const alabel=document.getElementById("alabel");
@@ -4812,6 +5211,7 @@ function audFollow(p){
          setTimeout(function(){ q.classList.remove("lit"); },1900); }
 }
 async function audSync(){
+  if(!AUDIO){ audBar.style.display="none"; return; }
   const my=++audToken;
   audShow(false); audList=[]; audAt=0; audEl.removeAttribute("src"); audIcon(false);
   if(scope==="quarter") return;            /* the whole quarter is not one reading */
