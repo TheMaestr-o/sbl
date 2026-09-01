@@ -10,7 +10,7 @@
 
 <br>
 
-![Version](https://img.shields.io/badge/version-2.1-c6a15b?style=flat-square)
+![Version](https://img.shields.io/badge/version-2.2-c6a15b?style=flat-square)
 ![Live](https://img.shields.io/badge/live-themaestr--o.github.io-606162?style=flat-square)
 ![Languages](https://img.shields.io/badge/22%20languages-606162?style=flat-square)
 ![Export](https://img.shields.io/badge/export-PDF-2d2d2d?style=flat-square)
@@ -151,6 +151,22 @@ Five presets — grey, the quarterly's cover navy, wine, forest, gold — or any
 | **1 – 4** | Highlighter · stroke · line · wave |
 | **N · I** | Your own note after the paragraph · your own words inside the line |
 | **E · C** | The eraser · copy with the reference |
+
+<br>
+
+## What 2.2 brought
+
+**Twenty-two languages.** Croatian, Italian, Romanian and Tagalog join the list, and every code in it was asked of the server before it was written down. The Romanian lesson gained a Bible of its own — Cornilescu.
+
+**The date line comes from the booklet.** It used to be assembled from a table of three languages: in nineteen of the twenty-two the word for Sabbath printed as `UNDEFINED`. The publisher prints that line himself, correctly, in every language and for every lesson — so it is taken, not made, and the booklet's own declension comes with it.
+
+**The passages are shown from the start, and arrive as they come.** An edition is four to six megabytes; waiting for the last of them before showing the first meant a sheet of empty boxes. Now each passage is set the moment its own edition lands. Turning the passages on or off no longer rebuilds the sheet either — the reader's place and every mark stay where they were.
+
+**A mark knows the words it was laid on.** Marks are stored as offsets into a block, so a publisher's correction used to slide them silently onto neighbouring words. Each mark now carries a signature of its paragraph: when the signature no longer matches, the marks in that paragraph are removed and the reader is told, and the rest of the lesson is left alone. Belt and braces — the current quarter is also frozen under `data/` in all twenty-two languages, so for most readers the text under a mark cannot move at all.
+
+**The quarter opens like a booklet:** a title page, and its thirteen lessons listed with their dates.
+
+**Typesetting.** A paragraph broken across the booklet's page turn is one paragraph again (twenty-two of them in a quarter). Russian quotations are set with guillemets instead of a double prime (258 in a quarter). A custom colour now has depth as well as hue, with both critical contrast pairs checked before the colour reaches the sheet.
 
 <br>
 
