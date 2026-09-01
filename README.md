@@ -12,11 +12,11 @@
 
 ![Version](https://img.shields.io/badge/version-2.1-c6a15b?style=flat-square)
 ![Live](https://img.shields.io/badge/live-themaestr--o.github.io-606162?style=flat-square)
-![Languages](https://img.shields.io/badge/DE%20%C2%B7%20EN%20%C2%B7%20RU-606162?style=flat-square)
+![Languages](https://img.shields.io/badge/22%20languages-606162?style=flat-square)
 ![Export](https://img.shields.io/badge/export-PDF-2d2d2d?style=flat-square)
 ![Offline](https://img.shields.io/badge/works-offline-2d2d2d?style=flat-square)
 ![Dependencies](https://img.shields.io/badge/dependencies-none-2d2d2d?style=flat-square)
-![License](https://img.shields.io/badge/license-Free-4caf50?style=flat-square)
+![License](https://img.shields.io/badge/license-MIT-4caf50?style=flat-square)
 
 <br>
 
@@ -36,7 +36,7 @@ The **Sabbath Bible Lesson** — the weekly Bible study booklet of the [Seventh 
 
 Not a reading app. A **digital typesetting** of one particular publication: the same grey section bands, the same lesson tag, the same memory-verse box, the same grid as the printed quarterly. What you save is what the church hands out.
 
-One language at a time — **German · English · Russian** — with the full Bible text pulled live from SDARM, and everything cached so it keeps working without internet.
+One language at a time — the booklet is published in **twenty-two**, and the picker offers every one the church's own service serves — with the full Bible text pulled live from SDARM, and everything cached so it keeps working without internet.
 
 <br>
 
@@ -120,11 +120,11 @@ Where the pointer is a finger the tools grow to match, and the rail lies down al
 
 <br>
 
-## Three languages
+## Twenty-two languages
 
-<div align="center"><img src="screenshots/languages.png" alt="The same lesson in German, English and Russian"></div>
+<div align="center"><img src="screenshots/languages.png" alt="The same lesson set in German, English and Russian"></div>
 
-Lesson text and Bible in **Luther 1912**, **King James** and the **Синодальный перевод**. Quotes from the Spirit of Prophecy carry their source, book title in italics — in all three languages.
+The booklet is read from Bulgarian to Zulu, and the picker names each language in its own words. Where a language has a Bible edition of its own the verses come in it — **Luther 1912**, **King James**, the **Синодальный перевод**, Reina-Valera, Almeida, Bible kralická, Louis Segond, Cornilescu; where it has none the reader says once, in ⚙, which edition he would rather read the passages in. Quotes from the Spirit of Prophecy carry their source, book title in italics, in whichever language the lesson is set.
 
 <br>
 
@@ -137,6 +137,10 @@ Five presets — grey, the quarterly's cover navy, wine, forest, gold — or any
 <br>
 
 ## The controls
+
+<div align="center"><img src="screenshots/settings.png" width="330" alt="The settings panel: language, verses, Bible edition, type size, theme, colour, paper, marking and the two PDF buttons"></div>
+
+<br>
 
 | | |
 |---|---|
@@ -172,7 +176,9 @@ Five presets — grey, the quarterly's cover navy, wine, forest, gold — or any
 
 ## Data & offline
 
-Everything is fetched live from the church's own source, `app.sdarm.org` — lesson texts and the Bible editions alike. Nothing is copied into this repository and nothing is rewritten; the page only sets the official text.
+Lesson texts and Bible editions come from the church's own source, `app.sdarm.org`, and nothing is rewritten — the page only sets the official text. The current quarter is frozen under `data/` in all **22** languages and answers first, so the publisher revising a quarter cannot move the text out from under a reader's marks. Anything not frozen is fetched live.
+
+Where the text does change anyway, a mark does not move with it. Every mark is stored with a short signature of the paragraph it was laid on; when the signature no longer matches, the marks **in that paragraph** are removed and the reader is told — and the rest of the lesson is left exactly as it was. A mark that has quietly slid onto the wrong words is worse than a mark that is gone.
 
 After the first visit a service worker keeps the quarter and the Bible, so the lesson opens instantly and works with no connection.
 
@@ -194,6 +200,7 @@ No build step, no framework, no dependencies — one HTML file and a service wor
 
 - Lesson content © [Seventh Day Adventist Reform Movement](https://sdarm.org); Bible text from SDARM's own editions. An independent reader, not affiliated with SDARM.
 - A quarter holds 13 lessons; each runs Sunday to Friday, with the Sabbath carrying the week's overview and memory verse.
+- [Impressum](impressum.html) · [Datenschutzerklärung](datenschutz.html)
 
 <br>
 
@@ -205,7 +212,9 @@ No build step, no framework, no dependencies — one HTML file and a service wor
 
 ## License
 
-Free to download and use. **© 2026 Sergio (Maestro).**
+[MIT](LICENSE) — the code is yours to take. The lesson text and the Bible editions are not: they stay with the Seventh Day Adventist Reform Movement and their own publishers.
+
+**© 2026 Serghei Galuscinshi**
 
 <br>
 
