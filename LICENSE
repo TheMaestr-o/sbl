@@ -1,0 +1,37 @@
+MIT License
+
+© 2026 Serghei Galuscinshi
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.
+
+
+---------------------------------------------------------------------------
+What this licence does not cover
+---------------------------------------------------------------------------
+
+The licence above applies to the software in this repository — the page, its
+stylesheet, its engine and the tools beside it.
+
+It does not apply to the text of the Sabbath Bible Lesson, which is published
+by the Seventh Day Adventist Reform Movement and remains its copyright; the
+copies under `data/` are held here for reading and are not licensed by this
+file. Nor does it apply to the Bible editions the lesson quotes, each of which
+remains under the copyright of its own publisher.
+
+In short: the code is yours to take, the Scripture and the lesson are not.
