@@ -25,9 +25,300 @@
 <meta name="twitter:title" content="SBL Edition — Sabbath Bible Lesson">
 <meta name="twitter:description" content="The weekly Sabbath Bible Lesson in its original booklet layout — mark it, write on it, save it as PDF. DE · EN · RU.">
 <meta name="twitter:image" content="https://themaestr-o.github.io/sbl/screenshots/social-preview.png">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=PT+Sans:ital,wght@0,400;0,700;1,400;1,700&family=PT+Serif:ital,wght@0,400;0,700;1,400;1,700&display=swap" rel="stylesheet">
+<!-- The faces travel with the booklet. Google served them, and the service worker
+     never saw the request: offline the sheet came out in a fallback face with other
+     metrics, and the PDF broke its pages elsewhere. Now they are ours, the subsets
+     and unicode-ranges are the ones Google cut, and nothing is asked of a third party. -->
+<style>
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-400-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-400-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-700-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-700-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-700-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-italic-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-400-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-400-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-700-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-700-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-700-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Sans';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptsans-normal-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-400-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-400-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-700-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-700-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-700-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: italic;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-italic-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-400-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-400-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-400-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-400-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+/* cyrillic-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-700-cyrillic-ext.woff2) format('woff2');
+  unicode-range: U+0460-052F, U+1C80-1C8A, U+20B4, U+2DE0-2DFF, U+A640-A69F, U+FE2E-FE2F;
+}
+/* cyrillic */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-700-cyrillic.woff2) format('woff2');
+  unicode-range: U+0301, U+0400-045F, U+0490-0491, U+04B0-04B1, U+2116;
+}
+/* latin-ext */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-700-latin-ext.woff2) format('woff2');
+  unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+0304, U+0308, U+0329, U+1D00-1DBF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C0, U+2113, U+2C60-2C7F, U+A720-A7FF;
+}
+/* latin */
+@font-face {
+  font-family: 'PT Serif';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url(fonts/ptserif-normal-700-latin.woff2) format('woff2');
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+</style>
 <style>
 :root{
   --z:1;   /* text size: the sheet scales as a whole, proportions untouched */
@@ -52,6 +343,13 @@
      quiet mark is named apart and given a tone of its own on the dark sheet:
      the same hue, lifted until it can be seen against the paper it lies on. */
   --quiet:var(--tl-quiet,#ccd5e2);
+  /* ——— the tone the panels stand on ———
+     The memory verse and the passages are the same kind of thing on the sheet —
+     text set apart on its own stock — so they take one tone and take it from one
+     place. It is the band's box lightened against the paper: at full strength the
+     panels weighed as much as the section band, and a sheet carrying four of them
+     went heavy. Where color-mix is not understood the box itself stands in. */
+  --panel:color-mix(in srgb, var(--box) 52%, var(--paper-tone, #fff));
   --gold:#c6a15b; --gold-d:#b28e44;
   --mine:#2f5bd0;                       /* everything the reader added himself */
   --warn:#e5484d; --warnbg:rgba(229,72,77,.10);   /* what is about to be removed */
@@ -97,6 +395,7 @@
   --on:#2b2b2b; --on-t:#fff; --onacc:#fff;
   --selc-t:#1c1c1c;
 }
+@supports not (color:color-mix(in srgb,red 50%,blue)){ :root{--panel:var(--box)} }
 *{box-sizing:border-box;margin:0;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
 body{background:var(--paper-tone);color:var(--ink);font-family:var(--sans);font-size:17px;line-height:1.5;-webkit-font-smoothing:antialiased}
 /* selecting text feels like running a highlighter over the booklet */
@@ -371,8 +670,9 @@ html.paper body{background-image:var(--paper)}
 html.paper .page{background-color:transparent}
 /* the same paper under the printed parts: the band, the memory box and the
    lesson tag are ink on this sheet, not stickers laid over it */
-html.paper .mem,html.paper .sec::before,html.paper .lesson{background-image:var(--paper)}
-html.paper .sec .day{background-image:var(--paper);background-blend-mode:soft-light}
+html.paper .mem,html.paper .sec::before,html.paper .lesson,html.paper .vgroup{background-image:var(--paper)}
+/* the verse tag is the day tag one size down, so it takes the grain the same way */
+html.paper .sec .day,html.paper .vref>span{background-image:var(--paper);background-blend-mode:soft-light}
 /* the browser tries to keep the old text under your eye when the sheet is
    replaced, and quietly scrolls back to it — which fought every jump to a day.
    The two gutters are the standing rule of this page: a fixed panel does not
@@ -406,16 +706,30 @@ html.paper .sec .day{background-image:var(--paper);background-blend-mode:soft-li
 
 /* LESSON tag — contour from L4.eps: vertical sides, horizontal top (bleeds off page top),
    bottom slants down to the right (right corner ~4.86% of width lower). */
-.lesson{position:absolute;top:-40px;right:64px;z-index:2;width:210px;height:138px;
+/* ——— the tag is as wide as its word, never narrower than the booklet's own ———
+   210 px was the printed tag measured off the vector, and it was written as a fixed
+   width with `nowrap` inside: a tongue whose word for "lesson" runs longer simply put
+   the word outside the shape. Hungarian does it today by 11 px. It is now a floor, not
+   a size — the tag grows with whatever it is given — and the seat the date keeps clear
+   of it is measured from the tag itself (`--lesw`, set after every render), so a longer
+   word pushes the date rather than colliding with it. */
+.lesson{position:absolute;top:-40px;right:64px;z-index:2;width:max-content;min-width:210px;
+  max-width:calc(100% - 128px);padding-left:16px;padding-right:16px;height:138px;
   background:var(--gray);color:var(--gray-dk);
   font-weight:700;font-size:26px;letter-spacing:3px;text-transform:uppercase;line-height:1;white-space:nowrap;
   display:flex;align-items:flex-end;justify-content:center;padding-bottom:18px;
   clip-path:polygon(0 0,100% 0,100% 100%,0 calc(100% - 10px))}
 
 /* the lesson tag's seat: the date can never grow into it, at any text size */
-.top{margin-bottom:24px;padding-right:292px;min-height:100px}
-.top .date{font-weight:700;font-size:19px;letter-spacing:.4px;text-transform:uppercase}
-h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;margin:6px 0 30px}
+.top{margin-bottom:24px;padding-right:calc(var(--lesw,210px) + 82px);min-height:100px}
+.top .date{font-weight:700;font-size:19px;letter-spacing:.4px;text-transform:uppercase;overflow-wrap:break-word}
+/* Thai and Japanese put no spaces between words at all, and German builds words a
+   column wide. The line breaker handles both while the document carries the right
+   `lang` — but a title is set once and read for a quarter, so it also gets a floor:
+   hyphenate where the language hyphenates, and break a word outright rather than
+   let it leave the sheet. */
+h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;margin:6px 0 30px;
+  hyphens:auto;overflow-wrap:break-word}
 
 /* ——— the first page of a quarter ———
    The same furniture as a lesson head, one size down: the range of months
@@ -425,7 +739,7 @@ h1.title{font-weight:700;font-size:58px;line-height:1.02;letter-spacing:-1px;mar
    right, because a list is read down two edges and not across. */
 .qfront{padding-top:6px}
 .qsub{font-size:13px;font-weight:700;letter-spacing:.09em;text-transform:uppercase;color:var(--ink)}
-h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;margin:22px 0 0}
+h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;margin:22px 0 0;hyphens:auto;overflow-wrap:break-word}
 .qrule{height:1px;background:var(--hair);margin:34px 0 30px}
 .qcap{font-size:10px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);margin-bottom:16px}
 .qlist{display:flex;flex-direction:column}
@@ -442,7 +756,7 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
   h1.qtitle{font-size:36px}
 }
 
-.mem{background:var(--box);padding:20px 22px;margin-bottom:26px;text-align:justify;hyphens:auto;font-size:18px;line-height:1.5}
+.mem{background:var(--panel);padding:20px 22px;margin-bottom:26px;text-align:justify;hyphens:auto;font-size:18px;line-height:1.5}
 .mem b{font-weight:700}
 .read{margin-bottom:34px;font-size:18px}
 .read .lbl{font-weight:700}
@@ -451,31 +765,60 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
 .quote{font-family:var(--serif);font-size:19px;line-height:1.52;text-align:justify;hyphens:auto;margin-bottom:34px}
 .quote i{font-style:italic}
 
-/* band shape from official vector: rectangle + dark tag (vertical left seam, right edge slanted 8.2deg) */
-.sec{position:relative;height:auto;min-height:40px;margin:40px 0 22px}   /* band hugs the text as in the printed booklet */
-.sec::before{content:"";position:absolute;inset:0;background:var(--gray);clip-path:polygon(0 0,100% 0,calc(100% - 7.5px) 100%,0 100%)}
+/* band shape from official vector: rectangle + dark tag (vertical left seam, right edge slanted 8.2deg)
+   Sizes are the printed booklet's own, measured off the quarterly and checked against the
+   sheet as it lands on A5: 42 px tall with 20 px lettering prints at 21.4 pt over 10.2 pt,
+   which is what the paper carries. At 22 px the lettering came out a point too large and
+   sat tight in the band. The day tag follows it down, 16 px — .81 of the band, as printed. */
+/* ——— the day tag sits down on the column and leans out over it ———
+   The cut is the one the booklet has and is not touched: what changed is which corner
+   the column holds. The band runs past the text column by exactly the width of the cut,
+   so the tag's BOTTOM corner lands on the column's right edge and its top corner stands
+   out over it. Before, the top sat on the edge and the bottom leaned in. */
+.sec{position:relative;height:auto;min-height:31px;margin:40px -6px 22px 0;display:flex;align-items:stretch}
+/* ——— the day tag takes the room it needs, and not a pixel more ———
+   The tag used to be absolute with a fixed seat cut out of the title's padding, so a
+   short tag still reserved a long one's width and the title broke a line early against
+   empty band. Laid out as a flex row the tag hugs its own text and the title takes what
+   is left: it now breaks only where it truly meets the tag, which for every section
+   title the booklet prints means it does not break at all. */
+.sec::before{content:"";position:absolute;inset:0;background:var(--gray);clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)}
 /* the right padding is the day tag's seat — a long title wraps inside the band
    instead of running underneath it */
-.sec .t{position:relative;min-height:40px;display:flex;align-items:center;padding:6px 152px 6px 20px;
-  font-weight:700;font-size:22px;line-height:1.2;text-transform:uppercase;letter-spacing:.2px}
+.sec .t{position:relative;flex:1 1 auto;min-width:0;min-height:31px;display:flex;align-items:center;
+  padding:6px 16px 6px 20px;font-weight:700;font-size:18px;line-height:1.2;text-transform:uppercase;letter-spacing:.2px}
 .sec .t .n{margin-right:.32em}   /* one space between "1." and the title */
-.sec .day{position:absolute;top:0;bottom:0;right:0;z-index:1;background:var(--gray-dk);color:var(--onacc);display:flex;align-items:center;
-  padding:0 26px;font-weight:700;font-size:18px;white-space:nowrap;clip-path:polygon(0 0,100% 0,calc(100% - 7.5px) 100%,0 100%)}
+.sec .day{position:relative;flex:0 0 auto;z-index:1;background:var(--gray-dk);color:var(--onacc);display:flex;align-items:center;
+  padding:0 23px;font-weight:400;font-size:18.5px;white-space:nowrap;clip-path:polygon(0 0,100% 0,calc(100% - 6px) 100%,0 100%)}
 
 /* 24px + the 2px rule = 26px, the same column the question text starts in, so
    verse and question hang on one vertical line */
-.vgroup{margin:8px 0 16px;padding:3px 0 4px 24px;border-left:2px solid var(--gray-dk)}
+/* ——— the passage is set on another paper, and its reference is a tag on the edge ———
+   The rule down the left was a bracket: it said "apart" and nothing else, and a sheet
+   carrying four passages stacked four brackets along the margin. The passage now sits
+   on its own tone, and the tone runs past the text column into the margin — a quire of
+   another stock bound into the booklet, wider than the block, as it is in a real book.
+   The reference wears the same slanted tag the day wears in the section band, so the
+   sheet keeps one shape at two scales. The first tag straddles the top edge; the rest
+   stand inside, because inside there is no edge to sit on. Every tag is aligned by its
+   own left edge to the verse text — a filled shape is read by its edge, not by the type
+   inside it. The line itself is the booklet's own: the first word of the question, the
+   verse number and the reference all stand on it, 26 px in from the column. */
+.vgroup{position:relative;margin:26px -20px 18px;padding:24px 20px 19px;background:var(--panel)}
 .vitem{break-inside:avoid}
 .vitem + .vitem{margin-top:12px}
-.vref{font-weight:700;font-size:12px;letter-spacing:1.2px;text-transform:uppercase;color:var(--gray-dk);margin-bottom:4px}
+.vref{margin:16px 0 7px}
+.vref>span{display:inline-block;background:var(--gray);color:var(--gray-dk);
+  font-weight:700;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;
+  padding:4px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 4px) 100%,0 100%)}
+/* the first tag sits astride the top edge of the quire */
+.vitem:first-child>.vref{position:absolute;top:0;left:20px;margin:0;transform:translateY(-50%);z-index:1}
 /* Set one verse to a line, the reference stands over the WORDS, not over the
    figures: the numbers hang out in their own narrow column, and a heading that
    began above them was a heading to the column of numbers. Indented by the same
    17px the verse text is, it heads the passage it names. The single reference
-   and the two of a parallel reading take the one rule — in the pair each span
-   is its own grid cell, so the padding stays inside the column and the two
-   labels keep step with the two columns of text below. */
-.vref.lines>span{padding-left:17px}
+   17px the verse text is, it heads the passage it names. */
+.vref.lines>span{padding-left:0}
 .vtext{font-family:var(--serif);font-size:16.5px;line-height:1.5;text-align:justify;hyphens:auto;color:#2b2b2b}
 /* The verse number keeps one look everywhere: same size, same colour, only a
    gentle raise and not a full superscript hop. It is set in the sans of the
@@ -483,16 +826,27 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
    not text, and cutting it from the same face as the words made it read as a
    word: a small serif figure inside a serif line is something to be read, and
    the eye stopped on it. In the label's own face it is plainly a mark. */
-.vtext .vnum{font-family:var(--sans);font-weight:700;font-size:11px;vertical-align:.42em;line-height:0;margin:0 4px 0 0;color:var(--gray-dk)}
+/* ——— the figure is lifted, and the line never knows ———
+   The number used to ride on `vertical-align` with `line-height:0`, which raises it
+   by changing the line box it sits in. A highlighter draws its ink as the background
+   of that box, so the stroke swelled and stepped exactly where a number stood.
+   Lifted with `position:relative` instead the shift is drawn, not measured: the line
+   box stays one height from end to end and the ink runs straight through.
+   And the figure is apparatus, not text — it is not for selecting or for copying,
+   so it takes no part in either. */
+.vtext .vnum{font-family:var(--sans);font-weight:700;font-size:11px;position:relative;top:-.42em;
+  margin:0 4px 0 0;color:var(--gray-dk);user-select:none;-webkit-user-select:none}
 /* one verse per line — number hangs in the margin, wrapped lines align under the text */
 .vtext.lines{text-align:left;hyphens:none}
 /* the number starts the line — flush with the rule of the group — and the
    verse hangs off it, under the reference that names it */
-.vtext.lines .v{display:block;padding-left:17px;text-indent:-17px;break-inside:avoid}
-.vtext.lines .v + .v{margin-top:5px}
+.vtext.lines .v{display:block;padding-left:21px;text-indent:-21px;break-inside:avoid}
+/* one passage, not a stack of paragraphs: the column of numbers carries the
+   rhythm, so nothing is added between the verses */
+.vtext.lines .v + .v{margin-top:0}
 /* min-width, not width: the verse follows the number as closely as it does in
    running text, and a three-digit number simply takes the room it needs */
-.vtext.lines .vn{display:inline-block;min-width:13px;margin-right:4px;text-indent:0;vertical-align:.42em;
+.vtext.lines .vn{display:inline-block;min-width:17px;margin-right:4px;text-indent:0;position:relative;top:-.42em;user-select:none;-webkit-user-select:none;
   font-family:var(--sans);font-weight:700;font-size:11px;color:var(--gray-dk)}   /* same raise, same face */
 .vmiss{color:#bbb}
 /* A passage still on its way holds its place and shows that it is coming,
@@ -503,37 +857,12 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
 @keyframes vwait{from{background-position:120% 0}to{background-position:-120% 0}}
 @media (prefers-reduced-motion:reduce){ .vtext:empty{animation:none} }
 
-/* Parallel reading — a second translation beside the first. The two columns
-   are not two blocks of text set next to each other: both are laid into one
-   grid and every verse is placed on its own row, so verse 12 on the left and
-   verse 12 on the right always stand on the same line. A verse one edition
-   does not carry leaves an empty cell instead of pushing the rest out of step.
-   The column elements themselves keep no box (`display:contents`) — they stay
-   in the DOM only so that a highlight still has one block with a stable
-   `data-k` to hang on; see `mkRestore()`. */
-.vpair{display:grid;grid-template-columns:1fr 1fr;column-gap:22px;row-gap:6px;align-items:start}
-.vpair>.vtext{display:contents}
-/* set as running text there is nothing to hold level, so each column goes back
-   to being an ordinary block and simply stands beside the other */
-.vpair.flow>.vtext{display:block}
-.vpair>.vtext>.v{grid-column:1;grid-row:var(--r)}
-.vpair>.vtext.alt>.v{grid-column:2}
-/* the grid keeps the rows apart — the running margin would only add to it */
-.vpair>.vtext .v + .v{margin-top:0}
-/* both columns are set exactly alike: a second translation is a translation,
-   not a footnote to the first, and greying it made it read as the lesser one.
-   The two are told apart by the edition named over each column, nothing else. */
-/* the reference line carries the editions too, one over each column: the same
-   line already stood there, so naming them costs no height at all */
-.vref.pair{display:grid;grid-template-columns:1fr 1fr;column-gap:22px}
-/* a note written against a parallel passage belongs to the whole width */
-.vpair>.mynote{grid-column:1/-1}
 
 /* The same second translation, where a column has nowhere to stand: hold the
    verse and it comes out under it, let go and it folds. On a phone and on a
    narrow tablet this is the only shape the other edition can take — and
    where the pair is actually on screen the card never opens, because the column
-   beside the verse is already the answer (see the guard on `paraPick()`). */
+   beside the verse is already the answer. */
 #vpeek{position:fixed;z-index:61;display:none;width:max-content;
   max-width:min(430px,calc(100vw - 20px));padding:10px 14px 12px;border-radius:var(--r-pop);
   background:var(--card);border:1px solid var(--card-line);box-shadow:var(--lift2);
@@ -551,13 +880,19 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
 #vpeek .pn{display:inline-block;min-width:13px;margin-right:4px;text-indent:0;vertical-align:.42em;
   font-weight:700;font-size:11px;color:var(--gray-dk)}
 @media (prefers-reduced-motion:reduce){ #vpeek{transition:opacity .16s} }
-.q{font-weight:700;font-size:18px;line-height:1.45;text-align:justify;hyphens:auto;margin:0 0 14px;padding-left:26px;text-indent:-26px}
+/* 21px = the widest marker plus one word space. The booklet does not letter its
+   questions the same way in every tongue: beside "a. b. c." it prints "A. B. C.",
+   "1. 2. 5.", Cyrillic "а. б. в. ц." and Thai "ก. ข. ค." — sixteen in all, and the
+   widest is half again the width of the narrowest. Measured across every language
+   at once, not off the English sheet. It used to be 26, where the gap after the
+   point read as a tab stop rather than as a space. */
+.q{font-weight:700;font-size:18px;line-height:1.45;text-align:justify;hyphens:auto;margin:0 0 14px;padding-left:21px;text-indent:-21px}
 .note{font-family:var(--serif);font-size:18px;line-height:1.52;text-align:justify;hyphens:auto;margin:0 0 16px}
 .note i{font-style:italic}
-.review{font-weight:700;font-size:18px;line-height:1.45;margin:0 0 14px;padding-left:26px;text-indent:-26px}
+.review{font-weight:700;font-size:18px;line-height:1.45;margin:0 0 14px;padding-left:21px;text-indent:-21px}
 /* the "a." / "b." marker owns its own column, so wrapped lines land exactly
    under the first word of the question rather than a few pixels off */
-.q .qm,.review .qm{display:inline-block;width:26px;text-indent:0}
+.q .qm,.review .qm{display:inline-block;width:21px;text-indent:0}
 /* ——— the letter is the address of the question ———
    A reader points another at one question the way he would in the room: by its
    letter. Pressing it copies the link, and pressing the day of a band copies the
@@ -578,7 +913,6 @@ footer{max-width:820px;margin:0 auto;text-align:center;padding:20px 22px 58px}
   background:linear-gradient(90deg,transparent,var(--gray-dk),transparent)}
 .fkind{font-size:10px;letter-spacing:2.6px;text-transform:uppercase;color:#b9b9b9;margin-bottom:15px}
 .fnote{font-size:12px;line-height:1.75;color:#9c9c9c}
-.fset{font-size:11px;letter-spacing:.4px;color:#c2c2c2;margin-top:9px}
 /* required of every page in Germany, and reachable from every one of them */
 .flegal{font-size:11px;letter-spacing:.4px;color:#c2c2c2;margin-top:7px}
 .flegal a{color:inherit;text-decoration:none;border-bottom:1px solid rgba(0,0,0,.14)}
@@ -601,14 +935,16 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   .bar-in{padding:9px 22px;gap:8px;justify-content:center}
   .wk{flex:0 0 100%;justify-content:space-between;gap:6px}
   .lbl{min-width:0;max-width:calc(100% - 46px);overflow:hidden;text-overflow:ellipsis;padding:0 10px}
-  .ar,.tintbtn{flex:none;width:34px;height:34px;font-size:17px}
+  .ar{flex:none;width:34px;height:34px;font-size:17px}
   .seg .o{padding:6px 11px}
   .tog{padding:7px 12px}
   .pdf{padding:7px 13px}
 
   .page{padding:calc(30px / var(--z)) calc(22px / var(--z)) calc(44px / var(--z));margin:0}
   /* lesson tag shrinks and the date keeps clear of it */
-  .lesson{width:136px;height:96px;top:-30px;right:22px;font-size:17px;letter-spacing:2px;padding-bottom:13px}
+  /* the floor comes down with the tag: the base 210 is the wide sheet's */
+  .lesson{width:max-content;min-width:136px;max-width:calc(100% - 96px);height:96px;top:-30px;right:22px;
+    font-size:17px;letter-spacing:2px;padding-bottom:13px;padding-left:12px;padding-right:12px}
   .top{margin-bottom:18px;padding-right:146px;min-height:66px}
   .top .date{font-size:14px;line-height:1.35}
   h1.title{font-size:34px;letter-spacing:-.5px;margin:4px 0 22px}
@@ -621,15 +957,14 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   .quote{font-size:17px;margin-bottom:26px}
 
   /* section band grows to fit; the title never runs under the day tag */
-  .sec{height:auto;min-height:36px;margin:30px 0 18px}
-  .sec .t{min-height:36px;font-size:15px;letter-spacing:0;line-height:1.25;padding:8px 104px 8px 12px}
+  .sec{height:auto;min-height:28px;margin:30px -6px 18px 0}
+  .sec .t{min-height:28px;font-size:15px;letter-spacing:0;line-height:1.25;padding:8px 12px}
   .q .qm,.review .qm{width:20px}
-  .sec .day{font-size:11.5px;padding:0 11px}
+  .sec .day{font-size:15px;padding:0 13px}
 
-  .vgroup{margin:8px 0 14px;padding-left:18px}   /* + 2px rule = the 20px question column */
+  .vgroup{margin:22px -14px 15px;padding:22px 14px 16px}
+  .vitem:first-child>.vref{left:14px}
   .vtext{font-size:15.5px}
-  /* no .vpair rules here on purpose: below 1040px the parallel is never
-     rendered at all (see PARA_MQ), so there is nothing to lay out */
   .q{font-size:17px;padding-left:20px;text-indent:-20px}
   .note{font-size:16.5px}
   .review{font-size:17px;padding-left:20px;text-indent:-20px}
@@ -637,16 +972,17 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
 }
 @media screen and (max-width:400px){
   .bar-in{padding:9px 18px;gap:6px}
-  .ar,.zoom,.tintbtn,.langbtn{width:30px;height:30px;font-size:12px}
+  .ar,.zoom{width:30px;height:30px;font-size:12px}
   .seg .o{padding:6px 7px;letter-spacing:.3px}
   .tog,.pdf{padding:7px 8px;letter-spacing:.3px}
-  .tog.ic,.pdf.ic,.tog.vlines,.langbtn{width:30px;height:30px;padding:0}
+  .tog.ic,.pdf.ic,.tog.vlines{width:30px;height:30px;padding:0}
   .page{padding:calc(26px / var(--z)) calc(18px / var(--z)) calc(40px / var(--z))}
-  .lesson{width:122px;height:88px;right:18px;font-size:15px;letter-spacing:1.5px}
+  .lesson{width:max-content;min-width:122px;max-width:calc(100% - 84px);height:88px;right:18px;
+    font-size:15px;letter-spacing:1.5px;padding-left:10px;padding-right:10px}
   .top{padding-right:130px;min-height:58px}
   h1.title{font-size:30px}
-  .sec .t{font-size:14px;padding-right:96px}
-  .sec .day{font-size:11px;padding:0 9px}
+  .sec .t{font-size:14px}
+  .sec .day{font-size:14px;padding:0 11px}
 }
 /* ——— PENCIL MARKS ———
    Everything is drawn as the background of the line itself, never as an overlay:
@@ -666,7 +1002,9 @@ mark.tex{padding:.1em 0 .12em;margin:0;background-size:100% 1.15em;background-po
 mark.ps{padding-left:.3em;margin-left:-.3em}
 mark.pe{padding-right:.3em;margin-right:-.3em}
 /* куски одного мазка встают встык: перекрытие давало бы тёмную зарубку на
-   стыке, а разрыв — белую щель. Обычно куска и вовсе один — см. mkWhole() */
+   стыке, а разрыв — белую щель. Обычно куска и вовсе один — см. mkWhole().
+   Внутри одного куска тело и колпачки, наоборот, идут с нахлёстом в .04em —
+   см. mkInkTo(): там щель была видна, а удвоение чернил на полпикселя нет. */
 mark.fill:not(.ps),mark.tex:not(.ps){margin-left:0;padding-left:0}
 mark.fill:not(.pe),mark.tex:not(.pe){margin-right:0;padding-right:0}
 /* an underline must not move a letter: side padding on an inline box pushes
@@ -865,7 +1203,7 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;
 .days:empty{display:none}
 /* the panel itself never reacts: no grey flash from the system's tap
    highlight, no accidental selection of the day letters — only the drop moves */
-.days,.rail,.bub,.rpick,.hintchip,.caretbtn,.mtoast{
+.days,.rail,.bub,.rpick,.hintchip,.mtoast{
   -webkit-tap-highlight-color:transparent;
   -webkit-user-select:none;-moz-user-select:none;user-select:none;
   -webkit-touch-callout:none}
@@ -1217,7 +1555,6 @@ body.loading #load{opacity:1}
   opacity:0;transform:scale(.92) translateY(3px);pointer-events:none;transform-origin:50% 0;
   transition:opacity .14s,transform .2s cubic-bezier(.2,1.4,.4,1)}
 .bub.on{opacity:1;transform:none;pointer-events:auto}
-.bub .mhair{width:.5px;height:20px;background:var(--hair);margin:0 2px}
 .mtool{width:28px;height:28px;display:flex;align-items:center;justify-content:center;border-radius:8px;
   color:#5b5b60;cursor:pointer;transition:background .16s,color .16s,transform .12s}
 @media (hover:hover){ .mtool:hover{background:rgba(120,120,128,.16);color:#1c1c1e} }
@@ -1302,11 +1639,10 @@ body.noverses .vgroup{display:none}
     transition:transform .34s cubic-bezier(.25,1.1,.35,1),opacity .2s}
   body.railout .rail{transform:translate(0,-50%)}
   body.railout .railtab{transform:translateY(-50%) translateX(-24px);opacity:0}
-  /* The rail out means a left gutter, and the gutter is the rail's own measured
-     width (`--railw`, set in `mkDrawer`): the buttons grow on a finger device,
-     so any number written here would be wrong on exactly the screens that
-     matter. The sheet is set beside the rail, never under it. */
-  body.railout{--gut-l:var(--railw,106px)}
+  /* The rail used to take a gutter of its own width and the sheet stepped aside
+     for it. On a narrow screen that moved the lesson under the reader's eye every
+     time the rail came or went, and the line he was on jumped. It now floats over
+     the sheet instead: nothing reflows, and a tap on the sheet puts it away. */
   /* One narrow column down the left edge, and everything in it a tenth smaller
      than anywhere else — on a phone the width taken from the lesson matters
      more than the size of the target. These sizes deliberately undercut the
@@ -1382,7 +1718,7 @@ html.dark body{background:var(--paper-tone)}
 html.dark.paper{ --paper-tone:#181713; --mat:rgba(33,32,28,.80); --matx:#21201c;
                  --matl:rgba(33,32,28,.62) }
 html.dark.paper body{background-blend-mode:soft-light}
-html.dark.paper .mem,html.dark.paper .sec::before,html.dark.paper .lesson{background-blend-mode:soft-light}
+html.dark.paper .mem,html.dark.paper .sec::before,html.dark.paper .lesson,html.dark.paper .vgroup{background-blend-mode:soft-light}
 
 /* the lesson's own type */
 html.dark .vtext{color:#c9c6c0}
@@ -1416,7 +1752,6 @@ html.dark .mynote.blank::after{color:#6f7f9e}
 /* the colophon */
 html.dark .fkind{color:#5f5e66}
 html.dark .fnote{color:#7b7a82}
-html.dark .fset{color:#5f5e66}
 html.dark .flegal{color:#5f5e66}
 html.dark .flegal a{border-bottom-color:rgba(255,255,255,.16)}
 html.dark .flegal a:hover{color:#8a8992}
@@ -1475,8 +1810,8 @@ html.dark .mtoast b:hover{color:#fff}
 
 @media print{
   @page{
-    size:A4;                     /* the booklet's own sheet, whatever the printer defaults to */
-    margin:15mm;                 /* the same air on all four sides */
+    size:A5;                     /* the booklet's own sheet — it is printed A5, not A4 */
+    margin:12mm;                 /* the same air on all four sides */
     @top-left{ content:"" } @top-center{ content:"" } @top-right{ content:"" }
     @bottom-center{ content:"" }
     @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.2px; color:#9a9a9a; }
@@ -1488,10 +1823,28 @@ html.dark .mtoast b:hover{color:#fff}
      No padding of its own: the top and bottom air comes from @page alone, so
      it matches the left and right margins exactly. */
   /* the paper grain is a screen affair: real paper brings its own */
-  .page{box-shadow:none;margin:0;max-width:none;overflow:hidden;padding:0;zoom:1;
+  /* ——— the sheet is set for a 690px column and the booklet is A5 ———
+     A5 less its margins is 124 mm — 469 px at 96 dpi — so the sheet is taken
+     down to it whole rather than reflowed: 469 / 690 = .68. Every proportion
+     the booklet has is kept, the line holds the same number of words, and the
+     type lands at about 9 pt, which is what the printed quarterly sets. The
+     reader's own --z is deliberately not in play: on paper the sheet is the
+     booklet's size, whatever size he reads it at on screen. */
+  /* ——— the sheet is set for a column and the booklet is A5 ———
+     A5 less its 12 mm margins is 124 mm. The sheet is taken down to it whole rather than
+     reflowed at the same width: at zoom .91 the column must measure 124 / .91 = 136 mm,
+     which is 515 px at 96 dpi. Narrower than the screen's 692 px on purpose — a small
+     sheet carries a short line, and that is what the printed booklet does. Type lands at
+     about 11.6 pt and the section band at 21 pt, which is what the paper carries.
+     The reader's own --z is deliberately not in play: on paper the sheet is the
+     booklet's size, whatever size he reads it at on screen. */
+  /* the tag leans into the margin, so the sheet must not clip it: the LESSON tag is
+     already reseated to top:0 for paper, so nothing else wants clipping here. */
+  .page{box-shadow:none;margin:0;width:515px;max-width:515px;overflow:visible;padding:0;zoom:.91;
     background-image:none;background-color:#fff}
   html.paper body,html.paper .page{background-image:none;background-color:#fff}
-  html.paper .mem,html.paper .sec::before,html.paper .lesson,html.paper .sec .day{background-image:none}
+  html.paper .mem,html.paper .sec::before,html.paper .lesson,html.paper .sec .day,
+  html.paper .vgroup,html.paper .vref>span{background-image:none}
   .page + .page{break-before:page;page-break-before:always}   /* each lesson opens its own page */
   /* on screen the tag bleeds off the top of the sheet and the sheet clips it.
      Paper has no bleed: left as it is, the tag prints its full height into the
@@ -1610,7 +1963,6 @@ html.dark .mtoast b:hover{color:#fff}
       <div class="sctl">
         <div class="tog ic" id="tog"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.45" stroke-linecap="round" stroke-linejoin="round"><path d="M5.6 3.2c-1.9.7-3 2.3-3 4.3 0 1.6 1 2.7 2.4 2.7 1.2 0 2.1-.9 2.1-2.1 0-1.1-.8-2-1.9-2-.2 0-.4 0-.5.1.2-1 .9-1.8 1.9-2.2ZM12.6 3.2c-1.9.7-3 2.3-3 4.3 0 1.6 1 2.7 2.4 2.7 1.2 0 2.1-.9 2.1-2.1 0-1.1-.8-2-1.9-2-.2 0-.4 0-.5.1.2-1 .9-1.8 1.9-2.2Z"/></svg></div>
         <div class="tog vlines" id="vlines"></div>
-        <div class="tog ic" id="paratog" hidden><svg width="16" height="14" viewBox="0 0 16 14" fill="none" stroke="currentColor" stroke-width="1.4" stroke-linecap="round"><path d="M1 2.4h5M1 5.9h5M1 9.4h3.4"/><path d="M10 2.4h5M10 5.9h5M10 9.4h3.4"/></svg></div>
       </div></div>
     <div class="srow"><span class="slab" id="lab-bible"></span><select class="ssel short" id="bible-sel"></select></div>
     <div class="srow prow" id="para-row" hidden><span class="slab" id="lab-second"></span><select class="ssel" id="para-sel"></select></div>
@@ -1652,8 +2004,6 @@ html.dark .mtoast b:hover{color:#fff}
   <div class="fkind">SBL Edition &middot; Sabbath Bible Lesson &middot; original booklet layout</div>
   <div class="fnote">Content &copy; <a href="https://sdarm.org" target="_blank" rel="noopener">Seventh Day Adventist Reform Movement</a><br>
     Bible text from SDARM editions &middot; Luther 1912 &middot; King James &middot; Синодальный</div>
-  <div class="fset">Set in PT Serif &amp; PT Sans &middot; built by <a href="https://github.com/TheMaestr-o" target="_blank" rel="noopener">Sergio</a>
-    &middot; <a href="https://github.com/TheMaestr-o/sbl" target="_blank" rel="noopener">source on GitHub</a></div>
   <div class="flegal"><a href="https://sdarm.life">sdarm.life</a> &middot; <a href="impressum.html">Impressum</a> &middot; <a href="datenschutz.html">Datenschutz</a></div>
 </footer>
 
@@ -1740,7 +2090,6 @@ let versesLines=localStorage.getItem("sbl.verselines")==="1";   /* one verse per
 /* Parallel reading: a second translation beside the one the lesson is in.
    Kept apart from `versesOn` on purpose — the reader turns it on once and it
    stays on through language changes and reloads, like every other setting. */
-let paraOn=localStorage.getItem("sbl.para")==="1";
 let paraVer=localStorage.getItem("sbl.paraver")||"";
 /* every edition app.sdarm.org serves, in the order the picker lists them:
    [language tag, file id, the name it is known by] */
@@ -1783,13 +2132,15 @@ const PARA=[
 
    Under the line nothing is lost — the second translation is still one gesture
    away, under a held verse. */
-const PARA_MQ=matchMedia("(min-width:1040px)");
-function paraFits(){ return PARA_MQ.matches; }
 /* the second column has to be a second translation: whatever the lesson is
    already set in cannot stand beside itself */
 /* One function, one answer: this says what is actually set beside the verses on
    screen. */
-function paraPick(){ return paraOn&&paraFits()&&paraVer&&paraVer!==bibleOf(lang)?paraVer:""; }
+/* ——— the second translation lost its column ———
+   Two columns were one of the two shapes this feature had. The other — holding a
+   verse — reads on every screen and costs the sheet nothing, so the column has gone
+   and the hold is the whole of it now. `paraVer` stays: it names the edition the held
+   verse comes up in, and the picker in the settings is its only control. */
 
 /* band colour themes — first colour matches the quarterly cover (navy + light) */
 /* Each theme is cut twice: `dk/lt/bx` for a white sheet and `d` for a dark one.
@@ -2095,44 +2446,6 @@ function verseHtml(books,sOsis,perLine){let out="";
    verse one edition does not carry leaves its cell empty instead of pushing
    everything under it out of line. `--r` is the grid row the pair stands on.
    Row 1 belongs to the two version labels, so the verses start at 2. */
-function versePair(booksA,booksB,sOsis,perLine){
-  const rows=[];
-  for(const raw of String(sOsis).split(",")){
-    const s=parseSeg(raw.trim());
-    const ba=booksA&&booksA[s.book], bb=booksB&&booksB[s.book];
-    for(let c=s.chap;c<=s.echap;c++){
-      const va=ba&&ba[c-1], vb=bb&&bb[c-1];
-      /* the longer of the two settles how far "the whole chapter" reaches */
-      const len=Math.max(va?va.length:0,vb?vb.length:0); if(!len) continue;
-      const from=c===s.chap?s.v1:1, to=Math.min(c===s.echap?s.v2:len,len);
-      for(let n=from;n<=to;n++){
-        const ta=va&&va[n-1]!=null?esc(strip(String(va[n-1])).trim()):"";
-        const tb=vb&&vb[n-1]!=null?esc(strip(String(vb[n-1])).trim()):"";
-        if(ta||tb) rows.push([n,ta,tb]);
-      }
-    }
-  }
-  let a="",b="";
-  /* Running text in two columns: each side is simply its own paragraph. The
-     verses no longer stand level with each other — that is the price of it —
-     but the passage takes half the height, and for reading straight through
-     rather than comparing word against word this is the shape that is wanted. */
-  if(!perLine){
-    for(const r of rows){
-      if(r[1]) a+='<span class="vnum">'+r[0]+'</span>'+r[1]+" ";
-      if(r[2]) b+='<span class="vnum">'+r[0]+'</span>'+r[2]+" ";
-    }
-    return [a.trim(),b.trim()];
-  }
-  for(let i=0;i<rows.length;i++){
-    /* the verses start on row 1: the editions now name themselves up in the
-       reference line, so no row is spent on labels */
-    const r=rows[i], pr=i+1;
-    a+='<span class="v" style="--r:'+pr+'"><span class="vn">'+r[0]+'</span>'+r[1]+'</span>';
-    b+='<span class="v" style="--r:'+pr+'"><span class="vn">'+r[0]+'</span>'+r[2]+'</span>';
-  }
-  return [a,b];
-}
 /* the short name of an edition — "en-nkjv" is read as NKJV */
 function verShort(id){ return String(id).split("-")[1]||String(id); }
 /* The reference over the second column has to read in the language of the
@@ -2265,7 +2578,6 @@ function renderLesson(les,tasks,lg){
   rlang=lg||lang;
   /* two full lessons already are two languages — a second edition inside each
      of them would make four columns of nothing legible */
-  const par=paraPick();                     /* "" when the second translation is off */
   let h='<div class="lesson">'+esc(strip(les.header||""))+'</div>'+
         '<div class="top"><div class="date" data-k="dt">'+esc(sabLine(les))+'</div></div>';
   h+='<h1 class="title" data-k="ti">'+esc(les.title||"")+'</h1>';
@@ -2309,35 +2621,15 @@ function renderLesson(les,tasks,lg){
             /* with a second translation the passage needs a second box to fill;
                its key simply carries a "p", so the marks on the first column
                are the very ones that were there before parallel existed */
-            const id2=par?id+"p":"", hid=par?id+"h":"";
-            /* the sheet says which edition it quotes: in two languages the two
-               sheets quote two different Bibles, and each task carries its own */
-            tasks.push([id,it.sOsis,id2,hid,bibleOf(rlang)]);
+            tasks.push([id,it.sOsis,"","",bibleOf(rlang)]);
             const ref=strip(it.text||"").replace(/[;,.\s]+$/,"");
-            /* Two columns take either shape. Set one verse per line they are
-               laid into a single grid and verse n stands opposite verse n; set
-               as running text each column is its own paragraph and the two only
-               keep their tops together. Both are useful, and which one is asked
-               for is the same setting as everywhere else on the page. */
             const cl=versesLines?" lines":"";
-            const box=par
-              ? '<div class="vpair'+(versesLines?"":" flow")+'">'
-                +'<div class="vtext'+cl+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>'
-                +'<div class="vtext'+cl+' alt" id="'+id2+'" data-k="'+kk+'v'+vi+'p"></div></div>'
-              : '<div class="vtext'+cl+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>';
-            /* The reference line says which Bible is being quoted, and it
-               says so whether there is one column or two. With two it always
-               did — naming one edition and not the other would have been
-               meaningless — and each name stands over its own column, on the
-               line that was there anyway: a row of labels of their own would
-               have pushed every passage further down the page for nothing.
-               A single column was left unnamed, and it is quoting an edition
-               just as particularly; "ОТ ИОАННА 1:4, 5" over a Russian sheet
-               does not say which Russian text it is. Same shape in both. */
-            const head=par
-              ? '<div class="vref pair'+cl+'"><span>'+esc(verShort(bibleOf(rlang)))+(ref?' · '+esc(ref):'')+'</span>'
-                +'<span id="'+hid+'">'+esc(verShort(par))+'</span></div>'
-              : (ref?'<div class="vref'+cl+'"><span>'+esc(verShort(bibleOf(rlang)))+' · '+esc(ref)+'</span></div>':'');
+            const box='<div class="vtext'+cl+'" id="'+id+'" data-k="'+kk+'v'+vi+'"></div>';
+            /* The reference names the edition as well as the passage: "ОТ ИОАННА 1:4, 5"
+               over a Russian sheet does not say which Russian text it is. It wears the
+               slanted tag the day wears in the section band — the sheet keeps one shape
+               at two scales — and the first tag of a quire straddles its top edge. */
+            const head=ref?'<div class="vref'+cl+'"><span>'+esc(verShort(bibleOf(rlang)))+' · '+esc(ref)+'</span></div>':'';
             g+='<div class="vitem" data-os="'+esc(it.sOsis||"")+'">'+head+box+'</div>'; }
           blocks.push(g+'</div>'); }
       }
@@ -2452,6 +2744,15 @@ function relaxDayStarts(){
   });
 }
 
+/* ——— the seat is the tag measured, not a number written down ———
+   The LESSON tag is as wide as the word the tongue gives it, so the room the date
+   keeps clear of it cannot be a constant: Hungarian's "13. Tanulmány" is wider than
+   the printed English tag, and a tongue nobody has published yet may be wider still.
+   Measured after every render, the date simply steps aside by as much as is needed. */
+function lessonSeat(){
+  const t=document.querySelector(".page .lesson");
+  document.documentElement.style.setProperty("--lesw",(t?Math.ceil(t.offsetWidth):210)+"px");
+}
 async function render(){
   const my=++token;
   mkKeepY=window.scrollY;              /* where the reader was, in case the lesson stays */
@@ -2524,6 +2825,7 @@ async function render(){
   docName=side.name;
   sheets.innerHTML=side.html;
 
+  lessonSeat();
   relaxDayStarts();
   mkRestore();
   mkDaysBuild(); mkOpenToday();
@@ -2550,17 +2852,12 @@ async function fillVerses(my){
      The class is on the box, the markup inside differs too, so both are set */
   document.querySelectorAll(".vtext,.vref").forEach(function(el){
     el.classList.toggle("lines",versesLines); });
-  document.querySelectorAll(".vpair").forEach(function(el){
-    el.classList.toggle("flow",!versesLines); });
   {
     /* Every edition the page needs at once — the second must not make the first
        one wait, and the service worker keeps each of them for next time. Each
        task says which edition is its own. */
-    const par=paraPick();
-    const pl=par?String(par).split("-")[0]:"";
     const want=[];
     for(const t of tasks) if(t[4]&&want.indexOf(t[4])<0) want.push(t[4]);
-    if(par&&want.indexOf(par)<0) want.push(par);
     const bibs={};
     /* One promise to an edition, and a passage is set the moment *its own*
        edition is in. An edition is four to six megabytes; waiting for the last
@@ -2570,26 +2867,9 @@ async function fillVerses(my){
     const editionP={};
     want.forEach(function(v){
       editionP[v]=Promise.resolve(loadBible(v)).then(function(b){ bibs[v]=b; return b; }); });
-    /* the names of the books in the second edition's language, if the page has
-       a lesson in it at all — fetched beside the editions, never after */
-    let refs2=null;
-    const refsP=Promise.resolve(
-      pl&&pl!==lang&&LANGS.indexOf(pl)>=0
-        ? paraRefMap(pl,current.getFullYear(),qOf(current)) : null
-    ).then(function(r){ refs2=r; return r; });
-
     const setPassage=function(t){
       const el=document.getElementById(t[0]); if(!el) return;
       const bib=bibs[t[4]];
-      if(t[2]){
-        const el2=document.getElementById(t[2]), bib2=bibs[par];
-        const p=versePair(bib&&bib.books,bib2&&bib2.books,t[1],versesLines);
-        el.innerHTML=p[0]||'<span class="vmiss">—</span>';
-        if(el2) el2.innerHTML=p[1]||'<span class="vmiss">—</span>';
-        const hd=t[3]&&document.getElementById(t[3]), r2=refs2&&refs2[t[1]];
-        if(hd&&r2) hd.textContent=verShort(par)+" · "+r2;
-        return;
-      }
       const vh=verseHtml(bib&&bib.books,t[1],versesLines);
       el.innerHTML=vh||'<span class="vmiss">—</span>';
     };
@@ -2598,7 +2878,6 @@ async function fillVerses(my){
       /* a plain passage waits on one edition; a parallel one on both, and on
          the book names that go over the second column */
       const need=[editionP[t[4]]||Promise.resolve(null)];
-      if(t[2]){ need.push(editionP[par]||Promise.resolve(null)); need.push(refsP); }
       return Promise.all(need).then(function(){
         if(my!==token) return;              /* the reader has turned the page */
         setPassage(t);
@@ -2803,58 +3082,30 @@ vlines.onclick=function(){ mkVerseLayout(true); };
    never offers the edition the lesson is already set in, and it is rebuilt on
    every language change, because what counts as "the other one" changes with
    it. */
-const paraTog=document.getElementById("paratog"), paraSel=document.getElementById("para-sel");
+const paraSel=document.getElementById("para-sel");
 function paraDefault(){ return bibleOf(lang)==="en-kjv"?"de-lut":"en-kjv"; }
 function paintPara(){
-  const fits=paraFits();
-  /* the three buttons in that row all answer one question — how the Bible text
-     is shown — so the second translation stands with them instead of taking a
-     row of its own. It keeps its setting while it is away: narrowing the window
-     hides the button, widening it again brings the columns back as they were. */
-  paraTog.hidden=!fits;
-  /* with no Bible text on the sheet there is nothing to set beside anything, so
-     the button is unlit — its setting is kept, it simply has nothing to do */
-  paraTog.classList.toggle("active",paraOn&&fits&&versesOn);
-  /* The list is never away: it names the edition for both shapes at once — the
-     column when the column is on, and the verse held under a finger when it is
-     not. Hiding it with the columns would leave the hold with no way to say
-     which translation it should bring. It only changes how it stands: pressed
-     to the button while the columns are on, on its own line with its own label
-     the rest of the time. */
+  /* the edition list is the whole of the setting now: it names the translation the
+     held verse comes up in, and it is never away. */
   const prow=document.getElementById("para-row");
-  prow.hidden=false;
-  prow.classList.toggle("solo",!(fits&&paraOn));
+  prow.hidden=false; prow.classList.add("solo");
   if(paraVer===bibleOf(lang)||!PARA.some(p=>p[1]===paraVer)){
     paraVer=paraDefault(); localStorage.setItem("sbl.paraver",paraVer); }
   paraSel.innerHTML=PARA.filter(p=>p[1]!==bibleOf(lang))
     .map(p=>'<option value="'+p[1]+'"'+(p[1]===paraVer?' selected':'')+'>'+esc(p[0]+" · "+p[2])+'</option>').join("");
 }
-paraTog.onclick=function(){
-  paraOn=!paraOn;
-  /* a second Bible text with no first one makes no sense — the same courtesy
-     the layout button does above */
-  if(paraOn&&!versesOn){ versesOn=true; localStorage.setItem("sbl.verses","1"); }
-  localStorage.setItem("sbl.para",paraOn?"1":"0");
-  /* the columns and the layout are separate questions, but both buttons must
-     show the truth after either of them moves */
-  paintPara(); paintVerseBtns(); render();
-};
 
 paraSel.onchange=function(){
   paraVer=paraSel.value; localStorage.setItem("sbl.paraver",paraVer);
   /* picking a second Bible text with no first one on screen leaves the reader
      with a setting and nothing to hold — the same courtesy the switch does */
-  let redraw=!!paraPick();
+  let redraw=false;
   if(!versesOn){ versesOn=true; localStorage.setItem("sbl.verses","1"); paintVerseBtns(); redraw=true; }
 
   /* otherwise only the column has to be set again: a held verse is fetched at
      the moment it is held, so a phone is not made to redraw the lesson */
   if(redraw) render();
 };
-/* Turning the tablet is the one gesture that adds or takes away the room for a
-   second column, so it is the one gesture that has to redraw the sheet. Only
-   when the parallel is actually on — otherwise a rotation costs nothing. */
-PARA_MQ.addEventListener("change",function(){ paintPara(); if(paraOn) render(); });
 
 /* ——— the second translation under a held verse ———
    Where the pair has no room the other edition is still one gesture away: press
@@ -2958,7 +3209,6 @@ document.addEventListener("keydown",function(e){ if(e.key==="Escape") peekDismis
 
 document.getElementById("sheets").addEventListener("pointerdown",function(e){
   if(mkMode) return;                    /* something in hand: it marks, it does not ask */
-  if(paraPick()) return;                /* the column beside the verse already answers */
   const el=e.target.closest&&e.target.closest("[data-vr]"); if(!el) return;
   const x0=e.clientX,y0=e.clientY; let held=false;
   clearTimeout(peekT);
@@ -2997,40 +3247,38 @@ const PDFWORD={de:["Woche","Quartal"],en:["Week","Quarter"],ru:["Неделя","
    round. The reader came for the lesson, and a label invented for him is worse
    than one in a language he can at least recognise as not his. */
 const UI={
-  settings:{de:"Einstellungen",en:"Settings",ru:"Настройки",bg:"Настройки",cs:"Nastavení",es:"Ajustes",fr:"Réglages",hu:"Beállítások",id:"Pengaturan",ja:"設定",mk:"Поставки",pt:"Ajustes",sr:"Подешавања",th:"การตั้งค่า",uk:"Налаштування",zh:"设置"},
-  lesson:  {de:"Lektion wählen",en:"Pick a lesson",ru:"Выбрать урок",bg:"Избор на урок",cs:"Vybrat lekci",es:"Elegir lección",fr:"Choisir la leçon",hu:"Lecke választása",id:"Pilih pelajaran",ja:"課を選ぶ",mk:"Избери лекција",pt:"Escolher a lição",sr:"Изабери лекцију",th:"เลือกบทเรียน",uk:"Обрати урок",zh:"选择课程"},
-  lang:    {de:"Sprache",en:"Language",ru:"Язык",bg:"Език",cs:"Jazyk",es:"Idioma",fr:"Langue",hu:"Nyelv",id:"Bahasa",ja:"言語",mk:"Јазик",pt:"Idioma",sr:"Језик",th:"ภาษา",uk:"Мова",zh:"语言"},
-  verses:  {de:"Bibeltext",en:"Bible text",ru:"Текст Библии",bg:"Библейски текст",cs:"Biblický text",es:"Texto bíblico",fr:"Texte biblique",hu:"Bibliai szöveg",id:"Teks Alkitab",ja:"聖書本文",mk:"Библиски текст",pt:"Texto bíblico",sr:"Библијски текст",th:"ข้อพระคัมภีร์",uk:"Текст Біблії",zh:"圣经经文"},
-  size:    {de:"Schriftgröße",en:"Text size",ru:"Размер текста",bg:"Размер на текста",cs:"Velikost písma",es:"Tamaño del texto",fr:"Taille du texte",hu:"Betűméret",id:"Ukuran teks",ja:"文字の大きさ",mk:"Големина на текстот",pt:"Tamanho do texto",sr:"Величина текста",th:"ขนาดตัวอักษร",uk:"Розмір тексту",zh:"文字大小"},
-  contents:{de:"Inhalt",en:"Contents",ru:"Содержание",bg:"Съдържание",cs:"Obsah",es:"Índice",fr:"Sommaire",hu:"Tartalom",id:"Daftar isi",ja:"目次",mk:"Содржина",pt:"Índice",sr:"Садржај",th:"สารบัญ",uk:"Зміст",zh:"目录"},
-  depth:   {de:"Tiefe",en:"Depth",ru:"Глубина",bg:"Дълбочина",cs:"Hloubka",es:"Profundidad",fr:"Profondeur",hu:"Mélység",id:"Kedalaman",ja:"濃さ",mk:"Длабочина",pt:"Profundidade",sr:"Дубина",th:"ความเข้ม",uk:"Глибина",zh:"深浅"},
-  colour:  {de:"Farbe",en:"Colour",ru:"Цвет",bg:"Цвят",cs:"Barva",es:"Color",fr:"Couleur",hu:"Szín",id:"Warna",ja:"色",mk:"Боја",pt:"Cor",sr:"Боја",th:"สี",uk:"Колір",zh:"颜色"},
-  pdf:     {de:"Als PDF sichern",en:"Save as PDF",ru:"Сохранить в PDF",bg:"Запази като PDF",cs:"Uložit jako PDF",es:"Guardar como PDF",fr:"Enregistrer en PDF",hu:"Mentés PDF-be",id:"Simpan sebagai PDF",ja:"PDF で保存",mk:"Зачувај како PDF",pt:"Salvar como PDF",sr:"Сачувај као PDF",th:"บันทึกเป็น PDF",uk:"Зберегти у PDF",zh:"保存为 PDF"},
-  show:    {de:"Bibeltext anzeigen",en:"Show the Bible text",ru:"Показывать текст Библии",bg:"Показвай библейския текст",cs:"Zobrazit biblický text",es:"Mostrar el texto bíblico",fr:"Afficher le texte biblique",hu:"Bibliai szöveg mutatása",id:"Tampilkan teks Alkitab",ja:"聖書本文を表示",mk:"Прикажи го библискиот текст",pt:"Mostrar o texto bíblico",sr:"Прикажи библијски текст",th:"แสดงข้อพระคัมภีร์",uk:"Показувати текст Біблії",zh:"显示圣经经文"},
-  perline: {de:"Ein Vers pro Zeile",en:"One verse per line",ru:"Каждый стих строкой",bg:"Всеки стих на нов ред",cs:"Každý verš na řádek",es:"Un versículo por línea",fr:"Un verset par ligne",hu:"Soronként egy vers",id:"Satu ayat per baris",ja:"一節ずつ改行",mk:"Секој стих во нов ред",pt:"Um versículo por linha",sr:"Сваки стих у нови ред",th:"บรรทัดละหนึ่งข้อ",uk:"Кожен вірш рядком",zh:"每节一行"},
-  flow:    {de:"Fließtext",en:"Running text",ru:"Сплошным текстом",bg:"Свързан текст",cs:"Souvislý text",es:"Texto corrido",fr:"Texte suivi",hu:"Folyó szöveg",id:"Teks mengalir",ja:"続けて表示",mk:"Непрекинат текст",pt:"Texto corrido",sr:"Текући текст",th:"ข้อความต่อเนื่อง",uk:"Суцільним текстом",zh:"连排正文"},
-  para:    {de:"Parallel",en:"Parallel",ru:"Параллельно",bg:"Паралелно",cs:"Souběžně",es:"En paralelo",fr:"En parallèle",hu:"Párhuzamosan",id:"Paralel",ja:"対訳",mk:"Паралелно",pt:"Em paralelo",sr:"Упоредо",th:"คู่ขนาน",uk:"Паралельно",zh:"对照"},
-  parahint:{de:"Zweite Übersetzung daneben",en:"A second translation alongside",ru:"Второй перевод рядом",bg:"Втори превод отстрани",cs:"Druhý překlad vedle",es:"Una segunda traducción al lado",fr:"Une seconde traduction à côté",hu:"Egy második fordítás mellette",id:"Terjemahan kedua di sampingnya",ja:"もう一つの訳を隣に",mk:"Втор превод покрај",pt:"Uma segunda tradução ao lado",sr:"Други превод поред",th:"คำแปลที่สองเคียงข้าง",uk:"Другий переклад поруч",zh:"旁边并列第二种译本"},
-  second:  {de:"Zweite Übersetzung",en:"Second translation",ru:"Второй перевод",bg:"Втори превод",cs:"Druhý překlad",es:"Segunda traducción",fr:"Seconde traduction",hu:"Második fordítás",id:"Terjemahan kedua",ja:"第二の訳",mk:"Втор превод",pt:"Segunda tradução",sr:"Други превод",th:"คำแปลที่สอง",uk:"Другий переклад",zh:"第二种译本"},
-  secondhint:{de:"Kommt unter dem gehaltenen Vers heraus",en:"Comes out under a held verse",ru:"Выходит под удержанным стихом",bg:"Появява се под задържан стих",cs:"Vyjede pod přidrženým veršem",es:"Aparece bajo el versículo que se mantiene pulsado",fr:"Apparaît sous le verset maintenu",hu:"A nyomva tartott vers alatt jelenik meg",id:"Muncul di bawah ayat yang ditahan",ja:"長押しした節の下に出ます",mk:"Се појавува под задржаниот стих",pt:"Aparece sob o versículo mantido pressionado",sr:"Појављује се испод задржаног стиха",th:"ปรากฏใต้ข้อที่กดค้างไว้",uk:"Виходить під утриманим віршем",zh:"长按经节时在其下显示"},
-  paper:   {de:"Papier",en:"Paper",ru:"Бумага",bg:"Хартия",cs:"Papír",es:"Papel",fr:"Papier",hu:"Papír",id:"Kertas",ja:"紙",mk:"Хартија",pt:"Papel",sr:"Папир",th:"กระดาษ",uk:"Папір",zh:"纸张"},
+  settings:{de:"Einstellungen",en:"Settings",ru:"Настройки",bg:"Настройки",cs:"Nastavení",es:"Ajustes",fr:"Réglages",hu:"Beállítások",id:"Pengaturan",ja:"設定",mk:"Поставки",pt:"Ajustes",sr:"Подешавања",th:"การตั้งค่า",uk:"Налаштування",zh:"设置",hr:"Postavke",it:"Impostazioni",ro:"Setări",tl:"Mga setting",rw:"Igenamiterere",zu:"Izilungiselelo"},
+  lesson:  {de:"Lektion wählen",en:"Pick a lesson",ru:"Выбрать урок",bg:"Избор на урок",cs:"Vybrat lekci",es:"Elegir lección",fr:"Choisir la leçon",hu:"Lecke választása",id:"Pilih pelajaran",ja:"課を選ぶ",mk:"Избери лекција",pt:"Escolher a lição",sr:"Изабери лекцију",th:"เลือกบทเรียน",uk:"Обрати урок",zh:"选择课程",hr:"Odaberi lekciju",it:"Scegli una lezione",ro:"Alege o lecție",tl:"Pumili ng aralin",rw:"Hitamo isomo",zu:"Khetha isifundo"},
+  lang:    {de:"Sprache",en:"Language",ru:"Язык",bg:"Език",cs:"Jazyk",es:"Idioma",fr:"Langue",hu:"Nyelv",id:"Bahasa",ja:"言語",mk:"Јазик",pt:"Idioma",sr:"Језик",th:"ภาษา",uk:"Мова",zh:"语言",hr:"Jezik",it:"Lingua",ro:"Limbă",tl:"Wika",rw:"Ururimi",zu:"Ulimi"},
+  verses:  {de:"Bibeltext",en:"Bible text",ru:"Текст Библии",bg:"Библейски текст",cs:"Biblický text",es:"Texto bíblico",fr:"Texte biblique",hu:"Bibliai szöveg",id:"Teks Alkitab",ja:"聖書本文",mk:"Библиски текст",pt:"Texto bíblico",sr:"Библијски текст",th:"ข้อพระคัมภีร์",uk:"Текст Біблії",zh:"圣经经文",hr:"Biblijski tekst",it:"Testo biblico",ro:"Text biblic",tl:"Teksto ng Biblia",rw:"Umwandiko wa Bibiliya",zu:"Umbhalo weBhayibheli"},
+  size:    {de:"Schriftgröße",en:"Text size",ru:"Размер текста",bg:"Размер на текста",cs:"Velikost písma",es:"Tamaño del texto",fr:"Taille du texte",hu:"Betűméret",id:"Ukuran teks",ja:"文字の大きさ",mk:"Големина на текстот",pt:"Tamanho do texto",sr:"Величина текста",th:"ขนาดตัวอักษร",uk:"Розмір тексту",zh:"文字大小",hr:"Veličina teksta",it:"Dimensione del testo",ro:"Mărimea textului",tl:"Laki ng teksto",rw:"Ingano y’inyandiko",zu:"Usayizi wombhalo"},
+  contents:{de:"Inhalt",en:"Contents",ru:"Содержание",bg:"Съдържание",cs:"Obsah",es:"Índice",fr:"Sommaire",hu:"Tartalom",id:"Daftar isi",ja:"目次",mk:"Содржина",pt:"Índice",sr:"Садржај",th:"สารบัญ",uk:"Зміст",zh:"目录",hr:"Sadržaj",it:"Indice",ro:"Cuprins",tl:"Nilalaman",rw:"Ibirimo",zu:"Okuqukethwe"},
+  depth:   {de:"Tiefe",en:"Depth",ru:"Глубина",bg:"Дълбочина",cs:"Hloubka",es:"Profundidad",fr:"Profondeur",hu:"Mélység",id:"Kedalaman",ja:"濃さ",mk:"Длабочина",pt:"Profundidade",sr:"Дубина",th:"ความเข้ม",uk:"Глибина",zh:"深浅",hr:"Dubina",it:"Profondità",ro:"Adâncime",tl:"Lalim",rw:"Ubujyakuzimu",zu:"Ukujula"},
+  colour:  {de:"Farbe",en:"Colour",ru:"Цвет",bg:"Цвят",cs:"Barva",es:"Color",fr:"Couleur",hu:"Szín",id:"Warna",ja:"色",mk:"Боја",pt:"Cor",sr:"Боја",th:"สี",uk:"Колір",zh:"颜色",hr:"Boja",it:"Colore",ro:"Culoare",tl:"Kulay",rw:"Ibara",zu:"Umbala"},
+  pdf:     {de:"Als PDF sichern",en:"Save as PDF",ru:"Сохранить в PDF",bg:"Запази като PDF",cs:"Uložit jako PDF",es:"Guardar como PDF",fr:"Enregistrer en PDF",hu:"Mentés PDF-be",id:"Simpan sebagai PDF",ja:"PDF で保存",mk:"Зачувај како PDF",pt:"Salvar como PDF",sr:"Сачувај као PDF",th:"บันทึกเป็น PDF",uk:"Зберегти у PDF",zh:"保存为 PDF",hr:"Spremi kao PDF",it:"Salva come PDF",ro:"Salvează ca PDF",tl:"I-save bilang PDF",rw:"Bika nka PDF",zu:"Londoloza njenge-PDF"},
+  show:    {de:"Bibeltext anzeigen",en:"Show the Bible text",ru:"Показывать текст Библии",bg:"Показвай библейския текст",cs:"Zobrazit biblický text",es:"Mostrar el texto bíblico",fr:"Afficher le texte biblique",hu:"Bibliai szöveg mutatása",id:"Tampilkan teks Alkitab",ja:"聖書本文を表示",mk:"Прикажи го библискиот текст",pt:"Mostrar o texto bíblico",sr:"Прикажи библијски текст",th:"แสดงข้อพระคัมภีร์",uk:"Показувати текст Біблії",zh:"显示圣经经文",hr:"Prikaži biblijski tekst",it:"Mostra il testo biblico",ro:"Arată textul biblic",tl:"Ipakita ang teksto ng Biblia",rw:"Erekana umwandiko wa Bibiliya",zu:"Bonisa umbhalo weBhayibheli"},
+  perline: {de:"Ein Vers pro Zeile",en:"One verse per line",ru:"Каждый стих строкой",bg:"Всеки стих на нов ред",cs:"Každý verš na řádek",es:"Un versículo por línea",fr:"Un verset par ligne",hu:"Soronként egy vers",id:"Satu ayat per baris",ja:"一節ずつ改行",mk:"Секој стих во нов ред",pt:"Um versículo por linha",sr:"Сваки стих у нови ред",th:"บรรทัดละหนึ่งข้อ",uk:"Кожен вірш рядком",zh:"每节一行",hr:"Svaki redak jedan stih",it:"Un versetto per riga",ro:"Un verset pe rând",tl:"Isang talata bawat linya",rw:"Umurongo umwe kuri buri murongo",zu:"Ivesi elilodwa emgqeni"},
+  flow:    {de:"Fließtext",en:"Running text",ru:"Сплошным текстом",bg:"Свързан текст",cs:"Souvislý text",es:"Texto corrido",fr:"Texte suivi",hu:"Folyó szöveg",id:"Teks mengalir",ja:"続けて表示",mk:"Непрекинат текст",pt:"Texto corrido",sr:"Текући текст",th:"ข้อความต่อเนื่อง",uk:"Суцільним текстом",zh:"连排正文",hr:"Tekući tekst",it:"Testo corrente",ro:"Text curgător",tl:"Tuloy-tuloy na teksto",rw:"Umwandiko ukomeza",zu:"Umbhalo oqhubekayo"},
+  second:  {de:"Zweite Übersetzung",en:"Second translation",ru:"Второй перевод",bg:"Втори превод",cs:"Druhý překlad",es:"Segunda traducción",fr:"Seconde traduction",hu:"Második fordítás",id:"Terjemahan kedua",ja:"第二の訳",mk:"Втор превод",pt:"Segunda tradução",sr:"Други превод",th:"คำแปลที่สอง",uk:"Другий переклад",zh:"第二种译本",hr:"Drugi prijevod",it:"Seconda traduzione",ro:"A doua traducere",tl:"Ikalawang salin",rw:"Ubusobanuro bwa kabiri",zu:"Ukuhumusha kwesibili"},
+  secondhint:{de:"Kommt unter dem gehaltenen Vers heraus",en:"Comes out under a held verse",ru:"Выходит под удержанным стихом",bg:"Появява се под задържан стих",cs:"Vyjede pod přidrženým veršem",es:"Aparece bajo el versículo que se mantiene pulsado",fr:"Apparaît sous le verset maintenu",hu:"A nyomva tartott vers alatt jelenik meg",id:"Muncul di bawah ayat yang ditahan",ja:"長押しした節の下に出ます",mk:"Се појавува под задржаниот стих",pt:"Aparece sob o versículo mantido pressionado",sr:"Појављује се испод задржаног стиха",th:"ปรากฏใต้ข้อที่กดค้างไว้",uk:"Виходить під утриманим віршем",zh:"长按经节时在其下显示",hr:"Izlazi ispod zadržanog stiha",it:"Compare sotto il versetto tenuto premuto",ro:"Apare sub versetul ținut apăsat",tl:"Lumalabas sa ilalim ng pinipindot na talata",rw:"Bugaragara munsi y’umurongo ufashwe",zu:"Kuvela ngaphansi kwevesi elibanjiwe"},
+  paper:   {de:"Papier",en:"Paper",ru:"Бумага",bg:"Хартия",cs:"Papír",es:"Papel",fr:"Papier",hu:"Papír",id:"Kertas",ja:"紙",mk:"Хартија",pt:"Papel",sr:"Папир",th:"กระดาษ",uk:"Папір",zh:"纸张",hr:"Papir",it:"Carta",ro:"Hârtie",tl:"Papel",rw:"Urupapuro",zu:"Iphepha"},
   paperhint:{de:"Feine Papierstruktur unter dem Text — nicht im Druck",
              en:"A faint paper grain under the text — never in print",
-             ru:"Лёгкая структура бумаги под текстом — в печать не идёт",bg:"Лека структура на хартия под текста — не се печата",cs:"Jemná struktura papíru pod textem — netiskne se",es:"Un grano de papel tenue bajo el texto — nunca al imprimir",fr:"Un léger grain de papier sous le texte — jamais à l'impression",hu:"Finom papírszemcse a szöveg alatt — nyomtatásban soha",id:"Serat kertas halus di bawah teks — tidak ikut tercetak",ja:"文字の下にうっすらと紙の地合い — 印刷には出ません",mk:"Лесна структура на хартија под текстот — не се печати",pt:"Uma leve textura de papel sob o texto — nunca na impressão",sr:"Лагана структура папира испод текста — не иде у штампу",th:"เนื้อกระดาษบาง ๆ ใต้ตัวอักษร — ไม่ปรากฏเมื่อพิมพ์",uk:"Легка структура паперу під текстом — у друк не йде",zh:"文字下的淡淡纸纹 — 打印时不出现"},
-  paperoff:{de:"Aus",en:"Off",ru:"Нет",bg:"Няма",cs:"Vypnuto",es:"Ninguno",fr:"Aucun",hu:"Nincs",id:"Tidak ada",ja:"なし",mk:"Нема",pt:"Nenhum",sr:"Нема",th:"ไม่มี",uk:"Немає",zh:"无"},
-  papergrain:{de:"Korn",en:"Grain",ru:"Зерно",bg:"Зърно",cs:"Zrno",es:"Grano",fr:"Grain",hu:"Szemcse",id:"Serat",ja:"きめ",mk:"Зрно",pt:"Grão",sr:"Зрно",th:"เนื้อละเอียด",uk:"Зерно",zh:"细纹"},
-  paperdust:{de:"Staub",en:"Dust",ru:"Пыль",bg:"Прах",cs:"Prach",es:"Polvo",fr:"Poussière",hu:"Por",id:"Debu",ja:"ほこり",mk:"Прашина",pt:"Poeira",sr:"Прашина",th:"ฝุ่น",uk:"Пил",zh:"粗纹"},
-  theme:   {de:"Bogen",en:"Sheet",ru:"Лист",bg:"Лист",cs:"List",es:"Hoja",fr:"Feuille",hu:"Lap",id:"Lembar",ja:"用紙",mk:"Лист",pt:"Folha",sr:"Лист",th:"หน้ากระดาษ",uk:"Аркуш",zh:"页面"},
+             ru:"Лёгкая структура бумаги под текстом — в печать не идёт",bg:"Лека структура на хартия под текста — не се печата",cs:"Jemná struktura papíru pod textem — netiskne se",es:"Un grano de papel tenue bajo el texto — nunca al imprimir",fr:"Un léger grain de papier sous le texte — jamais à l'impression",hu:"Finom papírszemcse a szöveg alatt — nyomtatásban soha",id:"Serat kertas halus di bawah teks — tidak ikut tercetak",ja:"文字の下にうっすらと紙の地合い — 印刷には出ません",mk:"Лесна структура на хартија под текстот — не се печати",pt:"Uma leve textura de papel sob o texto — nunca na impressão",sr:"Лагана структура папира испод текста — не иде у штампу",th:"เนื้อกระดาษบาง ๆ ใต้ตัวอักษร — ไม่ปรากฏเมื่อพิมพ์",uk:"Легка структура паперу під текстом — у друк не йде",zh:"文字下的淡淡纸纹 — 打印时不出现",hr:"Tiha zrnatost papira pod tekstom — nikad u tisku",it:"Una lieve grana di carta sotto il testo — mai in stampa",ro:"O granulație discretă de hârtie sub text — niciodată la tipar",tl:"Banayad na himaymay ng papel sa ilalim ng teksto — hindi kailanman sa print",rw:"Uburyohe bw’urupapuro munsi y’inyandiko — ntibigaragara mu icapiro",zu:"Ukusagela okuncane kwephepha ngaphansi kombhalo — akulokothi kuphrinte"},
+  paperoff:{de:"Aus",en:"Off",ru:"Нет",bg:"Няма",cs:"Vypnuto",es:"Ninguno",fr:"Aucun",hu:"Nincs",id:"Tidak ada",ja:"なし",mk:"Нема",pt:"Nenhum",sr:"Нема",th:"ไม่มี",uk:"Немає",zh:"无",hr:"Bez",it:"Nessuna",ro:"Fără",tl:"Wala",rw:"Nta na kimwe",zu:"Lutho"},
+  papergrain:{de:"Korn",en:"Grain",ru:"Зерно",bg:"Зърно",cs:"Zrno",es:"Grano",fr:"Grain",hu:"Szemcse",id:"Serat",ja:"きめ",mk:"Зрно",pt:"Grão",sr:"Зрно",th:"เนื้อละเอียด",uk:"Зерно",zh:"细纹",hr:"Zrno",it:"Grana",ro:"Granulație",tl:"Himaymay",rw:"Uburyohe",zu:"Ukusagela"},
+  paperdust:{de:"Staub",en:"Dust",ru:"Пыль",bg:"Прах",cs:"Prach",es:"Polvo",fr:"Poussière",hu:"Por",id:"Debu",ja:"ほこり",mk:"Прашина",pt:"Poeira",sr:"Прашина",th:"ฝุ่น",uk:"Пил",zh:"粗纹",hr:"Prah",it:"Polvere",ro:"Praf",tl:"Alikabok",rw:"Umukungugu",zu:"Uthuli"},
+  theme:   {de:"Bogen",en:"Sheet",ru:"Лист",bg:"Лист",cs:"List",es:"Hoja",fr:"Feuille",hu:"Lap",id:"Lembar",ja:"用紙",mk:"Лист",pt:"Folha",sr:"Лист",th:"หน้ากระดาษ",uk:"Аркуш",zh:"页面",hr:"List",it:"Foglio",ro:"Filă",tl:"Pahina",rw:"Urupapuro",zu:"Ikhasi"},
   themehint:{de:"Heller oder dunkler Bogen — im Druck immer weiß",
              en:"A light sheet or a dark one — always white in print",
-             ru:"Светлый лист или тёмный — в печати всегда белый",bg:"Светъл или тъмен лист — на печат винаги бял",cs:"Světlý nebo tmavý list — v tisku vždy bílý",es:"Hoja clara u oscura — siempre blanca al imprimir",fr:"Feuille claire ou sombre — toujours blanche à l'impression",hu:"Világos vagy sötét lap — nyomtatásban mindig fehér",id:"Lembar terang atau gelap — selalu putih saat dicetak",ja:"明るい用紙か暗い用紙か — 印刷は常に白",mk:"Светол или темен лист — во печат секогаш бел",pt:"Folha clara ou escura — sempre branca na impressão",sr:"Светао или таман лист — у штампи увек бео",th:"หน้ากระดาษสว่างหรือมืด — เมื่อพิมพ์เป็นสีขาวเสมอ",uk:"Світлий аркуш або темний — у друку завжди білий",zh:"浅色或深色页面 — 打印时始终为白"},
-  themeauto:{de:"System",en:"System",ru:"Как в системе",bg:"Като системата",cs:"Podle systému",es:"Como el sistema",fr:"Comme le système",hu:"Mint a rendszer",id:"Ikuti sistem",ja:"システムに合わせる",mk:"Како системот",pt:"Como o sistema",sr:"Као систем",th:"ตามระบบ",uk:"Як у системі",zh:"跟随系统"},
-  themelight:{de:"Hell",en:"Light",ru:"Светлый",bg:"Светъл",cs:"Světlý",es:"Claro",fr:"Clair",hu:"Világos",id:"Terang",ja:"ライト",mk:"Светол",pt:"Claro",sr:"Светао",th:"สว่าง",uk:"Світлий",zh:"浅色"},
+             ru:"Светлый лист или тёмный — в печати всегда белый",bg:"Светъл или тъмен лист — на печат винаги бял",cs:"Světlý nebo tmavý list — v tisku vždy bílý",es:"Hoja clara u oscura — siempre blanca al imprimir",fr:"Feuille claire ou sombre — toujours blanche à l'impression",hu:"Világos vagy sötét lap — nyomtatásban mindig fehér",id:"Lembar terang atau gelap — selalu putih saat dicetak",ja:"明るい用紙か暗い用紙か — 印刷は常に白",mk:"Светол или темен лист — во печат секогаш бел",pt:"Folha clara ou escura — sempre branca na impressão",sr:"Светао или таман лист — у штампи увек бео",th:"หน้ากระดาษสว่างหรือมืด — เมื่อพิมพ์เป็นสีขาวเสมอ",uk:"Світлий аркуш або темний — у друку завжди білий",zh:"浅色或深色页面 — 打印时始终为白",hr:"Svijetli list ili tamni — u tisku uvijek bijel",it:"Foglio chiaro o scuro — in stampa sempre bianco",ro:"Filă deschisă sau întunecată — la tipar mereu albă",tl:"Maliwanag o madilim na pahina — laging puti sa print",rw:"Urupapuro rwera cyangwa rwijimye — mu icapiro buri gihe rwera",zu:"Ikhasi elikhanyayo noma elimnyama — ekuphrinteni lihlala limhlophe"},
+  themeauto:{de:"System",en:"System",ru:"Как в системе",bg:"Като системата",cs:"Podle systému",es:"Como el sistema",fr:"Comme le système",hu:"Mint a rendszer",id:"Ikuti sistem",ja:"システムに合わせる",mk:"Како системот",pt:"Como o sistema",sr:"Као систем",th:"ตามระบบ",uk:"Як у системі",zh:"跟随系统",hr:"Sustav",it:"Sistema",ro:"Sistem",tl:"Sistema",rw:"Sisitemu",zu:"Isistimu"},
+  themelight:{de:"Hell",en:"Light",ru:"Светлый",bg:"Светъл",cs:"Světlý",es:"Claro",fr:"Clair",hu:"Világos",id:"Terang",ja:"ライト",mk:"Светол",pt:"Claro",sr:"Светао",th:"สว่าง",uk:"Світлий",zh:"浅色",hr:"Svijetli",it:"Chiaro",ro:"Deschis",tl:"Maliwanag",rw:"Rwera",zu:"Okukhanyayo"},
   bible:   {de:"Bibelausgabe",en:"Bible edition",ru:"Издание Библии",
             bg:"Библейско издание",cs:"Vydání Bible",es:"Edición de la Biblia",
             fr:"Édition de la Bible",hu:"Bibliakiadás",id:"Edisi Alkitab",
             ja:"聖書の版",mk:"Библиско издание",pt:"Edição da Bíblia",
-            sr:"Издање Библије",th:"ฉบับพระคัมภีร์",uk:"Видання Біблії",zh:"圣经版本"},
+            sr:"Издање Библије",th:"ฉบับพระคัมภีร์",uk:"Видання Біблії",zh:"圣经版本",hr:"Izdanje Biblije",it:"Edizione della Bibbia",ro:"Ediția Bibliei",tl:"Edisyon ng Biblia",rw:"Icapiro rya Bibiliya",zu:"Uhlelo lweBhayibheli"},
   biblehint:{de:"Die Ausgabe, aus der die Verse unter den Fragen kommen",
              en:"The edition the verses under the questions are taken from",
              ru:"Издание, из которого берутся стихи под вопросами",
@@ -3046,18 +3294,17 @@ const UI={
              sr:"Издање из којег долазе стихови испод питања",
              th:"ฉบับที่ใช้เป็นที่มาของข้อพระคัมภีร์ใต้คำถาม",
              uk:"Видання, з якого беруться вірші під запитаннями",
-             zh:"问题下方经节所依据的版本"},
+             zh:"问题下方经节所依据的版本",hr:"Izdanje iz kojega se uzimaju stihovi pod pitanjima",it:"L’edizione da cui sono presi i versetti sotto le domande",ro:"Ediția din care sunt luate versetele de sub întrebări",tl:"Ang edisyong pinagkukunan ng mga talata sa ilalim ng mga tanong",rw:"Icapiro imirongo iri munsi y’ibibazo ikuwe",zu:"Uhlelo amavesi angaphansi kwemibuzo athathwa kulo"},
   bibleauto:{de:"Wie die Lektion",en:"As the lesson",ru:"Как урок",
              bg:"Като урока",cs:"Jako lekce",es:"Como la lección",
              fr:"Comme la leçon",hu:"Mint a lecke",id:"Seperti pelajaran",
              ja:"課と同じ",mk:"Како лекцијата",pt:"Como a lição",
-             sr:"Као лекција",th:"ตามบทเรียน",uk:"Як урок",zh:"与课程相同"},
-  themedark:{de:"Dunkel",en:"Dark",ru:"Тёмный",bg:"Тъмен",cs:"Tmavý",es:"Oscuro",fr:"Sombre",hu:"Sötét",id:"Gelap",ja:"ダーク",mk:"Темен",pt:"Escuro",sr:"Таман",th:"มืด",uk:"Темний",zh:"深色"}
+             sr:"Као лекција",th:"ตามบทเรียน",uk:"Як урок",zh:"与课程相同",hr:"Kao lekcija",it:"Come la lezione",ro:"Ca lecția",tl:"Gaya ng aralin",rw:"Nk’isomo",zu:"Njengesifundo"},
+  themedark:{de:"Dunkel",en:"Dark",ru:"Тёмный",bg:"Тъмен",cs:"Tmavý",es:"Oscuro",fr:"Sombre",hu:"Sötét",id:"Gelap",ja:"ダーク",mk:"Темен",pt:"Escuro",sr:"Таман",th:"มืด",uk:"Темний",zh:"深色",hr:"Tamni",it:"Scuro",ro:"Întunecat",tl:"Madilim",rw:"Rwijimye",zu:"Okumnyama"}
 };
 function paintUI(){
   document.getElementById("lab-lang").textContent=T("lang");
   document.getElementById("lab-verses").textContent=T("verses");
-  document.getElementById("paratog").title=T("para")+" — "+T("parahint");
   document.getElementById("lab-second").textContent=T("second");
   document.getElementById("lab-second").title=T("secondhint");
   /* "the other translation" is not the same one in every language, and the row
@@ -3260,8 +3507,8 @@ document.addEventListener("click",function(e){
    ========================================================================== */
 const MK_STYLES=["fill","tex","line","wave"];
 const MKW={
-  note:{de:"Meine Notiz",en:"My note",ru:"Моя заметка"},
-  ph:{de:"Eigener Gedanke, Frage, Antwort …",en:"A thought, a question, an answer …",ru:"Своя мысль, вопрос, ответ…"},
+  note:{de:"Meine Notiz",en:"My note",ru:"Моя заметка",hr:"Moja bilješka",it:"La mia nota",ro:"Nota mea",es:"Mi nota",fr:"Ma note",pt:"Minha nota",cs:"Moje poznámka",uk:"Моя нотатка",bg:"Моята бележка",mk:"Мојата белешка",sr:"Моја белешка",hu:"Saját jegyzetem",id:"Catatan saya",ja:"私のメモ",zh:"我的批注",th:"บันทึกของฉัน",tl:"Aking tala",rw:"Inyandiko yanjye",zu:"Inothi lami"},
+  ph:{de:"Eigener Gedanke, Frage, Antwort …",en:"A thought, a question, an answer …",ru:"Своя мысль, вопрос, ответ…",hr:"Misao, pitanje, odgovor …",it:"Un pensiero, una domanda, una risposta …",ro:"Un gând, o întrebare, un răspuns …",es:"Un pensamiento, una pregunta, una respuesta …",fr:"Une pensée, une question, une réponse …",pt:"Um pensamento, uma pergunta, uma resposta …",cs:"Myšlenka, otázka, odpověď …",uk:"Думка, питання, відповідь …",bg:"Мисъл, въпрос, отговор …",mk:"Мисла, прашање, одговор …",sr:"Мисао, питање, одговор …",hu:"Egy gondolat, egy kérdés, egy válasz …",id:"Sebuah pikiran, pertanyaan, jawaban …",ja:"思い、問い、答え …",zh:"一个念头、一个问题、一个答案 …",th:"ความคิด คำถาม คำตอบ …",tl:"Isang isip, isang tanong, isang sagot …",rw:"Igitekerezo, ikibazo, igisubizo …",zu:"Umcabango, umbuzo, impendulo …"},
   /* ——— the one line of ours that goes to paper ———
      Whoever picks up the printed sheet must be able to tell at a glance which
      lines are not the lesson's own, and he reads that sheet in his own
@@ -3281,89 +3528,89 @@ const MKW={
           sr:"Блокови са обојеном траком и датумом, као и речи уметнуте у редове, потичу од читаоца; нису део лекције.",
           th:"บล็อกที่มีแถบสีและวันที่ รวมทั้งคำที่แทรกในบรรทัด เป็นของผู้อ่านเอง มิได้เป็นส่วนหนึ่งของบทเรียน",
           uk:"Блоки з кольоровою смугою та датою, а також вписані в рядок слова — від читача; вони не входять до тексту уроку.",
-          zh:"带有色条和日期的段落，以及插入行内的文字，均为读者自行添加，不属于课程正文。"},
-  ins:{de:"Eigenen Text einfügen",en:"Write your own here",ru:"Вписать своё"},
-  addnote:{de:"Eigene Notiz",en:"Own note",ru:"Своя заметка"},
-  copy:{de:"Mit Bibelstelle kopieren",en:"Copy with the reference",ru:"Копировать со ссылкой"},
-  erase:{de:"Entfernen",en:"Remove",ru:"Стереть"},
-  more:{de:"Mehr Farben und Formen",en:"More colours and shapes",ru:"Ещё цвета и фигуры"},
-  own:{de:"Eigene Farbe",en:"Own colour",ru:"Свой цвет"},
-  copied:{de:"Kopiert",en:"Copied",ru:"Скопировано"},
-  marks:{de:"Markierungen",en:"Marks",ru:"Пометки"},
+          zh:"带有色条和日期的段落，以及插入行内的文字，均为读者自行添加，不属于课程正文。",hr:"Datirani blokovi s obojenom crtom i riječi umetnute u redak",it:"I blocchi datati con una barra colorata e le parole inserite nella riga",ro:"Blocurile datate cu o bară colorată și cuvintele inserate în rând",tl:"Ang mga naka-petsang bloke na may kulay na guhit, at ang mga salitang isiningit sa linya",rw:"Uduce dufite itariki n’umurongo w’ibara, n’amagambo yinjijwe mu murongo",zu:"Izigaba ezinosuku ezinomudwa onombala, namagama afakwe emgqeni"},
+  ins:{de:"Eigenen Text einfügen",en:"Write your own here",ru:"Вписать своё",hr:"Napiši ovdje svoje",it:"Scrivi qui il tuo",ro:"Scrie aici al tău",es:"Escribe aquí lo tuyo",fr:"Écrivez ici le vôtre",pt:"Escreva aqui o seu",cs:"Napiš sem své",uk:"Напиши тут своє",bg:"Напиши тук своето",mk:"Напиши тука свое",sr:"Напиши овде своје",hu:"Írd ide a sajátodat",id:"Tulis milikmu di sini",ja:"ここに自分の言葉を",zh:"在此写下自己的话",th:"เขียนของคุณตรงนี้",tl:"Isulat dito ang iyo",rw:"Andika ibyawe hano",zu:"Bhala okwakho lapha"},
+  addnote:{de:"Eigene Notiz",en:"Own note",ru:"Своя заметка",hr:"Vlastita bilješka",it:"Nota personale",ro:"Notă proprie",es:"Nota propia",fr:"Note personnelle",pt:"Nota própria",cs:"Vlastní poznámka",uk:"Власна нотатка",bg:"Собствена бележка",mk:"Сопствена белешка",sr:"Сопствена белешка",hu:"Saját jegyzet",id:"Catatan sendiri",ja:"自分のメモ",zh:"自己的批注",th:"บันทึกส่วนตัว",tl:"Sariling tala",rw:"Inyandiko bwite",zu:"Inothi lakho"},
+  copy:{de:"Mit Bibelstelle kopieren",en:"Copy with the reference",ru:"Копировать со ссылкой",hr:"Kopiraj s navodom",it:"Copia con il riferimento",ro:"Copiază cu referința",es:"Copiar con la referencia",fr:"Copier avec la référence",pt:"Copiar com a referência",cs:"Kopírovat s odkazem",uk:"Копіювати з посиланням",bg:"Копирай с цитата",mk:"Копирај со упатот",sr:"Копирај са навођењем",hu:"Másolás a hivatkozással",id:"Salin dengan rujukan",ja:"参照付きでコピー",zh:"连出处一起复制",th:"คัดลอกพร้อมอ้างอิง",tl:"Kopyahin kasama ang sanggunian",rw:"Gukoporora hamwe n’aho byavuye",zu:"Kopisha nenkomba"},
+  erase:{de:"Entfernen",en:"Remove",ru:"Стереть",hr:"Ukloni",it:"Rimuovi",ro:"Șterge",es:"Quitar",fr:"Retirer",pt:"Remover",cs:"Odebrat",uk:"Прибрати",bg:"Премахни",mk:"Отстрани",sr:"Уклони",hu:"Eltávolítás",id:"Hapus",ja:"消す",zh:"移除",th:"ลบออก",tl:"Alisin",rw:"Kuraho",zu:"Susa"},
+  more:{de:"Mehr Farben und Formen",en:"More colours and shapes",ru:"Ещё цвета и фигуры",hr:"Više boja i oblika",it:"Altri colori e forme",ro:"Mai multe culori și forme",es:"Más colores y formas",fr:"Plus de couleurs et de formes",pt:"Mais cores e formas",cs:"Více barev a tvarů",uk:"Більше кольорів і форм",bg:"Още цветове и форми",mk:"Повеќе бои и форми",sr:"Више боја и облика",hu:"Több szín és forma",id:"Lebih banyak warna dan bentuk",ja:"色と形をもっと",zh:"更多颜色和形状",th:"สีและรูปแบบเพิ่มเติม",tl:"Higit pang kulay at hugis",rw:"Andi mabara n’imiterere",zu:"Eminye imibala nezimo"},
+  own:{de:"Eigene Farbe",en:"Own colour",ru:"Свой цвет",hr:"Vlastita boja",it:"Colore personale",ro:"Culoare proprie",es:"Color propio",fr:"Couleur personnelle",pt:"Cor própria",cs:"Vlastní barva",uk:"Власний колір",bg:"Собствен цвят",mk:"Сопствена боја",sr:"Сопствена боја",hu:"Saját szín",id:"Warna sendiri",ja:"自分の色",zh:"自定颜色",th:"สีของคุณเอง",tl:"Sariling kulay",rw:"Ibara ryawe",zu:"Umbala wakho"},
+  copied:{de:"Kopiert",en:"Copied",ru:"Скопировано",hr:"Kopirano",it:"Copiato",ro:"Copiat",es:"Copiado",fr:"Copié",pt:"Copiado",cs:"Zkopírováno",uk:"Скопійовано",bg:"Копирано",mk:"Копирано",sr:"Копирано",hu:"Másolva",id:"Tersalin",ja:"コピーしました",zh:"已复制",th:"คัดลอกแล้ว",tl:"Nakopya",rw:"Byakoporowe",zu:"Kukopishiwe"},
+  marks:{de:"Markierungen",en:"Marks",ru:"Пометки",hr:"Oznake",it:"Segni",ro:"Însemnări",es:"Marcas",fr:"Marques",pt:"Marcas",cs:"Značky",uk:"Позначки",bg:"Бележки",mk:"Ознаки",sr:"Ознаке",hu:"Jelölések",id:"Tanda",ja:"しるし",zh:"标记",th:"เครื่องหมาย",tl:"Mga marka",rw:"Ibimenyetso",zu:"Amamaki"},
   keys:{de:"Kurzbefehle",en:"Shortcuts",ru:"Подсказки",
         bg:"Клавиши",cs:"Klávesové zkratky",es:"Atajos",fr:"Raccourcis",
         hu:"Gyorsbillentyűk",id:"Pintasan",ja:"ショートカット",mk:"Кратенки",
-        pt:"Atalhos",sr:"Пречице",th:"ปุ่มลัด",uk:"Гарячі клавіші",zh:"快捷键"},
+        pt:"Atalhos",sr:"Пречице",th:"ปุ่มลัด",uk:"Гарячі клавіші",zh:"快捷键",hr:"Prečaci",it:"Scorciatoie",ro:"Scurtături",tl:"Mga shortcut",rw:"Buryo bwihuse",zu:"Izinqamuleli"},
   /* moved out of the line that sets it: an inline table of three languages
      could not fall back, and every language beyond those three read the
      English by accident rather than by decision */
   whatsnew:{de:"Was ist neu",en:"What's new",ru:"Что нового",
         bg:"Какво е новото",cs:"Co je nového",es:"Novedades",fr:"Nouveautés",
         hu:"Újdonságok",id:"Yang baru",ja:"新着",mk:"Што е ново",
-        pt:"Novidades",sr:"Шта је ново",th:"มีอะไรใหม่",uk:"Що нового",zh:"新变化"},
+        pt:"Novidades",sr:"Шта је ново",th:"มีอะไรใหม่",uk:"Що нового",zh:"新变化",hr:"Što je novo",it:"Novità",ro:"Ce e nou",tl:"Ano ang bago",rw:"Ibishya",zu:"Okusha"},
   marking:{de:"Marker und Notizen",en:"Marker and notes",ru:"Маркер и заметки",
            bg:"Маркер и бележки",cs:"Zvýrazňovač a poznámky",es:"Marcador y notas",
            fr:"Surligneur et notes",hu:"Kiemelő és jegyzetek",id:"Stabilo dan catatan",
            ja:"マーカーとメモ",mk:"Маркер и белешки",pt:"Marcador e notas",
            sr:"Маркер и белешке",th:"ปากกาเน้นข้อความและบันทึก",
-           uk:"Маркер і нотатки",zh:"荧光笔与笔记"},
-  pinhint:{de:"Doppelklick — Farbe festhalten",en:"Double-click to pin the colour",ru:"Двойной клик — закрепить цвет"},
-  pinned:{de:"Farbe festgehalten",en:"Colour pinned",ru:"Цвет закреплён"},
-  unpinned:{de:"Farbe losgelassen",en:"Colour unpinned",ru:"Цвет откреплён"},
-  markit:{de:"Markieren?",en:"Mark it?",ru:"Разметить?"},
+           uk:"Маркер і нотатки",zh:"荧光笔与笔记",hr:"Marker i bilješke",it:"Evidenziatore e note",ro:"Marker și notițe",tl:"Marker at mga tala",rw:"Ikaramu n’inyandiko",zu:"Umaki namanothi"},
+  pinhint:{de:"Doppelklick — Farbe festhalten",en:"Double-click to pin the colour",ru:"Двойной клик — закрепить цвет",hr:"Dvoklik pričvršćuje boju",it:"Doppio clic per fissare il colore",ro:"Dublu clic pentru a fixa culoarea",es:"Doble clic para fijar el color",fr:"Double-clic pour épingler la couleur",pt:"Duplo clique para fixar a cor",cs:"Dvojklik připne barvu",uk:"Подвійний клік закріплює колір",bg:"Двоен клик закача цвета",mk:"Двоен клик ја прикачува бојата",sr:"Двоклик прикачиње боју",hu:"Dupla kattintás rögzíti a színt",id:"Klik ganda untuk menyematkan warna",ja:"ダブルクリックで色を留める",zh:"双击固定颜色",th:"ดับเบิลคลิกเพื่อปักหมุดสี",tl:"I-double click upang i-pin ang kulay",rw:"Kanda kabiri kugira ngo ufate ibara",zu:"Chofoza kabili ukuphina umbala"},
+  pinned:{de:"Farbe festgehalten",en:"Colour pinned",ru:"Цвет закреплён",hr:"Boja pričvršćena",it:"Colore fissato",ro:"Culoare fixată",es:"Color fijado",fr:"Couleur épinglée",pt:"Cor fixada",cs:"Barva připnuta",uk:"Колір закріплено",bg:"Цветът е закачен",mk:"Бојата е прикачена",sr:"Боја прикачена",hu:"Szín rögzítve",id:"Warna disematkan",ja:"色を留めました",zh:"颜色已固定",th:"ปักหมุดสีแล้ว",tl:"Naka-pin ang kulay",rw:"Ibara ryafashwe",zu:"Umbala uphiniwe"},
+  unpinned:{de:"Farbe losgelassen",en:"Colour unpinned",ru:"Цвет откреплён",hr:"Boja otpuštena",it:"Colore sbloccato",ro:"Culoare eliberată",es:"Color soltado",fr:"Couleur détachée",pt:"Cor solta",cs:"Barva odepnuta",uk:"Колір відкріплено",bg:"Цветът е откачен",mk:"Бојата е откачена",sr:"Боја откачена",hu:"Szín feloldva",id:"Warna dilepas",ja:"色を外しました",zh:"颜色已取消固定",th:"ยกเลิกปักหมุดสีแล้ว",tl:"Inalis ang pin sa kulay",rw:"Ibara ryarekuwe",zu:"Umbala ukhishiwe"},
+  markit:{de:"Markieren?",en:"Mark it?",ru:"Разметить?",hr:"Označiti?",it:"Segnare?",ro:"Însemnezi?",es:"¿Marcar?",fr:"Marquer ?",pt:"Marcar?",cs:"Označit?",uk:"Позначити?",bg:"Да отбележа?",mk:"Да означам?",sr:"Означити?",hu:"Megjelöljem?",id:"Tandai?",ja:"しるしを付けますか",zh:"要标记吗",th:"ทำเครื่องหมายไหม",tl:"Markahan?",rw:"Gushyiraho ikimenyetso?",zu:"Ngimake?"},
   edited:{de:"Der Verlag hat diese Stelle geändert — die Markierungen darin sind fort",
           en:"The publisher revised this passage — the marks in it are gone",
-          ru:"Издатель поправил это место — пометки в нём сняты"},
-  railon:{de:"An",en:"On",ru:"Вкл"},
-  railoff:{de:"Aus",en:"Off",ru:"Выкл"},
-  railshown:{de:"Das Etui steht links",en:"The rail stands on the left",ru:"Пенал стоит слева"},
-  railhid:{de:"Etui weg — nur lesen",en:"Rail away — just reading",ru:"Пенал убран — просто чтение"},
-  up:{de:"Marker nehmen",en:"Take the marker",ru:"Взять маркер"},
-  down:{de:"Werkzeug weglegen",en:"Put the tool down",ru:"Положить инструмент"},
-  kept:{de:"In diesem Browser gespeichert",en:"Kept in this browser",ru:"Сохранено в этом браузере"},
-  wipe:{de:"Lektion leeren",en:"Clear this lesson",ru:"Стереть урок"},
+          ru:"Издатель поправил это место — пометки в нём сняты",hr:"Izdavač je promijenio ovaj odlomak — oznake u njemu su uklonjene",it:"L’editore ha rivisto questo passo — i segni in esso sono spariti",ro:"Editorul a revizuit acest pasaj — însemnările din el au dispărut",es:"El editor revisó este pasaje — las marcas en él han desaparecido",fr:"L’éditeur a révisé ce passage — les marques qu’il portait ont disparu",pt:"O editor reviu esta passagem — as marcas nela desapareceram",cs:"Vydavatel tento oddíl upravil — značky v něm zmizely",uk:"Видавець змінив цей уривок — позначки в ньому зникли",bg:"Издателят преработи този откъс — бележките в него са премахнати",mk:"Издавачот го измени овој пасус — ознаките во него ги нема",sr:"Издавач је изменио овај одломак — ознака у њему више нема",hu:"A kiadó átdolgozta ezt a szakaszt — a benne lévő jelölések eltűntek",id:"Penerbit merevisi bagian ini — tanda di dalamnya hilang",ja:"発行者がこの箇所を改めました — そこに付けたしるしは消えています",zh:"出版者修订了这段 — 其中的标记已消失",th:"ผู้จัดพิมพ์แก้ไขข้อความตอนนี้ — เครื่องหมายในนั้นหายไป",tl:"Binago ng naglathala ang bahaging ito — nawala ang mga marka rito",rw:"Uwatangaje yahinduye iki gice — ibimenyetso byari bimo byavuyeho",zu:"Umshicileli ushintshe le ndima — amamaki akuyo asukile"},
+  railon:{de:"An",en:"On",ru:"Вкл",hr:"Uključeno",it:"Attivo",ro:"Pornit",es:"Activado",fr:"Activée",pt:"Ligada",cs:"Zapnuto",uk:"Увімкнено",bg:"Включена",mk:"Вклучена",sr:"Укључена",hu:"Be",id:"Aktif",ja:"表示",zh:"开",th:"เปิด",tl:"Bukas",rw:"Birafunguye",zu:"Kuvuliwe"},
+  railoff:{de:"Aus",en:"Off",ru:"Выкл",hr:"Isključeno",it:"Spento",ro:"Oprit",es:"Desactivado",fr:"Désactivée",pt:"Desligada",cs:"Vypnuto",uk:"Вимкнено",bg:"Изключена",mk:"Исклучена",sr:"Искључена",hu:"Ki",id:"Mati",ja:"非表示",zh:"关",th:"ปิด",tl:"Sarado",rw:"Birafunze",zu:"Kuvaliwe"},
+  railshown:{de:"Das Etui steht links",en:"The rail stands on the left",ru:"Пенал стоит слева",hr:"Traka stoji slijeva",it:"La barra sta a sinistra",ro:"Bara stă în stânga",es:"La barra queda a la izquierda",fr:"La barre se tient à gauche",pt:"A barra fica à esquerda",cs:"Lišta stojí vlevo",uk:"Панель стоїть ліворуч",bg:"Лентата стои отляво",mk:"Лентата стои лево",sr:"Трака стоји слева",hu:"A sáv balra áll",id:"Bilah berdiri di kiri",ja:"道具立ては左に",zh:"工具栏立于左侧",th:"แถบเครื่องมืออยู่ทางซ้าย",tl:"Nasa kaliwa ang gabay",rw:"Umurongo w’ibikoresho uri ibumoso",zu:"Ibha imi ngakwesobunxele"},
+  railhid:{de:"Etui weg — nur lesen",en:"Rail away — just reading",ru:"Пенал убран — просто чтение",hr:"Traka sklonjena — samo čitanje",it:"Barra riposta — solo lettura",ro:"Bara retrasă — doar citire",es:"Barra guardada — solo lectura",fr:"Barre rangée — lecture seule",pt:"Barra recolhida — só leitura",cs:"Lišta uklizena — jen čtení",uk:"Панель сховано — лише читання",bg:"Лентата е прибрана — само четене",mk:"Лентата е тргната — само читање",sr:"Трака склоњена — само читање",hu:"A sáv eltéve — csak olvasás",id:"Bilah disimpan — hanya membaca",ja:"道具立てをしまいました — 読むだけ",zh:"工具栏已收起 — 只管阅读",th:"เก็บแถบเครื่องมือแล้ว — อ่านอย่างเดียว",tl:"Nakatago ang gabay — pagbasa lamang",rw:"Umurongo wabitswe — gusoma gusa",zu:"Ibha ifihliwe — ukufunda kuphela"},
+  up:{de:"Marker nehmen",en:"Take the marker",ru:"Взять маркер",hr:"Uzmi marker",it:"Prendi l’evidenziatore",ro:"Ia markerul",es:"Toma el marcador",fr:"Prendre le marqueur",pt:"Pegar o marcador",cs:"Vzít zvýrazňovač",uk:"Узяти маркер",bg:"Вземи маркера",mk:"Земи го маркерот",sr:"Узми маркер",hu:"Vedd a kiemelőt",id:"Ambil stabilo",ja:"マーカーを取る",zh:"拿起荧光笔",th:"หยิบปากกาเน้นข้อความ",tl:"Kunin ang marker",rw:"Fata ikaramu",zu:"Thatha umaki"},
+  down:{de:"Werkzeug weglegen",en:"Put the tool down",ru:"Положить инструмент",hr:"Odloži alat",it:"Posa lo strumento",ro:"Lasă unealta",es:"Deja la herramienta",fr:"Poser l’outil",pt:"Pousar a ferramenta",cs:"Odložit nástroj",uk:"Покласти інструмент",bg:"Остави инструмента",mk:"Остави ја алатката",sr:"Одложи алат",hu:"Tedd le az eszközt",id:"Letakkan alatnya",ja:"道具を置く",zh:"放下工具",th:"วางเครื่องมือ",tl:"Ibaba ang kasangkapan",rw:"Shyira igikoresho hasi",zu:"Beka phansi ithuluzi"},
+  kept:{de:"In diesem Browser gespeichert",en:"Kept in this browser",ru:"Сохранено в этом браузере",hr:"Čuva se u ovom pregledniku",it:"Conservato in questo browser",ro:"Păstrat în acest browser",es:"Guardado en este navegador",fr:"Conservé dans ce navigateur",pt:"Guardado neste navegador",cs:"Uloženo v tomto prohlížeči",uk:"Зберігається в цьому браузері",bg:"Пази се в този браузър",mk:"Се чува во овој прелистувач",sr:"Чува се у овом прегледачу",hu:"Ebben a böngészőben marad",id:"Disimpan di peramban ini",ja:"このブラウザーに残ります",zh:"保存在此浏览器中",th:"เก็บไว้ในเบราว์เซอร์นี้",tl:"Nakatago sa browser na ito",rw:"Bibitswe muri iyi mushakisha",zu:"Kugcinwe kulesi siphequluli"},
+  wipe:{de:"Lektion leeren",en:"Clear this lesson",ru:"Стереть урок",hr:"Očisti ovu lekciju",it:"Svuota questa lezione",ro:"Golește această lecție",tl:"Linisin ang araling ito",rw:"Siba iri somo",zu:"Susa lesi sifundo",bg:"Изчисти този урок",cs:"Vyčistit tuto lekci",es:"Limpiar esta lección",fr:"Effacer cette leçon",hu:"Lecke kiürítése",id:"Bersihkan pelajaran ini",ja:"この課を消す",mk:"Исчисти ја оваа лекција",pt:"Limpar esta lição",sr:"Очисти ову лекцију",th:"ล้างบทเรียนนี้",uk:"Очистити цей урок",zh:"清空本课"},
   wipehint:{de:"Alle Striche, Einfügungen und Notizen dieser Lektion. Danach lässt es sich zurückholen.",
             en:"Every stroke, insertion and note of this lesson. It can be taken back right after.",
-            ru:"Все мазки, вставки и заметки этого урока. Сразу после можно вернуть."},
-  sure:{de:"Sicher?",en:"Sure?",ru:"Точно?"},
-  undo:{de:"Zurückholen",en:"Undo",ru:"Вернуть"},
-  cleared:{de:"Lektion geleert",en:"Lesson cleared",ru:"Урок очищен"},
-  marker:{de:"Marker",en:"Marker",ru:"Маркер"},
-  aintro:{de:"Einleitung",en:"Opening",ru:"Вступление"},
-  mkoff:{de:"Marker aus — Text lässt sich normal markieren",en:"Marker off — the text selects normally",ru:"Маркер выключен — текст выделяется как обычно"},
-  mkon:{de:"Marker an",en:"Marker on",ru:"Маркер включён"},
-  instant:{de:"Sofort",en:"Instant",ru:"Сразу"},
-  fill:{de:"Marker",en:"Highlighter",ru:"Маркер"},
-  tex:{de:"Strich",en:"Stroke",ru:"Штрих"},
-  line:{de:"Linie",en:"Line",ru:"Линия"},
-  wave:{de:"Welle",en:"Wave",ru:"Волна"},
-  fmtb:{de:"Fett",en:"Bold",ru:"Жирный"},
-  fmti:{de:"Kursiv",en:"Italic",ru:"Курсив"},
-  fmtu:{de:"Unterstrichen",en:"Underline",ru:"Подчёркнутый"},
-  apart:{de:"Teil",en:"Part",ru:"Часть"},
-  aof:{de:"von",en:"of",ru:"из"},
-  aflowt:{de:"Ohne Halt lesen — die Seite geht mit",en:"Read straight through — the page follows",ru:"Читать подряд — лист идёт следом"},
-  linked:{de:"Link kopiert",en:"Link copied",ru:"Ссылка скопирована"},
-  linkq:{de:"Link zu dieser Frage",en:"Link to this question",ru:"Ссылка на этот вопрос"},
-  linkd:{de:"Link zu diesem Tag",en:"Link to this day",ru:"Ссылка на этот день"},
-  carryout:{de:"In eine Datei",en:"To a file",ru:"В файл"},
-  carryin:{de:"Aus einer Datei",en:"From a file",ru:"Из файла"},
+            ru:"Все мазки, вставки и заметки этого урока. Сразу после можно вернуть.",hr:"Svaki potez, umetak i bilješka ove lekcije. Može se poništiti.",it:"Ogni tratto, inserto e nota di questa lezione. Si può annullare.",ro:"Fiecare tușă, inserție și notiță a acestei lecții. Se poate anula.",tl:"Bawat hagod, singit at tala ng araling ito. Maaaring bawiin.",rw:"Buri murongo, ibyinjijwe n’inyandiko z’iri somo. Birashobora gusubizwaho.",zu:"Wonke umudwebo, okufakiwe namanothi alesi sifundo. Kungahlehliswa.",bg:"Всеки щрих, вмъкване и бележка в този урок. Може да се върне.",cs:"Každý tah, vsuvka a poznámka této lekce. Lze vzít zpět.",es:"Cada trazo, inserción y nota de esta lección. Se puede deshacer.",fr:"Chaque trait, insertion et note de cette leçon. On peut revenir en arrière.",hu:"A lecke minden vonása, beszúrása és jegyzete. Visszavonható.",id:"Setiap sapuan, sisipan, dan catatan pelajaran ini. Bisa dibatalkan.",ja:"この課のすべての線・挿入・メモ。元に戻せます。",mk:"Секој потег, вметнување и белешка од оваа лекција. Може да се врати.",pt:"Cada traço, inserção e nota desta lição. Pode ser desfeito.",sr:"Сваки потез, уметак и белешка ове лекције. Може се вратити.",th:"ทุกรอยขีด ส่วนแทรก และบันทึกของบทนี้ ย้อนกลับได้",uk:"Кожен штрих, вставка й нотатка цього уроку. Можна повернути.",zh:"本课的每一笔、每处插入与批注。可以撤销。"},
+  sure:{de:"Sicher?",en:"Sure?",ru:"Точно?",hr:"Sigurno?",it:"Sicuro?",ro:"Sigur?",es:"¿Seguro?",fr:"Sûr ?",pt:"Tem certeza?",cs:"Určitě?",uk:"Точно?",bg:"Сигурно?",mk:"Сигурно?",sr:"Сигурно?",hu:"Biztos?",id:"Yakin?",ja:"よろしいですか",zh:"确定吗",th:"แน่ใจไหม",tl:"Sigurado?",rw:"Urabyemeza?",zu:"Uqinisekile?"},
+  undo:{de:"Zurückholen",en:"Undo",ru:"Вернуть",hr:"Poništi",it:"Annulla",ro:"Anulează",es:"Deshacer",fr:"Annuler",pt:"Desfazer",cs:"Zpět",uk:"Скасувати",bg:"Отмени",mk:"Врати",sr:"Опозови",hu:"Vissza",id:"Batalkan",ja:"元に戻す",zh:"撤销",th:"เลิกทำ",tl:"Bawiin",rw:"Gusubiraho",zu:"Hlehlisa"},
+  cleared:{de:"Lektion geleert",en:"Lesson cleared",ru:"Урок очищен",hr:"Lekcija očišćena",it:"Lezione ripulita",ro:"Lecție golită",es:"Lección limpiada",fr:"Leçon effacée",pt:"Lição limpa",cs:"Lekce vyčištěna",uk:"Урок очищено",bg:"Урокът е изчистен",mk:"Лекцијата е исчистена",sr:"Лекција очишћена",hu:"A lecke kiürítve",id:"Pelajaran dibersihkan",ja:"この課を消しました",zh:"本课已清空",th:"ล้างบทเรียนแล้ว",tl:"Nalinis ang aralin",rw:"Isomo ryasibwe",zu:"Isifundo sisusiwe"},
+  marker:{de:"Marker",en:"Marker",ru:"Маркер",hr:"Marker",it:"Evidenziatore",ro:"Marker",es:"Marcador",fr:"Marqueur",pt:"Marcador",cs:"Zvýrazňovač",uk:"Маркер",bg:"Маркер",mk:"Маркер",sr:"Маркер",hu:"Kiemelő",id:"Stabilo",ja:"マーカー",zh:"荧光笔",th:"ปากกาเน้นข้อความ",tl:"Marker",rw:"Ikaramu isize",zu:"Umaki"},
+  aintro:{de:"Einleitung",en:"Opening",ru:"Вступление",bg:"Начало",cs:"Úvod",es:"Apertura",fr:"Ouverture",hu:"Nyitás",id:"Pembuka",ja:"はじめ",mk:"Почеток",pt:"Abertura",sr:"Почетак",th:"บทเปิด",uk:"Початок",zh:"开篇",hr:"Uvod",it:"Apertura",ro:"Deschidere",tl:"Pambungad",rw:"Intangiriro",zu:"Isingeniso"},
+  mkoff:{de:"Marker aus — Text lässt sich normal markieren",en:"Marker off — the text selects normally",ru:"Маркер выключен — текст выделяется как обычно",hr:"Marker isključen — tekst se označava kao inače",it:"Evidenziatore spento — il testo si seleziona normalmente",ro:"Marker oprit — textul se selectează normal",es:"Marcador desactivado — el texto se selecciona como siempre",fr:"Marqueur désactivé — le texte se sélectionne normalement",pt:"Marcador desligado — o texto seleciona-se normalmente",cs:"Zvýrazňovač vypnut — text se vybírá jako obvykle",uk:"Маркер вимкнено — текст виділяється як звичайно",bg:"Маркерът е изключен — текстът се избира както обикновено",mk:"Маркерот е исклучен — текстот се означува како обично",sr:"Маркер искључен — текст се бира као обично",hu:"Kiemelő kikapcsolva — a szöveg a szokásos módon jelölhető ki",id:"Stabilo mati — teks dipilih seperti biasa",ja:"マーカーを外しました — 文字は普通に選べます",zh:"荧光笔已关闭 — 文字可照常选取",th:"ปิดปากกาเน้นข้อความ — เลือกข้อความได้ตามปกติ",tl:"Nakasara ang marker — normal nang mapipili ang teksto",rw:"Ikaramu yahagaze — inyandiko ihitwamo nk’ibisanzwe",zu:"Umaki uvaliwe — umbhalo ukhethwa ngokujwayelekile"},
+  mkon:{de:"Marker an",en:"Marker on",ru:"Маркер включён",hr:"Marker uključen",it:"Evidenziatore attivo",ro:"Marker pornit",es:"Marcador activado",fr:"Marqueur activé",pt:"Marcador ligado",cs:"Zvýrazňovač zapnut",uk:"Маркер увімкнено",bg:"Маркерът е включен",mk:"Маркерот е вклучен",sr:"Маркер укључен",hu:"Kiemelő bekapcsolva",id:"Stabilo aktif",ja:"マーカーが入りました",zh:"荧光笔已开启",th:"เปิดปากกาเน้นข้อความ",tl:"Nakabukas ang marker",rw:"Ikaramu yatangiye",zu:"Umaki uvuliwe"},
+  instant:{de:"Sofort",en:"Instant",ru:"Сразу",hr:"Odmah",it:"Subito",ro:"Imediat",es:"Al instante",fr:"À l’instant",pt:"Agora mesmo",cs:"Hned",uk:"Щойно",bg:"Ей сега",mk:"Веднаш",sr:"Управо сад",hu:"Most",id:"Barusan",ja:"たった今",zh:"刚刚",th:"เมื่อครู่",tl:"Ngayon lang",rw:"Nonaha",zu:"Manje"},
+  fill:{de:"Marker",en:"Highlighter",ru:"Маркер",hr:"Marker",it:"Evidenziatore",ro:"Marker",es:"Marcador",fr:"Marqueur",pt:"Marcador",cs:"Zvýrazňovač",uk:"Маркер",bg:"Маркер",mk:"Маркер",sr:"Маркер",hu:"Kiemelő",id:"Stabilo",ja:"マーカー",zh:"荧光笔",th:"ปากกาเน้นข้อความ",tl:"Marker",rw:"Ikaramu isize",zu:"Umaki"},
+  tex:{de:"Strich",en:"Stroke",ru:"Штрих",hr:"Potez",it:"Tratto",ro:"Tușă",es:"Trazo",fr:"Trait",pt:"Traço",cs:"Tah",uk:"Штрих",bg:"Щрих",mk:"Потег",sr:"Потез",hu:"Vonás",id:"Sapuan",ja:"かすれ",zh:"粗描",th:"รอยขีด",tl:"Hagod",rw:"Umurongo ugari",zu:"Umudwebo"},
+  line:{de:"Linie",en:"Line",ru:"Линия",hr:"Crta",it:"Linea",ro:"Linie",es:"Línea",fr:"Ligne",pt:"Linha",cs:"Čára",uk:"Лінія",bg:"Черта",mk:"Линија",sr:"Црта",hu:"Vonal",id:"Garis",ja:"線",zh:"直线",th:"เส้น",tl:"Guhit",rw:"Umurongo",zu:"Umugqa"},
+  wave:{de:"Welle",en:"Wave",ru:"Волна",hr:"Valovita crta",it:"Onda",ro:"Undă",es:"Onda",fr:"Vague",pt:"Onda",cs:"Vlnovka",uk:"Хвиля",bg:"Вълна",mk:"Бранувана линија",sr:"Таласаста црта",hu:"Hullám",id:"Gelombang",ja:"波線",zh:"波浪线",th:"เส้นหยัก",tl:"Alon",rw:"Umurongo w’imiraba",zu:"Igagasi"},
+  fmtb:{de:"Fett",en:"Bold",ru:"Жирный",hr:"Podebljano",it:"Grassetto",ro:"Aldin",es:"Negrita",fr:"Gras",pt:"Negrito",cs:"Tučně",uk:"Жирний",bg:"Получер",mk:"Задебелено",sr:"Подебљано",hu:"Félkövér",id:"Tebal",ja:"太字",zh:"加粗",th:"ตัวหนา",tl:"Makapal",rw:"Inyuguti zinini",zu:"Okugqamile"},
+  fmti:{de:"Kursiv",en:"Italic",ru:"Курсив",hr:"Kurziv",it:"Corsivo",ro:"Cursiv",es:"Cursiva",fr:"Italique",pt:"Itálico",cs:"Kurzíva",uk:"Курсив",bg:"Курсив",mk:"Курзив",sr:"Курзив",hu:"Dőlt",id:"Miring",ja:"斜体",zh:"斜体",th:"ตัวเอียง",tl:"Pahilig",rw:"Inyuguti ziberamye",zu:"Okutshekile"},
+  fmtu:{de:"Unterstrichen",en:"Underline",ru:"Подчёркнутый",hr:"Podcrtano",it:"Sottolineato",ro:"Subliniat",es:"Subrayado",fr:"Souligné",pt:"Sublinhado",cs:"Podtrženo",uk:"Підкреслений",bg:"Подчертан",mk:"Подвлечено",sr:"Подвучено",hu:"Aláhúzott",id:"Garis bawah",ja:"下線",zh:"下划线",th:"ขีดเส้นใต้",tl:"Salungguhit",rw:"Gucamo umurongo",zu:"Udwetshiwe"},
+  apart:{de:"Teil",en:"Part",ru:"Часть",bg:"Част",cs:"Část",es:"Parte",fr:"Partie",hu:"Rész",id:"Bagian",ja:"部",mk:"Дел",pt:"Parte",sr:"Део",th:"ตอน",uk:"Частина",zh:"部分",hr:"Dio",it:"Parte",ro:"Partea",tl:"Bahagi",rw:"Igice",zu:"Ingxenye"},
+  aof:{de:"von",en:"of",ru:"из",bg:"от",cs:"z",es:"de",fr:"sur",hu:"/",id:"dari",ja:"／",mk:"од",pt:"de",sr:"од",th:"จาก",uk:"з",zh:"／",hr:"od",it:"di",ro:"din",tl:"ng",rw:"muri",zu:"kwa"},
+  aflowt:{de:"Ohne Halt lesen — die Seite geht mit",en:"Read straight through — the page follows",ru:"Читать подряд — лист идёт следом",bg:"Чети наред — страницата следва",cs:"Čti popořádku — stránka jde s tebou",es:"Lee de corrido — la página te sigue",fr:"Lisez d’une traite — la page suit",hu:"Olvasd végig — a lap követ",id:"Baca terus — halaman mengikuti",ja:"そのまま読み進めます — ページがついていきます",mk:"Читај наред — страницата следи",pt:"Lê a fio — a página acompanha",sr:"Читај редом — страница прати",th:"อ่านต่อเนื่อง — หน้าจะเลื่อนตาม",uk:"Читай поспіль — сторінка йде слідом",zh:"一路读下去 — 页面自会跟随",hr:"Čitaj u nizu — stranica prati",it:"Leggi di seguito — la pagina segue",ro:"Citește pe rând — pagina te urmează",tl:"Basahin nang tuloy-tuloy — susunod ang pahina",rw:"Soma ukurikiranya — urupapuro rurakurikira",zu:"Funda uqhubeke — ikhasi liyalandela"},
+  linked:{de:"Link kopiert",en:"Link copied",ru:"Ссылка скопирована",hr:"Poveznica kopirana",it:"Link copiato",ro:"Link copiat",es:"Enlace copiado",fr:"Lien copié",pt:"Link copiado",cs:"Odkaz zkopírován",uk:"Посилання скопійовано",bg:"Връзката е копирана",mk:"Врската е копирана",sr:"Веза копирана",hu:"Hivatkozás másolva",id:"Tautan tersalin",ja:"リンクをコピーしました",zh:"链接已复制",th:"คัดลอกลิงก์แล้ว",tl:"Nakopya ang link",rw:"Umuyoboro wakoporowe",zu:"Isixhumanisi sikopishiwe"},
+  linkq:{de:"Link zu dieser Frage",en:"Link to this question",ru:"Ссылка на этот вопрос",hr:"Poveznica na ovo pitanje",it:"Link a questa domanda",ro:"Link către această întrebare",es:"Enlace a esta pregunta",fr:"Lien vers cette question",pt:"Link para esta pergunta",cs:"Odkaz na tuto otázku",uk:"Посилання на це питання",bg:"Връзка към този въпрос",mk:"Врска до ова прашање",sr:"Веза на ово питање",hu:"Hivatkozás erre a kérdésre",id:"Tautan ke pertanyaan ini",ja:"この問いへのリンク",zh:"链接到这个问题",th:"ลิงก์ไปยังคำถามนี้",tl:"Link sa tanong na ito",rw:"Umuyoboro w’iki kibazo",zu:"Isixhumanisi salo mbuzo"},
+  linkd:{de:"Link zu diesem Tag",en:"Link to this day",ru:"Ссылка на этот день",hr:"Poveznica na ovaj dan",it:"Link a questo giorno",ro:"Link către această zi",es:"Enlace a este día",fr:"Lien vers ce jour",pt:"Link para este dia",cs:"Odkaz na tento den",uk:"Посилання на цей день",bg:"Връзка към този ден",mk:"Врска до овој ден",sr:"Веза на овај дан",hu:"Hivatkozás erre a napra",id:"Tautan ke hari ini",ja:"この日へのリンク",zh:"链接到这一天",th:"ลิงก์ไปยังวันนี้",tl:"Link sa araw na ito",rw:"Umuyoboro w’uyu munsi",zu:"Isixhumanisi salolu suku"},
+  carryout:{de:"In eine Datei",en:"To a file",ru:"В файл",bg:"Във файл",cs:"Do souboru",es:"A un archivo",fr:"Vers un fichier",hu:"Fájlba",id:"Ke berkas",ja:"ファイルへ",mk:"Во датотека",pt:"Para um ficheiro",sr:"У датотеку",th:"ไปยังไฟล์",uk:"У файл",zh:"导出到文件",hr:"U datoteku",it:"In un file",ro:"Într-un fișier",tl:"Sa isang file",rw:"Muri dosiye",zu:"Kuya kufayela"},
+  carryin:{de:"Aus einer Datei",en:"From a file",ru:"Из файла",bg:"От файл",cs:"Ze souboru",es:"Desde un archivo",fr:"Depuis un fichier",hu:"Fájlból",id:"Dari berkas",ja:"ファイルから",mk:"Од датотека",pt:"De um ficheiro",sr:"Из датотеке",th:"จากไฟล์",uk:"З файлу",zh:"从文件导入",hr:"Iz datoteke",it:"Da un file",ro:"Dintr-un fișier",tl:"Mula sa file",rw:"Kuva muri dosiye",zu:"Kusuka kufayela"},
   carryouthint:{de:"Alles Markierte und Notierte in eine Datei — per AirDrop oder Ordner aufs andere Gerät",
                 en:"Everything marked and written into one file — by AirDrop or through a folder",
-                ru:"Всё помеченное и записанное одним файлом — через AirDrop или папку"},
+                ru:"Всё помеченное и записанное одним файлом — через AirDrop или папку",bg:"Всичко отбелязано и написано в един файл — по AirDrop или през облака",cs:"Vše označené a napsané v jednom souboru — přes AirDrop nebo cloud",es:"Todo lo marcado y escrito en un solo archivo — por AirDrop o por la nube",fr:"Tout ce qui est marqué et écrit dans un seul fichier — par AirDrop ou par le nuage",hu:"Minden jelölés és írás egy fájlban — AirDroppal vagy felhőn át",id:"Semua tanda dan tulisan dalam satu berkas — lewat AirDrop atau awan",ja:"しるしと書き込みを一つのファイルに — AirDrop やクラウドで",mk:"Сè означено и напишано во една датотека — преку AirDrop или облак",pt:"Tudo o que foi marcado e escrito num só ficheiro — por AirDrop ou pela nuvem",sr:"Све означено и написано у једној датотеци — преко AirDrop-а или облака",th:"ทุกเครื่องหมายและข้อเขียนในไฟล์เดียว — ผ่าน AirDrop หรือคลาวด์",uk:"Усе позначене й написане в одному файлі — через AirDrop або хмару",zh:"把所有标记与书写汇入一个文件 — 经 AirDrop 或云端",hr:"Sve označeno i napisano u jednoj datoteci — preko AirDropa ili oblaka",it:"Tutto ciò che è segnato e scritto in un solo file — via AirDrop o dal cloud",ro:"Tot ce e însemnat și scris într-un singur fișier — prin AirDrop sau prin nor",tl:"Lahat ng namarkahan at naisulat sa isang file — sa pamamagitan ng AirDrop o ulap",rw:"Ibyanditswe n’ibimenyetso byose muri dosiye imwe — binyuze kuri AirDrop cyangwa igicu",zu:"Konke okumakiwe nokubhaliwe kufayela elilodwa — nge-AirDrop noma ngefu"},
   carryinhint:{de:"Wird dazugelegt, nicht darübergelegt: was hier steht, bleibt stehen",
                en:"It is added, not laid over: what is here stays",
-               ru:"Ляжет рядом, а не поверх: что здесь, то и останется"},
-  carryadded:{de:"Dazugelegt",en:"Added",ru:"Добавлено"},
-  carrymarks:{de:"Markierungen",en:"marks",ru:"пометок"},
-  carrynotes:{de:"Notizen",en:"notes",ru:"заметок"},
-  carryins:{de:"Eingefügtes",en:"insertions",ru:"вставок"},
-  carrykept:{de:"hiesige behalten",en:"kept as here",ru:"оставлено здешних"},
-  carrysame:{de:"Alles davon war schon hier",en:"All of it was here already",ru:"Всё это уже было здесь"},
-  carrynone:{de:"Noch nichts zu übertragen",en:"Nothing to carry yet",ru:"Пока нечего переносить"},
-  carrybad:{de:"Das ist keine Datei von hier",en:"Not a file from here",ru:"Это не отсюда"},
-  carryfull:{de:"Kein Platz im Browser — nichts geändert",en:"No room in the browser — nothing changed",ru:"В браузере нет места — ничего не менял"},
-  fmtq:{de:"Zitat",en:"Quotation",ru:"Цитата"}
+               ru:"Ляжет рядом, а не поверх: что здесь, то и останется",bg:"Добавя се, не се наслагва: тук нищо не се губи",cs:"Přidá se, nepřekryje: co je zde, zůstává",es:"Se añade, no se superpone: lo que hay aquí se queda",fr:"Il s’ajoute, il ne recouvre pas : ce qui est ici demeure",hu:"Hozzáadódik, nem írja felül: ami itt van, marad",id:"Ditambahkan, bukan ditimpa: yang di sini tetap",ja:"重ねずに加えます — ここにあるものは残ります",mk:"Се додава, не се преслојува: тоа што е тука останува",pt:"É acrescentado, não sobreposto: o que está aqui fica",sr:"Додаје се, не преклапа: што је овде остаје",th:"เพิ่มเข้ามา ไม่ทับของเดิม สิ่งที่มีอยู่ยังคงอยู่",uk:"Додається, не накладається: те, що тут, лишається",zh:"只是加入，不覆盖：此处的内容依旧保留",hr:"Dodaje se, ne prekriva: što je ovdje ostaje",it:"Si aggiunge, non si sovrappone: ciò che è qui resta",ro:"Se adaugă, nu se suprapune: ce e aici rămâne",tl:"Idinaragdag, hindi ipinapatong: nananatili ang narito",rw:"Birongerwaho, ntibipfukirane: ibiri hano birahaguma",zu:"Kuyengezwa, akumbozi: okulapha kuyahlala"},
+  carryadded:{de:"Dazugelegt",en:"Added",ru:"Добавлено",bg:"Добавено",cs:"Přidáno",es:"Añadido",fr:"Ajouté",hu:"Hozzáadva",id:"Ditambahkan",ja:"追加しました",mk:"Додадено",pt:"Adicionado",sr:"Додато",th:"เพิ่มแล้ว",uk:"Додано",zh:"已加入",hr:"Dodano",it:"Aggiunto",ro:"Adăugat",tl:"Naidagdag",rw:"Byongewe",zu:"Kungeziwe"},
+  carrymarks:{de:"Markierungen",en:"marks",ru:"пометок",bg:"бележки",cs:"značky",es:"marcas",fr:"marques",hu:"jelölés",id:"tanda",ja:"しるし",mk:"ознаки",pt:"marcas",sr:"ознака",th:"เครื่องหมาย",uk:"позначок",zh:"标记",hr:"oznaka",it:"segni",ro:"însemnări",tl:"marka",rw:"ibimenyetso",zu:"amamaki"},
+  carrynotes:{de:"Notizen",en:"notes",ru:"заметок",bg:"бележки",cs:"poznámky",es:"notas",fr:"notes",hu:"jegyzet",id:"catatan",ja:"メモ",mk:"белешки",pt:"notas",sr:"белешки",th:"บันทึก",uk:"нотаток",zh:"批注",hr:"bilježaka",it:"note",ro:"notițe",tl:"tala",rw:"inyandiko",zu:"amanothi"},
+  carryins:{de:"Eingefügtes",en:"insertions",ru:"вставок",bg:"вмъквания",cs:"vsuvky",es:"inserciones",fr:"insertions",hu:"beszúrás",id:"sisipan",ja:"挿入",mk:"вметнувања",pt:"inserções",sr:"уметака",th:"ส่วนที่แทรก",uk:"вставок",zh:"插入",hr:"umetaka",it:"inserti",ro:"inserții",tl:"singit",rw:"ibyinjijwe",zu:"okufakiwe"},
+  carrykept:{de:"hiesige behalten",en:"kept as here",ru:"оставлено здешних",bg:"запазени както тук",cs:"ponecháno jako zde",es:"conservado como aquí",fr:"conservé tel quel",hu:"itt maradt így",id:"tetap seperti di sini",ja:"ここのまま",mk:"задржано како тука",pt:"mantido como aqui",sr:"задржано као овде",th:"คงไว้อย่างที่นี่",uk:"збережено як тут",zh:"按此保留",hr:"zadržano kao ovdje",it:"mantenuto com’è qui",ro:"păstrat ca aici",tl:"napanatili gaya rito",rw:"byabitswe uko biri hano",zu:"kugcinwe njengalapha"},
+  carrysame:{de:"Alles davon war schon hier",en:"All of it was here already",ru:"Всё это уже было здесь",bg:"Всичко това вече беше тук",cs:"Všechno to už tu bylo",es:"Todo eso ya estaba aquí",fr:"Tout cela était déjà ici",hu:"Mindez már itt volt",id:"Semuanya sudah ada di sini",ja:"すべてすでにここにありました",mk:"Сето тоа веќе беше тука",pt:"Tudo isso já estava aqui",sr:"Све је то већ било овде",th:"ทั้งหมดนี้มีอยู่แล้ว",uk:"Усе це вже було тут",zh:"这些内容此处早已有了",hr:"Sve je to već bilo ovdje",it:"Era già tutto qui",ro:"Toate acestea erau deja aici",tl:"Nandito na ang lahat ng iyon",rw:"Ibyo byose byari bisanzwe hano",zu:"Konke lokho bekukhona kakade"},
+  carrynone:{de:"Noch nichts zu übertragen",en:"Nothing to carry yet",ru:"Пока нечего переносить",bg:"Още няма какво да се пренесе",cs:"Zatím není co přenést",es:"Todavía no hay nada que llevar",fr:"Rien à emporter pour l’instant",hu:"Még nincs mit átvinni",id:"Belum ada yang bisa dibawa",ja:"まだ持ち出すものがありません",mk:"Сè уште нема што да се пренесе",pt:"Ainda não há nada para levar",sr:"Још нема шта да се пренесе",th:"ยังไม่มีอะไรให้นำไป",uk:"Поки нема чого переносити",zh:"暂时没有可带走的内容",hr:"Još nema što prenijeti",it:"Non c’è ancora nulla da portare",ro:"Încă nu e nimic de dus",tl:"Wala pang maidadala",rw:"Nta kintu kiracyari cyo gutwara",zu:"Akukho okusengasuswa okwamanje"},
+  carrybad:{de:"Das ist keine Datei von hier",en:"Not a file from here",ru:"Это не отсюда",bg:"Това не е файл оттук",cs:"Není to soubor odsud",es:"No es un archivo de aquí",fr:"Ce n’est pas un fichier d’ici",hu:"Nem innen való fájl",id:"Bukan berkas dari sini",ja:"ここのファイルではありません",mk:"Ова не е датотека од овде",pt:"Não é um ficheiro daqui",sr:"Ово није датотека одавде",th:"ไม่ใช่ไฟล์จากที่นี่",uk:"Це не файл звідси",zh:"不是本站的文件",hr:"Nije datoteka odavde",it:"Non è un file di qui",ro:"Nu e un fișier de aici",tl:"Hindi ito file mula rito",rw:"Ntabwo ari dosiye yo hano",zu:"Akulona ifayela lakhona lapha"},
+  carryfull:{de:"Kein Platz im Browser — nichts geändert",en:"No room in the browser — nothing changed",ru:"В браузере нет места — ничего не менял",bg:"Няма място в браузъра — нищо не е променено",cs:"V prohlížeči není místo — nic se nezměnilo",es:"No hay sitio en el navegador — nada ha cambiado",fr:"Plus de place dans le navigateur — rien n’a changé",hu:"Nincs hely a böngészőben — semmi sem változott",id:"Tidak ada ruang di peramban — tidak ada yang berubah",ja:"ブラウザーに空きがありません — 何も変わっていません",mk:"Нема место во прелистувачот — ништо не е променето",pt:"Não há espaço no navegador — nada mudou",sr:"Нема места у прегледачу — ништа није промењено",th:"เบราว์เซอร์ไม่มีที่ว่าง — ไม่มีอะไรเปลี่ยน",uk:"Немає місця в браузері — нічого не змінено",zh:"浏览器空间不足 — 未作任何改动",hr:"Nema mjesta u pregledniku — ništa nije promijenjeno",it:"Non c’è spazio nel browser — nulla è cambiato",ro:"Nu e loc în browser — nimic nu s-a schimbat",tl:"Walang puwang sa browser — walang nabago",rw:"Nta mwanya muri mushakisha — nta cyahindutse",zu:"Ayikho indawo esipheqululini — akushintshanga lutho"},
+  fmtq:{de:"Zitat",en:"Quotation",ru:"Цитата",hr:"Navod",it:"Citazione",ro:"Citat",es:"Cita",fr:"Citation",pt:"Citação",cs:"Citace",uk:"Цитата",bg:"Цитат",mk:"Цитат",sr:"Цитат",hu:"Idézet",id:"Kutipan",ja:"引用",zh:"引文",th:"คำอ้างอิง",tl:"Sipi",rw:"Amagambo yavuzwe",zu:"Isicaphuno"}
 };
 /* ——— one word, in the language of the lesson ———
    Two books to look in — the labels around the sheet and the words of the
@@ -3538,11 +3785,22 @@ function mkInkTo(el,c,s,ps,pe){
   el.style.backgroundImage=mkInk(c,s,ps,pe);
   if(s!=="fill"){ el.style.backgroundSize=""; el.style.backgroundPosition=""; return; }
   const W=.42, L=ps!==false, R=pe!==false;
+  /* ——— the body runs a hair under each cap ———
+     Body and caps used to meet edge to edge. At a fractional zoom the browser
+     rounds the two layers to device pixels in opposite directions and leaves a
+     sliver of paper between them — the white hair at the round nose. They now
+     overlap by .04em, which is a twelfth of the cap: the cap is full height for
+     its first twelfth, so the overlap falls where both layers are a plain
+     rectangle and the ink only doubles over about half a pixel. A hair of
+     denser ink at the nose is what a felt pen does anyway; a hair of white
+     paper is what it never does. */
+  const OV=.04;
   const sizes=[], poss=[];
   if(L){ sizes.push(W+"em 1.04em"); poss.push("left .16em"); }
   if(R){ sizes.push(W+"em 1.04em"); poss.push("right .16em"); }
-  sizes.push("calc(100% - "+((L?W:0)+(R?W:0))+"em) 1.04em");
-  poss.push((L?W+"em":"0")+" .16em");
+  const cut=(L?W-OV:0)+(R?W-OV:0);
+  sizes.push("calc(100% - "+cut+"em) 1.04em");
+  poss.push((L?(W-OV)+"em":"0")+" .16em");
   el.style.backgroundSize=sizes.join(",");
   el.style.backgroundPosition=poss.join(",");
 }
@@ -5005,7 +5263,8 @@ matchMedia("(max-width:700px)").addEventListener("change",function(){
 mkDrawer(false);
 mkTab.addEventListener("click",function(e){ e.stopPropagation(); mkDrawer(true); });
 document.addEventListener("click",function(e){
-  if(!mkTouch||!document.body.classList.contains("railout")) return;
+  /* a tap beside the rail puts it away — pointer or finger alike */
+  if(!document.body.classList.contains("railout")) return;
   if(mkRail.contains(e.target)||mkTab.contains(e.target)||mkBub.contains(e.target)) return;
   if(mkMode) return;                       /* a tool is out — the reader is working */
   mkDrawer(false);

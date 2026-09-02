@@ -1,7 +1,43 @@
 /* SBL Edition 2.1 — cache once, then instant (and offline). */
-const SHELL = "sbl-shell-v4";
+const SHELL = "sbl-shell-v5";
 const DATA  = "sbl-data-v1";
-const SHELL_FILES = ["index.html"];
+/* The faces are shell, not data: without them the sheet is set in a fallback
+   face offline and the PDF breaks its pages somewhere else. */
+const SHELL_FILES = [
+  "index.html",
+  "fonts/ptsans-italic-400-cyrillic-ext.woff2",
+  "fonts/ptsans-italic-400-cyrillic.woff2",
+  "fonts/ptsans-italic-400-latin-ext.woff2",
+  "fonts/ptsans-italic-400-latin.woff2",
+  "fonts/ptsans-italic-700-cyrillic-ext.woff2",
+  "fonts/ptsans-italic-700-cyrillic.woff2",
+  "fonts/ptsans-italic-700-latin-ext.woff2",
+  "fonts/ptsans-italic-700-latin.woff2",
+  "fonts/ptsans-normal-400-cyrillic-ext.woff2",
+  "fonts/ptsans-normal-400-cyrillic.woff2",
+  "fonts/ptsans-normal-400-latin-ext.woff2",
+  "fonts/ptsans-normal-400-latin.woff2",
+  "fonts/ptsans-normal-700-cyrillic-ext.woff2",
+  "fonts/ptsans-normal-700-cyrillic.woff2",
+  "fonts/ptsans-normal-700-latin-ext.woff2",
+  "fonts/ptsans-normal-700-latin.woff2",
+  "fonts/ptserif-italic-400-cyrillic-ext.woff2",
+  "fonts/ptserif-italic-400-cyrillic.woff2",
+  "fonts/ptserif-italic-400-latin-ext.woff2",
+  "fonts/ptserif-italic-400-latin.woff2",
+  "fonts/ptserif-italic-700-cyrillic-ext.woff2",
+  "fonts/ptserif-italic-700-cyrillic.woff2",
+  "fonts/ptserif-italic-700-latin-ext.woff2",
+  "fonts/ptserif-italic-700-latin.woff2",
+  "fonts/ptserif-normal-400-cyrillic-ext.woff2",
+  "fonts/ptserif-normal-400-cyrillic.woff2",
+  "fonts/ptserif-normal-400-latin-ext.woff2",
+  "fonts/ptserif-normal-400-latin.woff2",
+  "fonts/ptserif-normal-700-cyrillic-ext.woff2",
+  "fonts/ptserif-normal-700-cyrillic.woff2",
+  "fonts/ptserif-normal-700-latin-ext.woff2",
+  "fonts/ptserif-normal-700-latin.woff2"
+];
 
 self.addEventListener("install", (e) => {
   e.waitUntil(caches.open(SHELL).then((c) => c.addAll(SHELL_FILES)).catch(()=>{}).then(() => self.skipWaiting()));
