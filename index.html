@@ -1868,6 +1868,40 @@ html.dark .mtoast b:hover{color:#fff}
   html.paper .mem,html.paper .sec::before,html.paper .lesson,html.paper .sec .day,
   html.paper .vgroup,html.paper .vref>span{background-image:none}
   .page + .page{break-before:page;page-break-before:always}   /* each lesson opens its own page */
+
+  /* ——— the lesson tag reaches the head of the sheet ———
+     On screen the tag bleeds off the top of the sheet and the sheet clips it. Paper has
+     no bleed of its own — content that leaves the page area is cut — so the first page
+     gives up its top margin and takes it back as padding: the text stands where it
+     always did, and the tag, pinned to the top of the page box, now touches the head of
+     the paper as it does in the printed booklet. */
+  @page:first{ margin-top:0 }
+  .page:first-child{ padding-top:12mm }
+  .page:first-child .lesson{ top:0 }
+
+  /* ——— the date holds one line ———
+     The seat the date keeps clear of the tag is measured on screen, where the column
+     is 692 px; on paper it is 515, and the same seat left the date a third of the sheet
+     and broke it in two on two hundred of the two hundred and eighty-six lessons the
+     quarter holds in all its tongues. On paper the gap beside the tag is narrower and
+     the line a size smaller, which is what the printed booklet does with it. */
+  .top{padding-right:calc(var(--lesw,210px) + 40px)}
+  .top .date{font-size:15.5px;letter-spacing:.3px}
+
+  /* ——— the quire keeps its shape across the page turn ———
+     Padding belongs to a box's real top and bottom, so a passage carried over began
+     the new page flush against the paper: the tag sat on the very edge with no room
+     above it and the tone started under it, which is not what the same block looks
+     like where it began. `box-decoration-break: clone` gives every fragment the whole
+     decoration — its padding, its tone — so the second page opens exactly as the first
+     did. The bleed and the padding are wider on paper than on screen: a screen has no
+     edge to speak of, and a sheet has 12 mm of margin to breathe into. */
+  /* No bleed on paper: a paged medium clips whatever leaves the page area, so the
+     negative margins the screen uses to run the quire into the margin do nothing here
+     but cost the text its width. The panel is the column, and its air is padding. */
+  .vgroup{padding:20px 18px;margin-left:0;margin-right:0;
+    -webkit-box-decoration-break:clone;box-decoration-break:clone}
+  .vitem:first-child>.vref{left:18px}
   /* on screen the tag bleeds off the top of the sheet and the sheet clips it.
      Paper has no bleed: left as it is, the tag prints its full height into the
      top margin, 4 mm from the edge of the paper. Same bottom edge, same seat
