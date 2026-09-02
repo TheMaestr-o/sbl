@@ -1,10 +1,12 @@
 /* SBL Edition 2.1 — cache once, then instant (and offline). */
-const SHELL = "sbl-shell-v5";
+const SHELL = "sbl-shell-v6";
 const DATA  = "sbl-data-v1";
 /* The faces are shell, not data: without them the sheet is set in a fallback
    face offline and the PDF breaks its pages somewhere else. */
 const SHELL_FILES = [
   "index.html",
+  "fonts/cormorantgaramond-italic-700-latin.woff2",
+  "fonts/cormorantgaramond-normal-700-latin.woff2",
   "fonts/ptsans-italic-400-cyrillic-ext.woff2",
   "fonts/ptsans-italic-400-cyrillic.woff2",
   "fonts/ptsans-italic-400-latin-ext.woff2",

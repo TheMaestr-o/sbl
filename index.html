@@ -318,6 +318,12 @@
   src: url(fonts/ptserif-normal-700-latin.woff2) format('woff2');
   unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
 }
+
+/* The site's own face, and only for its own mark: sdarm.life sets SDARM.life in
+   Cormorant Garamond, and a logotype set in another face is another logotype.
+   Latin alone — the mark is ten letters and never any others. */
+@font-face{font-family:'Cormorant Garamond';font-style:italic;font-weight:700;font-display:swap;src:url(fonts/cormorantgaramond-italic-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
+@font-face{font-family:'Cormorant Garamond';font-style:normal;font-weight:700;font-display:swap;src:url(fonts/cormorantgaramond-normal-700-latin.woff2) format('woff2');unicode-range:U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD}
 </style>
 <style>
 :root{
@@ -909,9 +915,25 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
 
 /* colophon — takes its accent from whatever colour the bands are wearing */
 footer{max-width:820px;margin:0 auto;text-align:center;padding:20px 22px 58px}
-.frule{width:230px;height:1px;margin:0 auto 16px;
+/* the mark, as the site sets it: .04em between the letters and not a hair more */
+.fmark{display:block;text-align:center;font-family:'Cormorant Garamond',Georgia,serif;
+  font-weight:700;font-size:30px;line-height:1;letter-spacing:.04em;color:#8d8578;
+  opacity:.72;margin:0 0 11px;border:0;text-decoration:none;transition:opacity .2s,color .2s}
+/* the rule stands midway: the same 11 px above it as below, so it divides the mark
+   from the title instead of sitting on one of them */
+.fmark i{font-style:italic;color:#927223;letter-spacing:0}
+.fmark:hover{opacity:1;border:0}
+@media (max-width:560px){ .fmark{font-size:24px;margin-bottom:16px} }
+.frule{width:230px;height:1px;margin:0 auto 11px;
   background:linear-gradient(90deg,transparent,var(--gray-dk),transparent)}
-.fkind{font-size:10px;letter-spacing:2.6px;text-transform:uppercase;color:#b9b9b9;margin-bottom:15px}
+/* the title of the thing, set as a title: serif capitals wide apart, the way a title
+   page has been set since the booklet's own century. The left padding gives back the
+   space the last letter's tracking adds, so the line centres true. */
+.fkind{font-family:var(--serif);font-size:15.5px;font-weight:400;letter-spacing:.42em;
+  /* capitals have no descenders and barely reach the ascender line, so the default
+     leading leaves air above and below the letters inside the line box itself —
+     the title is set solid and the space it keeps is the margin, nothing else */
+  line-height:1;text-transform:uppercase;color:#a49c8b;margin:0 0 11px;padding:0 0 0 .42em}
 .fnote{font-size:12px;line-height:1.75;color:#9c9c9c}
 /* required of every page in Germany, and reachable from every one of them */
 .flegal{font-size:11px;letter-spacing:.4px;color:#c2c2c2;margin-top:7px}
@@ -2000,11 +2022,14 @@ html.dark .mtoast b:hover{color:#fff}
   <span class="mtool" data-a="erase"><svg width="16" height="15" viewBox="0 0 16 15" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12.2h9.5M4.6 9.9 9.2 5.3l3.1 3.1-4.6 4.6H5.9z"/></svg></span>
 </div>
 <footer>
+  <!-- The mark is the site's own and is set as sdarm.life sets it: SDARM upright,
+       .life in italic gold, letter-spacing .04em — the spacing the site uses. It is
+       one word, centred: spread across the column the letters stopped being a name. -->
+  <a class="fmark" href="https://sdarm.life">SDARM<i>.life</i></a>
   <div class="frule"></div>
-  <div class="fkind">SBL Edition &middot; Sabbath Bible Lesson &middot; original booklet layout</div>
-  <div class="fnote">Content &copy; <a href="https://sdarm.org" target="_blank" rel="noopener">Seventh Day Adventist Reform Movement</a><br>
-    Bible text from SDARM editions &middot; Luther 1912 &middot; King James &middot; Синодальный</div>
-  <div class="flegal"><a href="https://sdarm.life">sdarm.life</a> &middot; <a href="impressum.html">Impressum</a> &middot; <a href="datenschutz.html">Datenschutz</a></div>
+  <div class="fkind">Sabbath Bible Lesson</div>
+  <div class="fnote">Content &copy; <a href="https://sdarm.org" target="_blank" rel="noopener">Seventh Day Adventist Reform Movement</a></div>
+  <div class="flegal"><a href="impressum.html">Impressum</a> &middot; <a href="datenschutz.html">Datenschutz</a></div>
 </footer>
 
 <script>
