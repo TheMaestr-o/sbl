@@ -356,6 +356,12 @@
      panels weighed as much as the section band, and a sheet carrying four of them
      went heavy. Where color-mix is not understood the box itself stands in. */
   --panel:color-mix(in srgb, var(--box) 52%, var(--paper-tone, #fff));
+  /* ——— one frame for every panel on the sheet ———
+     The memory verse and the passages are the same kind of thing — text set apart on
+     its own stock — so they keep one grid: the same bleed past the text column and the
+     same frame inside it. Written once, because two numbers drift and one cannot. */
+  --quire:20px;   /* how far the panel runs past the text column */
+  --frame:20px;   /* from the panel's edge to what is set on it */
   --gold:#c6a15b; --gold-d:#b28e44;
   --mine:#2f5bd0;                       /* everything the reader added himself */
   --warn:#e5484d; --warnbg:rgba(229,72,77,.10);   /* what is about to be removed */
@@ -719,7 +725,10 @@ html.paper .sec .day,html.paper .vref>span{background-image:var(--paper);backgro
    a size — the tag grows with whatever it is given — and the seat the date keeps clear
    of it is measured from the tag itself (`--lesw`, set after every render), so a longer
    word pushes the date rather than colliding with it. */
-.lesson{position:absolute;top:-40px;right:64px;z-index:2;width:max-content;min-width:210px;
+/* the tag reaches the same right edge the quire does: the panels run --quire past the
+   text column, and a tag stopping at the column would be the one thing on the sheet
+   that does not. On paper nothing bleeds, so there it stays on the column. */
+.lesson{position:absolute;top:-40px;right:calc(64px - var(--quire));z-index:2;width:max-content;min-width:210px;
   max-width:calc(100% - 128px);padding-left:16px;padding-right:16px;height:138px;
   background:var(--gray);color:var(--gray-dk);
   font-weight:700;font-size:26px;letter-spacing:3px;text-transform:uppercase;line-height:1;white-space:nowrap;
@@ -762,7 +771,10 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
   h1.qtitle{font-size:36px}
 }
 
-.mem{background:var(--panel);padding:20px 22px;margin-bottom:26px;text-align:justify;hyphens:auto;font-size:18px;line-height:1.5}
+/* the memory verse stands on the same quire as the passages: twenty past the text
+   column on either side, and the words themselves where they always were — the box
+   grows outward, the setting inside it does not move */
+.mem{background:var(--panel);padding:20px var(--frame);margin:0 calc(var(--quire) * -1) 26px;text-align:justify;hyphens:auto;font-size:18px;line-height:1.5}
 .mem b{font-weight:700}
 .read{margin-bottom:34px;font-size:18px}
 .read .lbl{font-weight:700}
@@ -778,10 +790,11 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
    sat tight in the band. The day tag follows it down, 16 px — .81 of the band, as printed. */
 /* ——— the day tag sits down on the column and leans out over it ———
    The cut is the one the booklet has and is not touched: what changed is which corner
-   the column holds. The band runs past the text column by exactly the width of the cut,
-   so the tag's BOTTOM corner lands on the column's right edge and its top corner stands
-   out over it. Before, the top sat on the edge and the bottom leaned in. */
-.sec{position:relative;height:auto;min-height:31px;margin:40px -6px 22px 0;display:flex;align-items:stretch}
+   the block holds. The band is as wide as the quire the passages lie on — twenty past
+   the text column on the left — and runs six further on the right, the width of its own
+   cut, so the tag's BOTTOM corner lands exactly on the quire's right edge and its top
+   corner stands out over it. Before, the top sat on the edge and the bottom leaned in. */
+.sec{position:relative;height:auto;min-height:31px;margin:40px -26px 22px -20px;display:flex;align-items:stretch}
 /* ——— the day tag takes the room it needs, and not a pixel more ———
    The tag used to be absolute with a fixed seat cut out of the title's padding, so a
    short tag still reserved a long one's width and the title broke a line early against
@@ -810,7 +823,7 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
    own left edge to the verse text — a filled shape is read by its edge, not by the type
    inside it. The line itself is the booklet's own: the first word of the question, the
    verse number and the reference all stand on it, 26 px in from the column. */
-.vgroup{position:relative;margin:26px -20px 18px;padding:24px 20px 19px;background:var(--panel)}
+.vgroup{position:relative;margin:26px calc(var(--quire) * -1) 18px;padding:24px var(--frame) 19px;background:var(--panel)}
 .vitem{break-inside:avoid}
 .vitem + .vitem{margin-top:12px}
 .vref{margin:16px 0 7px}
@@ -818,7 +831,7 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
   font-weight:700;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;
   padding:4px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 4px) 100%,0 100%)}
 /* the first tag sits astride the top edge of the quire */
-.vitem:first-child>.vref{position:absolute;top:0;left:20px;margin:0;transform:translateY(-50%);z-index:1}
+.vitem:first-child>.vref{position:absolute;top:0;left:var(--frame);margin:0;transform:translateY(-50%);z-index:1}
 /* ——— the tag keeps its own padding in both layouts ———
    This once indented the reference so it stood over the words rather than over the
    column of figures. The reference is a tag now, and zeroing its left padding glued
@@ -966,7 +979,7 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   .page{padding:calc(30px / var(--z)) calc(22px / var(--z)) calc(44px / var(--z));margin:0}
   /* lesson tag shrinks and the date keeps clear of it */
   /* the floor comes down with the tag: the base 210 is the wide sheet's */
-  .lesson{width:max-content;min-width:136px;max-width:calc(100% - 96px);height:96px;top:-30px;right:22px;
+  .lesson{width:max-content;min-width:136px;max-width:calc(100% - 96px);height:96px;top:-30px;right:calc(22px - var(--quire));
     font-size:17px;letter-spacing:2px;padding-bottom:13px;padding-left:12px;padding-right:12px}
   .top{margin-bottom:18px;padding-right:146px;min-height:66px}
   .top .date{font-size:14px;line-height:1.35}
@@ -974,19 +987,20 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
 
   /* justified text needs a wide measure — a phone has none, so rag right */
   .mem,.quote,.vtext,.q,.note,.review{text-align:left}
-  .mem{padding:16px;margin-bottom:20px;font-size:16px}
+  :root{--quire:14px;--frame:14px}
+  .mem{padding:16px var(--frame);margin:0 calc(var(--quire) * -1) 20px;font-size:16px}
   .read{font-size:16px;margin-bottom:20px}
   .read .val{margin-left:0;display:block}
   .quote{font-size:17px;margin-bottom:26px}
 
   /* section band grows to fit; the title never runs under the day tag */
-  .sec{height:auto;min-height:28px;margin:30px -6px 18px 0}
+  .sec{height:auto;min-height:28px;margin:30px -20px 18px -14px}
   .sec .t{min-height:28px;font-size:15px;letter-spacing:0;line-height:1.25;padding:8px 12px}
   .q .qm,.review .qm{width:20px}
   .sec .day{font-size:15px;padding:0 13px}
 
-  .vgroup{margin:22px -14px 15px;padding:22px 14px 16px}
-  .vitem:first-child>.vref{left:14px}
+  .vgroup{margin:22px calc(var(--quire) * -1) 15px;padding:22px var(--frame) 16px}
+  .vitem:first-child>.vref{left:var(--frame)}
   .vtext{font-size:15.5px}
   .q{font-size:17px;padding-left:20px;text-indent:-20px}
   .note{font-size:16.5px}
@@ -1000,7 +1014,7 @@ footer a:hover{color:var(--gray-dk);border-bottom-color:var(--gray-dk)}
   .tog,.pdf{padding:7px 8px;letter-spacing:.3px}
   .tog.ic,.pdf.ic,.tog.vlines{width:30px;height:30px;padding:0}
   .page{padding:calc(26px / var(--z)) calc(18px / var(--z)) calc(40px / var(--z))}
-  .lesson{width:max-content;min-width:122px;max-width:calc(100% - 84px);height:88px;right:18px;
+  .lesson{width:max-content;min-width:122px;max-width:calc(100% - 84px);height:88px;right:calc(18px - var(--quire));
     font-size:15px;letter-spacing:1.5px;padding-left:10px;padding-right:10px}
   .top{padding-right:130px;min-height:58px}
   h1.title{font-size:30px}
@@ -1835,11 +1849,17 @@ html.dark .mtoast b:hover{color:#fff}
 @media print{
   @page{
     size:A5;                     /* the booklet's own sheet — it is printed A5, not A4 */
-    margin:12mm;                 /* the same air on all four sides */
+    /* ——— the margin is the sheet's, the gutter is the page's ———
+       A paged medium clips whatever leaves the page area, so the quire the passages lie
+       on could not run past the text column as it does on screen: its padding pushed the
+       words in instead, and the sheet carried two left edges 4.3 mm apart. The page keeps
+       5 mm of margin and takes the other 7 as padding of its own, so the column is the
+       same 124 mm it always was and there is room beside it for a panel to bleed into. */
+    margin:12mm 5mm;
     @top-left{ content:"" } @top-center{ content:"" } @top-right{ content:"" }
     @bottom-center{ content:"" }
-    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.2px; color:#9a9a9a; }
-    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:8.5px; letter-spacing:.4px; color:#9a9a9a; }
+    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.2px; color:#6f6f6f; }
+    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.4px; color:#6f6f6f; }
   }
   .bar,footer{display:none} body{background:#fff}
   #sheets{padding-left:0;padding-bottom:0}   /* the gutters are a screen affair */
@@ -1864,7 +1884,7 @@ html.dark .mtoast b:hover{color:#fff}
      booklet's size, whatever size he reads it at on screen. */
   /* the tag leans into the margin, so the sheet must not clip it: the LESSON tag is
      already reseated to top:0 for paper, so nothing else wants clipping here. */
-  .page{box-shadow:none;margin:0;width:515px;max-width:515px;overflow:visible;padding:0;zoom:.91;
+  .page{box-shadow:none;margin:0;width:573px;max-width:573px;overflow:visible;padding:0 29px;zoom:.91;
     background-image:none;background-color:#fff}
   html.paper body,html.paper .page{background-image:none;background-color:#fff}
   html.paper .mem,html.paper .sec::before,html.paper .lesson,html.paper .sec .day,
@@ -1901,9 +1921,9 @@ html.dark .mtoast b:hover{color:#fff}
   /* No bleed on paper: a paged medium clips whatever leaves the page area, so the
      negative margins the screen uses to run the quire into the margin do nothing here
      but cost the text its width. The panel is the column, and its air is padding. */
-  .vgroup{padding:20px 18px;margin-left:0;margin-right:0;
-    -webkit-box-decoration-break:clone;box-decoration-break:clone}
-  .vitem:first-child>.vref{left:18px}
+  /* the bleed is honoured on paper now — see the page gutter above — so the panels keep
+     the margins and the frame the sheet gives them everywhere else */
+  .vgroup{-webkit-box-decoration-break:clone;box-decoration-break:clone}
   /* on screen the tag bleeds off the top of the sheet and the sheet clips it.
      Paper has no bleed: left as it is, the tag prints its full height into the
      top margin, 4 mm from the edge of the paper. Same bottom edge, same seat
