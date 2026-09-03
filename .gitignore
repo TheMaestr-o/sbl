@@ -20,3 +20,7 @@ __pycache__/
 # то, что кладут рядом на время работы
 /Lektion */
 *.local.html
+
+# записи живут на своём сервере, не в коде — см. AUD_BASE в index.html
+audio/
+*.mp3
