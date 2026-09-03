@@ -5579,7 +5579,14 @@ const aseek=document.getElementById("aseek"), atime=document.getElementById("ati
 const alabel=document.getElementById("alabel");
 const AUD_LETTERS="abcdefgh";
 let audList=[], audAt=0, audToken=0;
-function audDir(no){ return "audio/"+lang+"-"+String(no).replace(/\D/g,"").padStart(2,"0"); }
+/* ——— the recordings live on their own server, not in the code ———
+   A quarter of readings is twenty megabytes of MP3, and a repository is for the page,
+   not for its media: every clone paid for them and every checkout carried them. They
+   are served from wherever this points instead. Empty means beside the page, which is
+   what a local trial wants; anything else is a host, and it needs the usual CORS from
+   that host. `audio/` is closed in .gitignore so they cannot wander back in. */
+const AUD_BASE="";
+function audDir(no){ return AUD_BASE+"audio/"+lang+"-"+String(no).replace(/\D/g,"").padStart(2,"0"); }
 async function audHas(u){ try{ const r=await fetch(u,{method:"HEAD"}); return r.ok; }catch(e){ return false; } }
 function mmss(t){ t=Math.max(0,Math.floor(t||0)); return Math.floor(t/60)+":"+String(t%60).padStart(2,"0"); }
 function audShow(on){ document.body.classList.toggle("audon",on); if(!on) audEl.pause(); }
