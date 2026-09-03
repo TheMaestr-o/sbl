@@ -819,12 +819,13 @@ h1.qtitle{font-weight:700;font-size:50px;line-height:1.04;letter-spacing:-.6px;m
   padding:4px 12px;clip-path:polygon(0 0,100% 0,calc(100% - 4px) 100%,0 100%)}
 /* the first tag sits astride the top edge of the quire */
 .vitem:first-child>.vref{position:absolute;top:0;left:20px;margin:0;transform:translateY(-50%);z-index:1}
-/* Set one verse to a line, the reference stands over the WORDS, not over the
-   figures: the numbers hang out in their own narrow column, and a heading that
-   began above them was a heading to the column of numbers. Indented by the same
-   17px the verse text is, it heads the passage it names. The single reference
-   17px the verse text is, it heads the passage it names. */
-.vref.lines>span{padding-left:0}
+/* ——— the tag keeps its own padding in both layouts ———
+   This once indented the reference so it stood over the words rather than over the
+   column of figures. The reference is a tag now, and zeroing its left padding glued
+   its lettering to its own edge — and left the two layouts disagreeing, the tag set
+   in by twelve pixels in running text and by none when a verse takes a line. The tag
+   is a filled shape: it is aligned by its edge, and what sits inside it is its own
+   business, the same twelve pixels whichever way the passage is set. */
 .vtext{font-family:var(--serif);font-size:16.5px;line-height:1.5;text-align:justify;hyphens:auto;color:#2b2b2b}
 /* The verse number keeps one look everywhere: same size, same colour, only a
    gentle raise and not a full superscript hop. It is set in the sans of the
@@ -1162,13 +1163,14 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;
    tool down; that is not a second trigger but the same one letting go slowly.
    A phone never sees this rule: there the rail is a drawer behind a tab (see the
    narrow block below) and is off screen already. */
-/* ——— on a desktop it waits at the foot of the margin ———
-   The reading starts at the top of the sheet and travels down it; a tool level
-   with the middle of the text stands in the way of that. At the foot of the
-   margin it is out of the reading and still one movement away. A narrow screen
-   keeps it in the middle — there the margin is short, and the middle is the only
-   place it fits. */
-@media (min-width:1011px){ :root{--railtop:auto;--railbot:22px;--raily:translateY(0)} }
+/* ——— the rail stands level with the reading, on every screen ———
+   It used to wait at the foot of the margin on a wide screen, on the reasoning that
+   reading travels down the sheet and a tool level with the text is in its way. In use
+   it read as abandoned down there — the hand goes to the middle of the page and finds
+   nothing, and the eye has to travel to the bottom corner and back for every stroke.
+   The middle is where the hand already is. Nothing overrides the default now: the rail
+   is centred at every width, and the narrow screen, which was always centred, is
+   unchanged. */
 @media (min-width:701px){
   .rail{opacity:0;pointer-events:none;transform:var(--raily,translateY(-50%)) translateX(-7px);
     transition:opacity .18s ease,transform .24s cubic-bezier(.25,1.1,.35,1)}
