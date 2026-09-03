@@ -1,10 +1,15 @@
 /* SBL Edition 2.1 — cache once, then instant (and offline). */
-const SHELL = "sbl-shell-v6";
+const SHELL = "sbl-shell-v7";
 const DATA  = "sbl-data-v1";
 /* The faces are shell, not data: without them the sheet is set in a fallback
    face offline and the PDF breaks its pages somewhere else. */
+/* Impressum and Datenschutz are not extras: German law wants them reachable, and a
+   reader offline is still a reader. They are small and they are shell. */
 const SHELL_FILES = [
   "index.html",
+  "impressum.html",
+  "datenschutz.html",
+  "legal.css",
   "fonts/cormorantgaramond-italic-700-latin.woff2",
   "fonts/cormorantgaramond-normal-700-latin.woff2",
   "fonts/ptsans-italic-400-cyrillic-ext.woff2",
