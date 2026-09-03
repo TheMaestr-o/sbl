@@ -1137,6 +1137,36 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
 .mynote:focus .del,.mynote:focus-within .del{display:flex}
 .mynote .del:active{opacity:1;color:#fff;background:var(--warn)}
 @media (prefers-reduced-motion:reduce){ .mynote,.mynote .del{transition:none} }
+/* ——— the first Sabbath's offering, set as a leaf and not as a lesson ———
+   It opens with a rule and a small heading rather than a section band: a band is
+   how a day of the week announces itself, and this is not a day. The heart is the
+   same mark the quarter list and the contents give it, so a reader who saw it there
+   meets it again here. The letter itself is set in the serif of the commentary — it
+   is read, not studied — and the writer signs at the foot, as the booklet prints it. */
+.fso{margin:52px 0 0;padding-top:26px;border-top:1px solid var(--hair)}
+.fso-head{display:flex;align-items:baseline;gap:9px;margin-bottom:14px}
+.fso-mark{color:var(--gray-dk);font-size:15px;line-height:1}
+.fso-kind{font-weight:700;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray-dk)}
+.fso-when{margin-left:auto;font-size:12px;color:var(--muted);white-space:nowrap}
+.fso-title{font-weight:700;font-size:27px;line-height:1.12;letter-spacing:-.4px;margin:0 0 20px;
+  hyphens:auto;overflow-wrap:break-word}
+.fso-p{font-family:var(--serif);font-size:18px;line-height:1.52;text-align:justify;hyphens:auto;
+  margin-bottom:15px}
+.fso-p em,.fso-p i{font-style:italic}
+.fso-sign{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--muted);
+  text-align:right;margin-top:22px}
+@media screen and (max-width:720px){
+  .fso{margin-top:40px;padding-top:22px}
+  .fso-title{font-size:23px}
+  .fso-p{font-size:16px;text-align:left}          /* no rivers in a narrow column */
+  .fso-when{font-size:11px}
+}
+@media screen and (max-width:400px){
+  .fso-title{font-size:21px}
+  .fso-p{font-size:15px}
+  .fso-head{flex-wrap:wrap;gap:6px}
+  .fso-when{margin-left:0;flex-basis:100%}
+}
 .legend{display:none}
 
 /* one tap and the room is empty: the rail slides out to the left, the bar
@@ -1970,6 +2000,9 @@ html.dark .mtoast b:hover{color:#fff}
   .daystart{break-inside:avoid;page-break-inside:avoid}
   .sec,.q,.vref{break-after:avoid;page-break-after:avoid}
   .sec,.q,.review,.mem{break-inside:avoid;page-break-inside:avoid}
+  .fso-head,.fso-title{break-after:avoid;page-break-after:avoid}
+  .fso-sign{break-before:avoid;page-break-before:avoid}
+  .fso-p{orphans:2;widows:2}
   /* long passages flow on instead of leaving half a page empty … */
   .vgroup,.vitem,.note,.quote{break-inside:auto;page-break-inside:auto}
   /* … but a verse set on its own line is never cut in half, and running text
@@ -2781,8 +2814,40 @@ function renderLesson(les,tasks,lg){
     let ri=0;
     for(const rq of day.reviewQuestions||[]) if(rq) h+=markedHtml("review",typo(dropPageNo(strip(rq))),"d"+di+"r"+(ri++));
   }
+  h+=fsoHtml(les);
   return h+'<div class="legend"></div>';
 }
+/* ——— the first Sabbath's offering ———
+   Three times a quarter the booklet carries a reading that is not a lesson: no
+   questions, no days, no passages — a letter from the field that is read on the
+   first Sabbath of the month and gathered for. The quarter list and the contents
+   have always named it with a heart; the sheet itself never carried a word of it,
+   so a reader who came for that Sabbath found the lesson and not the letter.
+   It is set as what it is: a leaf at the end of the lesson, opening with its own
+   heading rather than a section band — a band would make it the seventh day of a
+   six-day week. The writer signs it, as in the booklet. Its paragraphs take mark
+   keys of their own (`f0`, `f1`, …) so the pencil works on them like anywhere
+   else, and the keys cannot collide with a day's (`d0n1`) or a question's. */
+function fsoHtml(les){
+  const f=les&&les.fso; if(!f) return "";
+  const title=strip(f.title||""), sub=strip(f.subtitle||"");
+  const when=strip(f.displayDate||f.dateLong||"");
+  const who=strip(f.writer||"");
+  const paras=(f.paragraph||[]).map(x=>strip((x&&x.text)||"")).filter(Boolean);
+  if(!title&&!paras.length) return "";
+  let o='<section class="fso">';
+  o+='<div class="fso-head"><span class="fso-mark">&#9829;</span>'
+    +'<span class="fso-kind">'+esc(title)+'</span>'
+    +(when?'<span class="fso-when">'+esc(when)+'</span>':'')+'</div>';
+  if(sub) o+='<h2 class="fso-title" data-k="ft">'+esc(sub)+'</h2>';
+  paras.forEach(function(t,i){
+    o+='<div class="fso-p" data-k="f'+i+'">'+mkGlue(keepEm(esc(typo(t))))+'</div>'; });
+  if(who) o+='<div class="fso-sign">'+esc(who)+'</div>';
+  return o+'</section>';
+}
+/* the publisher italicises a title inside the running text — a magazine, a book.
+   Everything else is escaped; only that one pair is let back through. */
+function keepEm(t){ return t.replace(/&lt;(\/?)em&gt;/g,"<$1em>"); }
 /* ——— the line that says which Sabbath this is ———
    It used to be built here: a table of the word "Sabbath" and a date formatted
    by the browser. The table held three languages, so the other nineteen read
