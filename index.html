@@ -1161,10 +1161,12 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;
   /* it keeps to the left margin: outside the sheet where there is room, and
      over the sheet's own white edge on a tablet — never over the text */
   left:max(10px,calc((100vw - 900px) / 2));
-  display:flex;flex-direction:column;align-items:center;gap:5px;padding:8px 7px;
+  /* cut from the same cloth as the strip of days opposite: same gap, same padding,
+     same pill, so the two margins of the sheet answer each other */
+  display:flex;flex-direction:column;align-items:center;gap:3px;padding:6px;
   background:var(--matl);-webkit-backdrop-filter:var(--blur);backdrop-filter:var(--blur);
-  border-radius:var(--r-tool);box-shadow:0 0 0 .5px var(--hair),var(--lift1);
-  transition:opacity .2s}
+  border-radius:var(--r-pill);box-shadow:0 0 0 .5px var(--hair),var(--lift1);
+  transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
 /* ——— it comes when it is called ———
    Standing in the margin all day, the rail was the darkest thing on a bright
    page: the eye found it before it found a word, and a tool nobody asked for
@@ -1185,13 +1187,19 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;
    The middle is where the hand already is. Nothing overrides the default now: the rail
    is centred at every width, and the narrow screen, which was always centred, is
    unchanged. */
+/* On a wide screen the rail waits out of sight and comes when it is wanted — see
+   mkCall. What it looks like when it comes does not change with the width: one strip,
+   the same pill and the same step as the days opposite. */
 @media (min-width:701px){
   .rail{opacity:0;pointer-events:none;transform:var(--raily,translateY(-50%)) translateX(-7px);
     transition:opacity .18s ease,transform .24s cubic-bezier(.25,1.1,.35,1)}
   body.railcall:not(.bare):not(.writing) .rail{opacity:1;pointer-events:auto;transform:var(--raily,translateY(-50%))}
 }
 .rail .sep{width:24px;height:.5px;background:var(--hair);margin:2px 0}
-.rail .two{display:grid;grid-template-columns:repeat(2,30px);gap:4px}
+/* one strip, not two files of it: the rail is a column in the margin, and a second
+   column doubles its width against the sheet for nothing — the narrow screen has
+   always set it this way and it was right there too */
+.rail .two{display:flex;flex-direction:column;align-items:center;gap:3px}
 .rbtn{width:30px;height:30px;display:flex;align-items:center;justify-content:center;border-radius:9px;
   color:#5b5b60;cursor:pointer;transition:background .16s,color .16s,transform .12s}
 @media (hover:hover){ .rbtn:hover{background:rgba(120,120,128,.16);color:#1c1c1e} }
@@ -1200,7 +1208,7 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;
 .rbtn.on{background:var(--on);color:var(--on-t)}
 .rbtn.own.on{background:var(--mine);color:var(--onacc)}
 .rbtn svg{display:block}
-.inks{display:grid;grid-template-columns:repeat(2,22px);gap:6px;justify-content:center}
+.inks{display:flex;flex-direction:column;align-items:center;gap:3px}
 .ink{position:relative;width:22px;height:22px;border-radius:50%;cursor:pointer;flex:none;
   box-shadow:inset 0 0 0 .5px rgba(0,0,0,.14),inset 0 -3px 5px rgba(0,0,0,.06),inset 0 3px 4px rgba(255,255,255,.5);
   transition:transform .16s cubic-bezier(.3,1.4,.4,1),box-shadow .16s}
@@ -1286,7 +1294,16 @@ body.bare .rail,body.writing .rail{opacity:0;pointer-events:none;
 @media (hover:hover){ .dchip:hover{background:rgba(120,120,128,.14);color:#2b2b2b} }
 .dchip.on{color:var(--onacc)}
 body.bare .days,body.writing .days{opacity:0;pointer-events:none;transform:translateY(-50%) translateX(calc(100% + 22px))}
-@media (max-width:1010px){ .days{right:8px} }
+/* ——— on anything hand-held the days wait to be asked ———
+   A tablet has room for the strip but not the attention: it stood in the margin from
+   the first moment with nothing asked of it. Below 1010 px it is away until the sheet
+   is touched — the phone block below also brings it down to the foot and makes it
+   solid. A mouse keeps it standing: there the margin is wide and the strip costs the
+   reading nothing. */
+@media (max-width:1010px){
+  .days{right:8px;opacity:0;pointer-events:none;transition:opacity .22s,transform .3s cubic-bezier(.3,.9,.3,1)}
+  body.dayscall:not(.bare):not(.writing) .days{opacity:1;pointer-events:auto}
+}
 /* the phone rules for the strip live in one place, further down with the rest
    of the phone layout — a second copy here only argued with it */
 @media (pointer:coarse){ .dchip,.days .dpill{width:36px;height:36px} .dchip{font-size:11.5px} }
@@ -1633,11 +1650,11 @@ body.noverses .vgroup{display:none}
    lies down along the bottom edge instead of standing beside the page. */
 @media (pointer:coarse){
   .page{-webkit-touch-callout:none}
-  .rail{left:10px;padding:9px 8px;gap:6px;border-radius:22px}
-  .rail .two{grid-template-columns:repeat(2,38px);gap:5px}
+  .rail{left:10px;padding:7px;gap:4px}   /* the pill and the strip stay; a finger only wants the step */
+  .rail .two{gap:4px}   /* a finger wants the step, not a second column */
   .rbtn{width:38px;height:38px;border-radius:11px}
   .hand{width:42px;height:42px}
-  .inks{grid-template-columns:repeat(2,28px);gap:7px}
+  .inks{gap:5px}
   .ink{width:28px;height:28px}
   .mtool{width:38px;height:38px;border-radius:11px}
   .area{width:min(260px,66vw);height:130px} .hue{width:min(260px,66vw);height:20px}
@@ -1695,11 +1712,21 @@ body.noverses .vgroup{display:none}
   .ink{width:20px;height:20px}
   .rail .sep{width:20px;height:.5px;margin:1px 0}
   .rpick{left:calc(100% + 9px);right:auto;top:50%;bottom:auto;transform:translateY(-50%)}
-  /* the strip of days lies along the bottom, and the sheet ends above it */
+  /* ——— the days lie along the bottom, and wait to be asked ———
+     On a hand-held screen the strip took a band of the page from the first moment,
+     over the very lines being read, and the reader had asked for none of it. It is
+     away until the sheet is touched, comes up for a few seconds, and goes back — so
+     the page opens as a page. And it is not glass down here: a translucent strip over
+     moving text is unreadable at the moment it is wanted, so it takes the solid stock
+     the sheet itself is made of. */
   .days{right:auto;left:50%;top:auto;bottom:calc(env(safe-area-inset-bottom) + 12px);
-    transform:translateX(-50%);flex-direction:row;border-radius:999px}
+    transform:translateX(-50%) translateY(140%);flex-direction:row;border-radius:999px;
+    background:var(--matx);-webkit-backdrop-filter:none;backdrop-filter:none;
+    opacity:0;pointer-events:none}
+  body.dayscall:not(.bare):not(.writing) .days{transform:translateX(-50%);opacity:1;pointer-events:auto}
   body.bare .days,body.writing .days{transform:translateX(-50%) translateY(140%)}
-  body{--gut-b:calc(env(safe-area-inset-bottom) + 66px)}
+  /* the sheet keeps its own foot: the strip lies over it, it does not push it */
+  body{--gut-b:calc(env(safe-area-inset-bottom) + 16px)}
   body.bare,body.writing{--gut-b:0px}
   body.writing{--gut-l:0px}
 }
@@ -1858,8 +1885,11 @@ html.dark .mtoast b:hover{color:#fff}
     margin:12mm 5mm;
     @top-left{ content:"" } @top-center{ content:"" } @top-right{ content:"" }
     @bottom-center{ content:"" }
-    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.2px; color:#6f6f6f; }
-    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.4px; color:#6f6f6f; }
+    /* the margin boxes sit in the page MARGIN, which is 5 mm now; the text column
+       starts 7 mm further in, so the folio and the address take that 7 mm as padding
+       and stand flush with the blocks above them instead of hanging outside */
+    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.2px; color:#6f6f6f; padding-left:7mm; }
+    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.4px; color:#6f6f6f; padding-right:7mm; }
   }
   .bar,footer{display:none} body{background:#fff}
   #sheets{padding-left:0;padding-bottom:0}   /* the gutters are a screen affair */
@@ -1928,7 +1958,10 @@ html.dark .mtoast b:hover{color:#fff}
      Paper has no bleed: left as it is, the tag prints its full height into the
      top margin, 4 mm from the edge of the paper. Same bottom edge, same seat
      for the date — only the part that used to hang outside is gone. */
-  .lesson{right:0;top:0;height:98px}
+  /* the tag hangs past the column by the same --quire the panels do; on paper the
+     page's own 29 px of padding is where the column begins, so the tag is set from
+     that, not from the page edge — right:0 put it 7 mm outside every other block */
+  .lesson{right:calc(29px - var(--quire));top:0;height:98px}
   /* a day never starts at the foot of a page: the band, the question that opens
      it and the text that answers that question are built as one block
      (`daystart`, see renderLesson) and travel over together. The old rules stay
@@ -2318,7 +2351,7 @@ function hueTintDark(h,d){
 let hueOwn=210;        /* where the strip's dot sits until the reader moves it */
 let hueDepth=.5;       /* and how deep — .5 is the cut the page wore before */
 let hueActive=false;   /* is the page wearing a hue of its own, or a theme */
-let tintIdx=1;         /* which swatch, when no hue of its own is worn — the cover */
+let tintIdx=4;         /* which swatch, when no hue of its own is worn — gold */
 
 /* ——— light sheet or dark ———
    Three states and not two: a reader who has said nothing is following his
@@ -2356,7 +2389,7 @@ function setTheme(t){
    he left them, and re-cuts only their lightnesses for the ground underneath. */
 function paintTint(){
   if(hueActive) setTint(hueTint(hueOwn),hueTintDark(hueOwn));
-  else{ const t=THEMES[tintIdx]||THEMES[1]; setTint(t,t.d); }
+  else{ const t=THEMES[tintIdx]||THEMES[4]; setTint(t,t.d); }
 }
 (function(){try{const s=JSON.parse(localStorage.getItem("sbl.tint")||"null");if(!s)return;
   /* {c:"#rrggbb"} is how a custom colour was kept before the strip: the hue of
@@ -5301,6 +5334,13 @@ function mkHolds(){
   try{ if(mkRail.matches(":hover")) return true; }catch(e){}
   return false;
 }
+/* ——— it comes to the hand and goes when the hand is done ———
+   The rail is one strip in the margin at every width, but it is not furniture: it comes
+   out when there is something to use it on, and puts itself away when there is not.
+   `mkHolds` is what counts as still in use — a live selection, an open colour box, a
+   stroke being laid, the pointer over the rail itself — and only when none of that holds
+   does the rail go, a breath later so a colour can still be changed. A tap beside it is
+   the same answer arriving sooner. */
 function mkCall(on){
   if(!mkRailOn){ document.body.classList.remove("railcall"); return; }
   clearTimeout(mkCallT);
@@ -5320,10 +5360,22 @@ function mkLinger(ms){
 /* a finished selection is the moment a tool is wanted — but only when the hand
    is empty: with a marker already taken the selection is painted where it lies
    (mkFromSelection) and nothing has to appear at all */
-function mkCallOnSel(){ setTimeout(function(){ if(mkSelLive()) mkCall(true); },mkTouch?200:70); }
+const MK_NARROW=matchMedia("(max-width:700px)");
+function mkCallOnSel(){ setTimeout(function(){
+  if(!mkSelLive()) return;
+  /* the same answer in both shapes: on a wide sheet the rail is called out of the
+     margin, on a narrow one it is the drawer that comes. Selecting a phrase is the
+     moment a tool is wanted, and it used to be the moment nothing happened on a
+     phone — the tab had to be found and pulled by hand. */
+  if(MK_NARROW.matches){ if(mkRailOn) mkDrawer(true); return; }
+  mkCall(true);
+},mkTouch?200:70); }
 document.addEventListener("mouseup",mkCallOnSel);
 document.addEventListener("touchend",mkCallOnSel);
 document.addEventListener("selectionchange",function(){ if(!mkSelLive()) mkCall(false); });
+/* and goes back when the phrase is let go — unless a tool is in hand, which means
+   the reader is still working and the drawer is his to close */
+MK_NARROW.addEventListener("change",function(){ if(!MK_NARROW.matches) mkDrawer(false); });
 /* on a phone the rail lives in the edge: the tab pulls it out, a tap anywhere
    else puts it back, and it never starts the day taking half the screen */
 const mkTab=document.getElementById("railtab");
@@ -5343,6 +5395,22 @@ matchMedia("(max-width:700px)").addEventListener("change",function(){
 });
 mkDrawer(false);
 mkTab.addEventListener("click",function(e){ e.stopPropagation(); mkDrawer(true); });
+/* ——— the days come to a touch and go back ———
+   Hand-held only: below 1010 px the strip is away until the sheet is touched, then it
+   is up for a few seconds and gone. Touching it again keeps it. A pointer never calls
+   it — there it simply stands. */
+const DAYS_MQ=matchMedia("(max-width:1010px)");
+let daysT=0;
+function daysCall(){
+  if(!DAYS_MQ.matches) return;
+  document.body.classList.add("dayscall");
+  clearTimeout(daysT);
+  daysT=setTimeout(function(){ document.body.classList.remove("dayscall"); },4200);
+}
+document.addEventListener("pointerdown",daysCall,{passive:true});
+DAYS_MQ.addEventListener("change",function(){
+  if(!DAYS_MQ.matches) document.body.classList.remove("dayscall");
+});
 document.addEventListener("click",function(e){
   /* a tap beside the rail puts it away — pointer or finger alike */
   if(!document.body.classList.contains("railout")) return;
@@ -5437,7 +5505,11 @@ render();
    at, which is not always the one being read: the arrows walk into the quarters
    either side, and that walk is how the reader learns there are others. */
 let outQ=null;
-let outOn=localStorage.getItem("sbl.outline")!=="0";
+/* The contents open only for a reader who has asked for them. It used to be the
+   other way round — a first visit met the list of thirteen lessons laid over the
+   dimmed sheet, so the first thing the page did was stand between the reader and
+   the lesson he came for. It is one press away in the bar, and the choice is kept. */
+let outOn=localStorage.getItem("sbl.outline")==="1";
 const outEl=document.getElementById("outline");
 function outSet(on){ outOn=on; document.body.classList.toggle("outlineon",on);
   try{ localStorage.setItem("sbl.outline",on?"1":"0"); }catch(e){} }
