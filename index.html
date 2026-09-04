@@ -2052,7 +2052,8 @@ html.dark .mtoast b:hover{color:#fff}
      the lesson's own */
   .legend.has{display:block;margin-top:30px;padding-top:9px;border-top:.5px solid #ddd;
     font-family:var(--sans);font-size:9.5px;letter-spacing:.3px;color:#8a8a8a}
-  .legend .sw{display:inline-block;width:8px;height:8px;background:var(--mine);border-radius:2px;margin-right:5px} }
+  .legend .sw{display:inline-block;width:8px;height:8px;background:var(--mine);border-radius:2px;margin-right:5px}
+  }
 </style>
 <script>
 /* ——— the stock is chosen before the sheet is drawn ———
@@ -2839,7 +2840,6 @@ function renderLesson(les,tasks,lg){
     let ri=0;
     for(const rq of day.reviewQuestions||[]) if(rq) h+=markedHtml("review",typo(dropPageNo(strip(rq))),"d"+di+"r"+(ri++));
   }
-  h+=fsoHtml(les);
   return h+'<div class="legend"></div>';
 }
 /* ——— the first Sabbath's offering ———
@@ -3306,8 +3306,8 @@ document.addEventListener("keydown",function(e){
   if(t&&(t.isContentEditable||F.test(t.tagName))) return;
   if(a&&(a.isContentEditable||F.test(a.tagName))) return;
   if(e.metaKey||e.ctrlKey||e.altKey) return;
-  if(e.key==="ArrowLeft"){ current=step(-1); render(); }
-  if(e.key==="ArrowRight"){ current=step(1); render(); }
+  if(e.key==="ArrowLeft"){ current=step(-1); fsoOpen=null; render(); }
+  if(e.key==="ArrowRight"){ current=step(1); fsoOpen=null; render(); }
 });
 /* the month, with every week carrying the lesson that ends on its Sabbath */
 const calpop=document.getElementById("calpop");
@@ -3355,8 +3355,8 @@ async function buildCal(){
     e.stopPropagation(); calMonth.setMonth(calMonth.getMonth()+ +n.dataset.m,1); buildCal(); }; });
   calpop.querySelectorAll("[data-d]").forEach(function(el){ el.onclick=function(e){
     e.stopPropagation(); calpop.hidden=true;
-    current=ymdToDate(el.dataset.d); render(); }; });
-  calpop.querySelector("[data-today]").onclick=function(){ calpop.hidden=true; current=new Date(); render(); };
+    current=ymdToDate(el.dataset.d); fsoOpen=null; render(); }; });
+  calpop.querySelector("[data-today]").onclick=function(){ calpop.hidden=true; current=new Date(); fsoOpen=null; render(); };
 }
 /* the same three-language table that put "UNDEFINED" on the date line stood
    here too: nineteen of the twenty-two read it and got nothing. There is no
@@ -5280,52 +5280,27 @@ let mkAnchors=[];
 let mkLastLes=null, mkKeepY=0;
 /* ——— the letter, asked for by name ———
    The contents give the offering a line of its own, under the heart, and a
-   press on that line means the letter — not the lesson it is bound into and
-   not today inside it. The Sabbath it stands on is left here by the press and
-   waits until the sheet is built; then it is the landing, and the reader opens
-   on the letter he pressed. */
-let fsoWant=null;
-/* ——— and it keeps the place while the passages come in ———
-   The landing is made as soon as the sheet has stopped growing, and that is
-   before the Bible has arrived: every passage box on the sheet is still empty,
-   and each of them grows when its passage is set. The letter is at the foot of
-   the lesson, so it is pushed down by all of them at once — the reader presses
-   the heart, sees the letter, and a second later is looking at Friday.
-   So the letter is landed on again once the passages are in. The reader who
-   has meanwhile taken the page somewhere himself is left where he put it —
-   the same three inputs that call off a jump call this off too. */
-let fsoLandEl=null;
-function fsoLandOff(){ fsoLandEl=null; }
-function fsoReland(){
-  const el=fsoLandEl; if(!el) return;
-  fsoLandEl=null;
-  if(!el.isConnected) return;                    /* another sheet is on the page */
-  mkAfterLayout(function(){ mkBarH(); mkLand(el); mkDaysMark(); });
-}
+   press on that line means the letter and not the lesson it shares its Sabbath
+   with: the two stand on the same date, so the date alone cannot say which was
+   pressed. This holds the Sabbath of the letter being read, and the sheet is
+   built from it. Every other way of moving through the quarter — the arrows,
+   the calendar, a lesson pressed in the contents, a link pasted in — puts it
+   down again, because all of them mean the lesson. */
+let fsoOpen=null;
 function mkOpenToday(){
   const root=mkDaysRoot();
   const pg=root.querySelector(".page[data-les]");
   const id=scope+"/"+(pg?pg.dataset.les:"");
   const same=mkLastLes===id;
   mkLastLes=id;
-  /* a quarter puts thirteen sheets on the page, three of them with a letter at
-     the end: the one wanted is the one on that sheet */
-  const letter=fsoWant?(root.querySelector('.page[data-les="'+fsoWant+'"] .fso')
-                        ||root.querySelector(".fso")):null;
-  fsoWant=null; fsoLandEl=null;
+
   /* `mkGoTo` takes both columns there, so today opens on today in each of them
      instead of leaving the second one standing at the title */
   const sec=!same&&scope==="week"&&pg?root.querySelector('.sec[data-d="'+ymd(new Date())+'"]'):null;
   /* wait for the sheet to finish laying itself out: a place measured while the
      text is still flowing puts the reader — and the mark — on the wrong day */
   mkAfterLayout(function(){
-    if(letter){
-      mkGoTo(letter,false);                       /* the letter was pressed, open on it */
-      fsoLandEl=letter;
-      ["touchstart","wheel","keydown"].forEach(function(ev){
-        window.addEventListener(ev,fsoLandOff,{passive:true,once:true}); });
-    }
-    else if(same) window.scrollTo(0,mkKeepY);     /* same lesson, other language — stay put */
+    if(same) window.scrollTo(0,mkKeepY);          /* same lesson, other language — stay put */
     else if(sec) mkGoTo(sec,false);
     else window.scrollTo(0,0);
     mkDaysMark(); requestAnimationFrame(mkDaysMark);   /* now, and again once the frame lands */
@@ -5782,12 +5757,15 @@ async function outBuild(){
   const here=ymd(current);
   let h="";
   les.forEach(function(l){
-    if(l.fso) h+='<div class="oitem gift" data-d="'+l.date+'" data-fso="1"><div class="ono">'+heart+'</div>'
+    /* the letter and its lesson keep the same Sabbath, so only one of the two
+       rows may be lit: whichever of them is on the sheet */
+    const letterOn=!!(fsoOpen&&String(fsoOpen)===String(l.date));
+    if(l.fso) h+='<div class="oitem gift'+(letterOn?" on":"")+'" data-d="'+l.date+'" data-fso="1"><div class="ono">'+heart+'</div>'
       +'<div><div class="otitle">'+esc(strip(l.fso.title||""))+'</div>'
       +'<div class="odate">'+esc(fsoWhen(l))+'</div></div></div>';
     /* the row lights up for the whole week it covers, not the Sabbath alone */
     const days=l.dailyLessons||[], start=days.length?days[0].date:l.date;
-    const on=(here>=start&&here<=l.date)?" on":"";
+    const on=(!letterOn&&here>=start&&here<=l.date)?" on":"";
     h+='<div class="oitem'+on+'" data-d="'+l.date+'"><div class="ono">'+esc(l.no)+'</div>'
       +'<div><div class="otitle">'+esc(strip(l.title||""))+'</div>'
       +'<div class="odate">'+esc(strip(l.dateLong||""))+'</div></div></div>';
@@ -5797,7 +5775,7 @@ async function outBuild(){
     current=ymdToDate(el.dataset.d); outQ=null;      /* follow the lesson home */
     /* the heart and the lesson under it stand on the same Sabbath, so the date
        alone cannot say which of the two was pressed: the row says so itself */
-    fsoWant=el.dataset.fso?el.dataset.d:null;
+    fsoOpen=el.dataset.fso?el.dataset.d:null;
     if(!matchMedia("(min-width:1561px)").matches) outSet(false);
     render(); }; });
   const cur=list.querySelector(".oitem.on"); if(cur) cur.scrollIntoView({block:"nearest"});
@@ -6096,7 +6074,7 @@ addEventListener("hashchange",function(){
   const w=linkRead(); if(!w) return;
   linkWant=w;
   if(w.lang!==lang){ lang=w.lang; try{ localStorage.setItem("sbl.lang",lang); }catch(e){} paintUI(); buildSeg(); }
-  current=w.at;
+  current=w.at; fsoOpen=null;
   render();
 });
 
