@@ -1172,6 +1172,17 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
   .fso-when{margin-left:0;flex-basis:100%}
 }
 .legend{display:none}
+/* ——— the address, hidden inside the type ———
+   The foot of the page is drawn by a margin box, and a margin box is text: it
+   cannot carry an anchor, and a link laid over it is clipped to the type area
+   and never reaches it (measured: the click box stops at 34 pt from the foot of
+   the paper, the printed address sits at 8). So the link is not laid beside the
+   type — it IS the type. The tag that opens a lesson, and the name that opens a
+   letter, carry it: nothing is added to the sheet, nothing moves, and nothing
+   gives it away. Dead on the screen, where the page is already the site, and
+   alive in the PDF, where the reader has nowhere else to go. */
+.hid{color:inherit;text-decoration:none;pointer-events:none}
+.strip{display:none}          /* the sheet's own margin, and only on paper */
 
 /* one tap and the room is empty: the rail slides out to the left, the bar
    lifts away, and nothing but the lesson is left on the screen */
@@ -1922,8 +1933,16 @@ html.dark .mtoast b:hover{color:#fff}
     /* the margin boxes sit in the page MARGIN, which is 5 mm now; the text column
        starts 7 mm further in, so the folio and the address take that 7 mm as padding
        and stand flush with the blocks above them instead of hanging outside */
-    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.2px; color:#6f6f6f; padding-left:7mm; }
-    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.4px; color:#6f6f6f; padding-right:7mm; }
+    /* ——— the address stays drawn, not linked ———
+       A margin box is text and nothing else: it cannot carry an anchor, so the
+       printed address cannot be pressed. The way round it — a real element fixed
+       to the foot of the page — was tried and taken out again: a fixed element
+       keeps no room of its own in the flow, so it printed on top of the last
+       line of the lesson on every page, and Chromium dropped it altogether on
+       the page after the opening one, whose page box is a different size. A
+       footer that overprints the text is worse than a footer nobody can press. */
+    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.2px; color:#9a9a9a; padding-left:7mm; }
+    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.4px; color:#9a9a9a; padding-right:7mm; }
   }
   .bar,footer{display:none} body{background:#fff}
   #sheets{padding-left:0;padding-bottom:0}   /* the gutters are a screen affair */
@@ -1954,6 +1973,8 @@ html.dark .mtoast b:hover{color:#fff}
   html.paper .mem,html.paper .sec::before,html.paper .lesson,html.paper .sec .day,
   html.paper .vgroup,html.paper .vref>span{background-image:none}
   .page + .page{break-before:page;page-break-before:always}   /* each lesson opens its own page */
+  /* the sheet is set with 29 px of padding either side and no word stands in it */
+  .strip{display:block;position:absolute;left:0;top:0;width:29px;height:100%}
 
   /* ——— the lesson tag reaches the head of the sheet ———
      On screen the tag bleeds off the top of the sheet and the sheet clips it. Paper has
@@ -2031,7 +2052,8 @@ html.dark .mtoast b:hover{color:#fff}
      the lesson's own */
   .legend.has{display:block;margin-top:30px;padding-top:9px;border-top:.5px solid #ddd;
     font-family:var(--sans);font-size:9.5px;letter-spacing:.3px;color:#8a8a8a}
-  .legend .sw{display:inline-block;width:8px;height:8px;background:var(--mine);border-radius:2px;margin-right:5px} }
+  .legend .sw{display:inline-block;width:8px;height:8px;background:var(--mine);border-radius:2px;margin-right:5px}
+  }
 </style>
 <script>
 /* ——— the stock is chosen before the sheet is drawn ———
@@ -2729,7 +2751,7 @@ function renderLesson(les,tasks,lg){
   rlang=lg||lang;
   /* two full lessons already are two languages — a second edition inside each
      of them would make four columns of nothing legible */
-  let h='<div class="lesson">'+esc(strip(les.header||""))+'</div>'+
+  let h='<div class="lesson">'+hidLink(esc(strip(les.header||"")))+'</div>'+
         '<div class="top"><div class="date" data-k="dt">'+esc(sabLine(les))+'</div></div>';
   h+='<h1 class="title" data-k="ti">'+esc(les.title||"")+'</h1>';
 
@@ -2751,7 +2773,7 @@ function renderLesson(les,tasks,lg){
     const st=strip(day.sectionTitle||"").trim();
     const mm=st.match(/^(\d+[.)]?)\s+(.*)$/);
     const secInner=mm?'<span class="n">'+esc(mm[1])+'</span><span class="ttl">'+esc(mm[2])+'</span>':'<span class="ttl">'+esc(st)+'</span>';
-    const band='<div class="sec" data-d="'+esc(day.date)+'"><div class="t" data-k="d'+di+'">'+secInner+'</div><div class="day">'+esc(tag)+'</div></div>';
+    const band='<div class="sec" data-d="'+esc(day.date)+'"><div class="t" data-k="d'+di+'">'+secInner+'</div><div class="day">'+hidLink(esc(tag))+'</div></div>';
     /* the day is built as a list of blocks first, so that its opening can be
        held together below */
     const subs=day.subsections||[], blocks=[];
@@ -2780,7 +2802,7 @@ function renderLesson(les,tasks,lg){
                over a Russian sheet does not say which Russian text it is. It wears the
                slanted tag the day wears in the section band — the sheet keeps one shape
                at two scales — and the first tag of a quire straddles its top edge. */
-            const head=ref?'<div class="vref'+cl+'"><span>'+esc(verShort(bibleOf(rlang)))+' · '+esc(ref)+'</span></div>':'';
+            const head=ref?'<div class="vref'+cl+'"><span>'+hidLink(esc(verShort(bibleOf(rlang)))+' · '+esc(ref))+'</span></div>':'';
             g+='<div class="vitem" data-os="'+esc(it.sOsis||"")+'">'+head+box+'</div>'; }
           blocks.push(g+'</div>'); }
       }
@@ -2818,7 +2840,6 @@ function renderLesson(les,tasks,lg){
     let ri=0;
     for(const rq of day.reviewQuestions||[]) if(rq) h+=markedHtml("review",typo(dropPageNo(strip(rq))),"d"+di+"r"+(ri++));
   }
-  h+=fsoHtml(les);
   return h+'<div class="legend"></div>';
 }
 /* ——— the first Sabbath's offering ———
@@ -2832,8 +2853,21 @@ function renderLesson(les,tasks,lg){
    six-day week. The writer signs it, as in the booklet. Its paragraphs take mark
    keys of their own (`f0`, `f1`, …) so the pencil works on them like anywhere
    else, and the keys cannot collide with a day's (`d0n1`) or a question's. */
+/* see `.hid` in the stylesheet: the sheet's own opening words carry the link */
+function hidLink(inner){ return '<a class="hid" href="https://sbl.sdarm.life">'+inner+'</a>'; }
 function fsoHtml(les){ return letterHtml(les&&les.fso,
-  {mark:"&#9829;",sub:true,key:"f",when:les&&les.dateLong}); }
+  {mark:"&#9829;",sub:true,key:"f",alone:true,when:les&&les.dateLong}); }
+/* ——— the letter stands on a sheet of its own ———
+   It was set as a leaf at the end of the lesson, and that is where the booklet
+   prints it — but the reader does not come to it that way. He comes to it from
+   the line that names it in the contents, and a line in a list of thirteen
+   promises a page, not a footnote to somebody else's. So it is a sheet: it opens
+   as a lesson opens, it is saved as a lesson is saved, and in the quarter it
+   stands where its line stands — before the lesson of that Sabbath.
+   The sheet keeps the lesson's own number as its name, so a mark laid on the
+   letter is filed where it always was, and the keys `f0`, `f1` … cannot meet a
+   day's now that the lesson no longer carries the letter at its foot. */
+function fsoSheet(les,lg){ return sheet(fsoHtml(les),les.date,lg); }
 /* The quarter opens with a foreword and three of its Sabbaths carry an offering, and the
    two are the same thing on the page: a title, a few paragraphs, a name at the end. One
    setting serves both — the offering wears the heart the lists give it and dates itself,
@@ -2862,9 +2896,9 @@ function letterHtml(f,o){
   }
   if(!title&&!paras.length&&!lead.length) return "";
   const k=o.key||"f";
-  let out='<section class="fso'+(o.sub?"":" fso-plain")+'">';
+  let out='<section class="fso'+((o.sub&&!o.alone)?"":" fso-plain")+'">';
   out+='<div class="fso-head">'+(o.mark?'<span class="fso-mark">'+o.mark+'</span>':"")
-    +'<span class="fso-kind">'+esc(title)+'</span>'
+    +'<span class="fso-kind">'+hidLink(esc(title))+'</span>'
     +(when?'<span class="fso-when">'+esc(when)+'</span>':'')+'</div>';
   if(sub) out+='<h2 class="fso-title" data-k="'+k+'t">'+esc(sub)+'</h2>';
   /* the strays keep keys of their own so that the numbering of the real
@@ -2918,10 +2952,40 @@ let scope="week";                        /* "week" | "quarter" */
    `mkKey` reads it from here, so the marks of the right-hand lesson file
    themselves under their own key without the pencil knowing two sheets exist. */
 function sheet(inner,id,lg){
-  return '<div class="page"'+(id?' data-les="'+id+'" data-lang="'+(lg||lang)+'"':'')+'>'+inner+'</div>'; }
+  return '<div class="page"'+(id?' data-les="'+id+'" data-lang="'+(lg||lang)+'"':'')+'>'
+    /* ——— and the same link down the whole sheet ———
+       The words that carry it — the tag, the date of a day, the label over a
+       passage — do not fall on every page: a page of nothing but commentary has
+       none of them. So the sheet also carries one tall, empty anchor standing in
+       its left margin, where no word is set. Chromium cuts an element that spans
+       pages into one annotation per page, so every page of the sheet answers,
+       and nothing on any of them moves or shows. */
+    +'<a class="strip" href="https://sbl.sdarm.life" aria-hidden="true" tabindex="-1"></a>'
+    +inner+'</div>'; }
 /* what the browser will call the saved file — set as the page is built */
 let docName="SBL Edition";
 function fileSafe(s){ return String(s||"").replace(/[\\/:*?"<>|]+/g," ").replace(/\s+/g," ").trim(); }
+/* ——— what the saved file is called ———
+   The name is read by a person looking down a folder, so it is set the way the
+   sheet itself is set: the parts stand apart, divided by the same middle dot the
+   foot of the page uses, and the date comes first so that a quarter of saved
+   lessons falls into its own order. Empty parts drop out rather than leaving a
+   divider with nothing on either side of it. */
+function fileName(parts){ return fileSafe(parts.filter(Boolean).join(" · ")); }
+/* ——— the shelf mark every saved file opens with ———
+   A reader who saves a quarter in three tongues ends with fifty files in one
+   folder, and a folder sorts them by their names, letter by letter. So the name
+   opens with what groups them and closes with what tells them apart: the
+   edition, the tongue, the quarter, then the number of the lesson, then its
+   title. The number is padded to two figures because a folder compares
+   characters and not quantities, and "10" stands before "2" everywhere else.
+   The quarter itself takes 00: it is the whole booklet, and it comes before its
+   own first lesson. */
+function fileMark(lg,ymd){
+  const y=String(ymd).slice(0,4), m=+String(ymd).slice(4,6);
+  return "SBL "+String(lg||lang).toUpperCase()+" "+y+"Q"+(Math.floor((m-1)/3)+1);
+}
+function fileNo(n){ return String(n||"").replace(/\D/g,"").padStart(2,"0"); }
 
 /* An A4 page holds about 1010 px of text. Keeping the opening of a day
    together is worth a page break; keeping half a page of commentary together
@@ -2965,6 +3029,46 @@ function relaxDayStarts(){
    keeps clear of it cannot be a constant: Hungarian's "13. Tanulmány" is wider than
    the printed English tag, and a tongue nobody has published yet may be wider still.
    Measured after every render, the date simply steps aside by as much as is needed. */
+/* ——— the line under the page that says where you are ———
+   A hundred and twenty pages of a quarter arrive with nothing on them to say
+   which lesson is being read. The head of the page cannot say it: Chromium does
+   not carry `string-set`, so the line cannot be taken from the sheet as it is
+   set, and `:first` — the one way to leave a page bare — means the first page of
+   the document and not the first page of a lesson, so the tag that opens every
+   lesson would have a running head sitting on top of it.
+   What Chromium does carry is named pages, which is the same thing said
+   backwards: one `@page` rule per sheet, written as the sheet is built, and
+   every page of that sheet wears it. So the line goes to the foot, beside the
+   address and the folio, and the head of the page stays clear everywhere.
+   A lesson gives its number and its title; the letter names itself. A long line
+   is set a size smaller rather than cut — the title of a lesson is not ours to
+   shorten. */
+function cssStr(t){ return '"'+String(t||"").replace(/[\\"]/g,"\\$&")+'"'; }
+/* the name of the sheet and nothing else: the number of the lesson is on the
+   sheet itself, in the tag that opens it, and the foot of a page is no place to
+   repeat it. The letter answers with the name the contents give it. */
+function pageText(pg){
+  const q=function(sel){ const el=pg.querySelector(sel); return el?strip(el.textContent):""; };
+  return pg.querySelector(".fso")?q(".fso-kind"):q(".title");
+}
+function pageFoot(){
+  let el=document.getElementById("pagefoot");
+  if(!el){ el=document.createElement("style"); el.id="pagefoot"; document.head.appendChild(el); }
+  let out="";
+  document.querySelectorAll("#sheets .page[data-les]").forEach(function(pg,i){
+    /* the letter and the lesson it belongs to answer to the same name — the
+       sheet is named here by its place on the page, which is its own */
+    const nm="sbl"+i;
+    pg.setAttribute("data-pg",nm);
+    const line=pageText(pg);
+    if(!line) return;
+    const size=line.length>72?"8px":(line.length>58?"8.5px":"9.5px");
+    out+='.page[data-pg="'+nm+'"]{page:'+nm+'}\n'
+      +'@media print{@page '+nm+'{ @bottom-center{ content:'+cssStr(line)
+      +'; font-family:"PT Sans",sans-serif; font-size:'+size+'; letter-spacing:.2px; color:#9a9a9a; } }}\n';
+  });
+  el.textContent=out;
+}
 function lessonSeat(){
   const t=document.querySelector(".page .lesson");
   document.documentElement.style.setProperty("--lesw",(t?Math.ceil(t.offsetWidth):210)+"px");
@@ -3022,16 +3126,27 @@ async function render(){
       const data=await loadQuarter(lg,current.getFullYear(),qOf(current));
       const lessons=(data&&data.lessons)||[];
       if(!lessons.length) return {html:sheet('<div class="msg">No lessons for this quarter.</div>'),title:"",name:""};
-      return {html:quarterFront(data,lessons,lg)+lessons.map(function(les){ return sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
+      return {html:quarterFront(data,lessons,lg)+lessons.map(function(les){
+          return (les.fso?fsoSheet(les,lg):"")+sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
         title:strip(data.title||""),
-        name:fileSafe("SBL "+current.getFullYear()+"-Q"+qOf(current)+" "+strip(data.title||""))};
+        name:fileName(["SBL "+String(lg||lang).toUpperCase()+" "+current.getFullYear()+"Q"+qOf(current),
+          "00",strip(data.title||"")])};
     }
     const les=await findLesson(current,lg);
     if(!les) return {html:sheet('<div class="msg">No lesson for this week.</div>'),title:"",name:""};
+    /* the letter was asked for by name and gets the sheet to itself */
+    if(fsoOpen&&les.fso&&String(les.date)===String(fsoOpen))
+      return {html:fsoSheet(les,lg),
+        title:strip(les.fso.title||""),
+        /* the letter stands on the Sabbath of its lesson and its name says so:
+           `01-0` keeps it beside the first lesson instead of at the end of the folder */
+        name:fileName([fileMark(lg,les.date),fileNo(les.no)+"-0",strip(les.fso.title||"")])};
     return {html:sheet(renderLesson(les,tasks,lg),les.date,lg),
       title:strip(les.header||""),
-      name:fileSafe("SBL "+String(les.date).replace(/^(\d{4})(\d{2})(\d{2})$/,"$1-$2-$3")
-        +" "+strip(les.header||"")+" "+strip(les.title||""))};
+      /* the number comes from `no`, not from the heading: the publisher writes the
+         heading in his own tongue, and Chinese spells the number out — 第十课 carries
+         no figure at all to sort by */
+      name:fileName([fileMark(lg,les.date),fileNo(les.no),strip(les.title||"")])};
   }
 
   const side=await sideHtml(lang);
@@ -3046,6 +3161,7 @@ async function render(){
   sheets.innerHTML=side.html;
 
   lessonSeat();
+  pageFoot();
   relaxDayStarts();
   mkRestore();
   mkDaysBuild(); mkOpenToday();
@@ -3056,7 +3172,6 @@ async function render(){
   vtasks=tasks;
   document.body.classList.toggle("noverses",!versesOn);
   if(versesOn && tasks.length) await fillVerses(my);
-  fsoReland();
   linkStamp(); linkLand();
 }
 
@@ -3191,8 +3306,8 @@ document.addEventListener("keydown",function(e){
   if(t&&(t.isContentEditable||F.test(t.tagName))) return;
   if(a&&(a.isContentEditable||F.test(a.tagName))) return;
   if(e.metaKey||e.ctrlKey||e.altKey) return;
-  if(e.key==="ArrowLeft"){ current=step(-1); render(); }
-  if(e.key==="ArrowRight"){ current=step(1); render(); }
+  if(e.key==="ArrowLeft"){ current=step(-1); fsoOpen=null; render(); }
+  if(e.key==="ArrowRight"){ current=step(1); fsoOpen=null; render(); }
 });
 /* the month, with every week carrying the lesson that ends on its Sabbath */
 const calpop=document.getElementById("calpop");
@@ -3240,8 +3355,8 @@ async function buildCal(){
     e.stopPropagation(); calMonth.setMonth(calMonth.getMonth()+ +n.dataset.m,1); buildCal(); }; });
   calpop.querySelectorAll("[data-d]").forEach(function(el){ el.onclick=function(e){
     e.stopPropagation(); calpop.hidden=true;
-    current=ymdToDate(el.dataset.d); render(); }; });
-  calpop.querySelector("[data-today]").onclick=function(){ calpop.hidden=true; current=new Date(); render(); };
+    current=ymdToDate(el.dataset.d); fsoOpen=null; render(); }; });
+  calpop.querySelector("[data-today]").onclick=function(){ calpop.hidden=true; current=new Date(); fsoOpen=null; render(); };
 }
 /* the same three-language table that put "UNDEFINED" on the date line stood
    here too: nineteen of the twenty-two read it and got nothing. There is no
@@ -5165,52 +5280,27 @@ let mkAnchors=[];
 let mkLastLes=null, mkKeepY=0;
 /* ——— the letter, asked for by name ———
    The contents give the offering a line of its own, under the heart, and a
-   press on that line means the letter — not the lesson it is bound into and
-   not today inside it. The Sabbath it stands on is left here by the press and
-   waits until the sheet is built; then it is the landing, and the reader opens
-   on the letter he pressed. */
-let fsoWant=null;
-/* ——— and it keeps the place while the passages come in ———
-   The landing is made as soon as the sheet has stopped growing, and that is
-   before the Bible has arrived: every passage box on the sheet is still empty,
-   and each of them grows when its passage is set. The letter is at the foot of
-   the lesson, so it is pushed down by all of them at once — the reader presses
-   the heart, sees the letter, and a second later is looking at Friday.
-   So the letter is landed on again once the passages are in. The reader who
-   has meanwhile taken the page somewhere himself is left where he put it —
-   the same three inputs that call off a jump call this off too. */
-let fsoLandEl=null;
-function fsoLandOff(){ fsoLandEl=null; }
-function fsoReland(){
-  const el=fsoLandEl; if(!el) return;
-  fsoLandEl=null;
-  if(!el.isConnected) return;                    /* another sheet is on the page */
-  mkAfterLayout(function(){ mkBarH(); mkLand(el); mkDaysMark(); });
-}
+   press on that line means the letter and not the lesson it shares its Sabbath
+   with: the two stand on the same date, so the date alone cannot say which was
+   pressed. This holds the Sabbath of the letter being read, and the sheet is
+   built from it. Every other way of moving through the quarter — the arrows,
+   the calendar, a lesson pressed in the contents, a link pasted in — puts it
+   down again, because all of them mean the lesson. */
+let fsoOpen=null;
 function mkOpenToday(){
   const root=mkDaysRoot();
   const pg=root.querySelector(".page[data-les]");
   const id=scope+"/"+(pg?pg.dataset.les:"");
   const same=mkLastLes===id;
   mkLastLes=id;
-  /* a quarter puts thirteen sheets on the page, three of them with a letter at
-     the end: the one wanted is the one on that sheet */
-  const letter=fsoWant?(root.querySelector('.page[data-les="'+fsoWant+'"] .fso')
-                        ||root.querySelector(".fso")):null;
-  fsoWant=null; fsoLandEl=null;
+
   /* `mkGoTo` takes both columns there, so today opens on today in each of them
      instead of leaving the second one standing at the title */
   const sec=!same&&scope==="week"&&pg?root.querySelector('.sec[data-d="'+ymd(new Date())+'"]'):null;
   /* wait for the sheet to finish laying itself out: a place measured while the
      text is still flowing puts the reader — and the mark — on the wrong day */
   mkAfterLayout(function(){
-    if(letter){
-      mkGoTo(letter,false);                       /* the letter was pressed, open on it */
-      fsoLandEl=letter;
-      ["touchstart","wheel","keydown"].forEach(function(ev){
-        window.addEventListener(ev,fsoLandOff,{passive:true,once:true}); });
-    }
-    else if(same) window.scrollTo(0,mkKeepY);     /* same lesson, other language — stay put */
+    if(same) window.scrollTo(0,mkKeepY);          /* same lesson, other language — stay put */
     else if(sec) mkGoTo(sec,false);
     else window.scrollTo(0,0);
     mkDaysMark(); requestAnimationFrame(mkDaysMark);   /* now, and again once the frame lands */
@@ -5667,12 +5757,15 @@ async function outBuild(){
   const here=ymd(current);
   let h="";
   les.forEach(function(l){
-    if(l.fso) h+='<div class="oitem gift" data-d="'+l.date+'" data-fso="1"><div class="ono">'+heart+'</div>'
+    /* the letter and its lesson keep the same Sabbath, so only one of the two
+       rows may be lit: whichever of them is on the sheet */
+    const letterOn=!!(fsoOpen&&String(fsoOpen)===String(l.date));
+    if(l.fso) h+='<div class="oitem gift'+(letterOn?" on":"")+'" data-d="'+l.date+'" data-fso="1"><div class="ono">'+heart+'</div>'
       +'<div><div class="otitle">'+esc(strip(l.fso.title||""))+'</div>'
       +'<div class="odate">'+esc(fsoWhen(l))+'</div></div></div>';
     /* the row lights up for the whole week it covers, not the Sabbath alone */
     const days=l.dailyLessons||[], start=days.length?days[0].date:l.date;
-    const on=(here>=start&&here<=l.date)?" on":"";
+    const on=(!letterOn&&here>=start&&here<=l.date)?" on":"";
     h+='<div class="oitem'+on+'" data-d="'+l.date+'"><div class="ono">'+esc(l.no)+'</div>'
       +'<div><div class="otitle">'+esc(strip(l.title||""))+'</div>'
       +'<div class="odate">'+esc(strip(l.dateLong||""))+'</div></div></div>';
@@ -5682,7 +5775,7 @@ async function outBuild(){
     current=ymdToDate(el.dataset.d); outQ=null;      /* follow the lesson home */
     /* the heart and the lesson under it stand on the same Sabbath, so the date
        alone cannot say which of the two was pressed: the row says so itself */
-    fsoWant=el.dataset.fso?el.dataset.d:null;
+    fsoOpen=el.dataset.fso?el.dataset.d:null;
     if(!matchMedia("(min-width:1561px)").matches) outSet(false);
     render(); }; });
   const cur=list.querySelector(".oitem.on"); if(cur) cur.scrollIntoView({block:"nearest"});
@@ -5981,7 +6074,7 @@ addEventListener("hashchange",function(){
   const w=linkRead(); if(!w) return;
   linkWant=w;
   if(w.lang!==lang){ lang=w.lang; try{ localStorage.setItem("sbl.lang",lang); }catch(e){} paintUI(); buildSeg(); }
-  current=w.at;
+  current=w.at; fsoOpen=null;
   render();
 });
 
