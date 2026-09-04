@@ -3126,16 +3126,27 @@ async function render(){
       const data=await loadQuarter(lg,current.getFullYear(),qOf(current));
       const lessons=(data&&data.lessons)||[];
       if(!lessons.length) return {html:sheet('<div class="msg">No lessons for this quarter.</div>'),title:"",name:""};
-      return {html:quarterFront(data,lessons,lg)+lessons.map(function(les){ return sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
+      return {html:quarterFront(data,lessons,lg)+lessons.map(function(les){
+          return (les.fso?fsoSheet(les,lg):"")+sheet(renderLesson(les,tasks,lg),les.date,lg); }).join(""),
         title:strip(data.title||""),
-        name:fileSafe("SBL "+current.getFullYear()+"-Q"+qOf(current)+" "+strip(data.title||""))};
+        name:fileName(["SBL "+String(lg||lang).toUpperCase()+" "+current.getFullYear()+"Q"+qOf(current),
+          "00",strip(data.title||"")])};
     }
     const les=await findLesson(current,lg);
     if(!les) return {html:sheet('<div class="msg">No lesson for this week.</div>'),title:"",name:""};
+    /* the letter was asked for by name and gets the sheet to itself */
+    if(fsoOpen&&les.fso&&String(les.date)===String(fsoOpen))
+      return {html:fsoSheet(les,lg),
+        title:strip(les.fso.title||""),
+        /* the letter stands on the Sabbath of its lesson and its name says so:
+           `01-0` keeps it beside the first lesson instead of at the end of the folder */
+        name:fileName([fileMark(lg,les.date),fileNo(les.no)+"-0",strip(les.fso.title||"")])};
     return {html:sheet(renderLesson(les,tasks,lg),les.date,lg),
       title:strip(les.header||""),
-      name:fileSafe("SBL "+String(les.date).replace(/^(\d{4})(\d{2})(\d{2})$/,"$1-$2-$3")
-        +" "+strip(les.header||"")+" "+strip(les.title||""))};
+      /* the number comes from `no`, not from the heading: the publisher writes the
+         heading in his own tongue, and Chinese spells the number out — 第十课 carries
+         no figure at all to sort by */
+      name:fileName([fileMark(lg,les.date),fileNo(les.no),strip(les.title||"")])};
   }
 
   const side=await sideHtml(lang);
