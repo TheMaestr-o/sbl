@@ -1933,8 +1933,16 @@ html.dark .mtoast b:hover{color:#fff}
     /* the margin boxes sit in the page MARGIN, which is 5 mm now; the text column
        starts 7 mm further in, so the folio and the address take that 7 mm as padding
        and stand flush with the blocks above them instead of hanging outside */
-    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.2px; color:#6f6f6f; padding-left:7mm; }
-    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.4px; color:#6f6f6f; padding-right:7mm; }
+    /* ——— the address stays drawn, not linked ———
+       A margin box is text and nothing else: it cannot carry an anchor, so the
+       printed address cannot be pressed. The way round it — a real element fixed
+       to the foot of the page — was tried and taken out again: a fixed element
+       keeps no room of its own in the flow, so it printed on top of the last
+       line of the lesson on every page, and Chromium dropped it altogether on
+       the page after the opening one, whose page box is a different size. A
+       footer that overprints the text is worse than a footer nobody can press. */
+    @bottom-left{ content:"sbl.sdarm.life"; font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.2px; color:#9a9a9a; padding-left:7mm; }
+    @bottom-right{ content:counter(page) "  /  " counter(pages); font-family:"PT Sans",sans-serif; font-size:9.5px; letter-spacing:.4px; color:#9a9a9a; padding-right:7mm; }
   }
   .bar,footer{display:none} body{background:#fff}
   #sheets{padding-left:0;padding-bottom:0}   /* the gutters are a screen affair */
@@ -3021,6 +3029,46 @@ function relaxDayStarts(){
    keeps clear of it cannot be a constant: Hungarian's "13. Tanulmány" is wider than
    the printed English tag, and a tongue nobody has published yet may be wider still.
    Measured after every render, the date simply steps aside by as much as is needed. */
+/* ——— the line under the page that says where you are ———
+   A hundred and twenty pages of a quarter arrive with nothing on them to say
+   which lesson is being read. The head of the page cannot say it: Chromium does
+   not carry `string-set`, so the line cannot be taken from the sheet as it is
+   set, and `:first` — the one way to leave a page bare — means the first page of
+   the document and not the first page of a lesson, so the tag that opens every
+   lesson would have a running head sitting on top of it.
+   What Chromium does carry is named pages, which is the same thing said
+   backwards: one `@page` rule per sheet, written as the sheet is built, and
+   every page of that sheet wears it. So the line goes to the foot, beside the
+   address and the folio, and the head of the page stays clear everywhere.
+   A lesson gives its number and its title; the letter names itself. A long line
+   is set a size smaller rather than cut — the title of a lesson is not ours to
+   shorten. */
+function cssStr(t){ return '"'+String(t||"").replace(/[\\"]/g,"\\$&")+'"'; }
+/* the name of the sheet and nothing else: the number of the lesson is on the
+   sheet itself, in the tag that opens it, and the foot of a page is no place to
+   repeat it. The letter answers with the name the contents give it. */
+function pageText(pg){
+  const q=function(sel){ const el=pg.querySelector(sel); return el?strip(el.textContent):""; };
+  return pg.querySelector(".fso")?q(".fso-kind"):q(".title");
+}
+function pageFoot(){
+  let el=document.getElementById("pagefoot");
+  if(!el){ el=document.createElement("style"); el.id="pagefoot"; document.head.appendChild(el); }
+  let out="";
+  document.querySelectorAll("#sheets .page[data-les]").forEach(function(pg,i){
+    /* the letter and the lesson it belongs to answer to the same name — the
+       sheet is named here by its place on the page, which is its own */
+    const nm="sbl"+i;
+    pg.setAttribute("data-pg",nm);
+    const line=pageText(pg);
+    if(!line) return;
+    const size=line.length>72?"8px":(line.length>58?"8.5px":"9.5px");
+    out+='.page[data-pg="'+nm+'"]{page:'+nm+'}\n'
+      +'@media print{@page '+nm+'{ @bottom-center{ content:'+cssStr(line)
+      +'; font-family:"PT Sans",sans-serif; font-size:'+size+'; letter-spacing:.2px; color:#9a9a9a; } }}\n';
+  });
+  el.textContent=out;
+}
 function lessonSeat(){
   const t=document.querySelector(".page .lesson");
   document.documentElement.style.setProperty("--lesw",(t?Math.ceil(t.offsetWidth):210)+"px");
@@ -3102,6 +3150,7 @@ async function render(){
   sheets.innerHTML=side.html;
 
   lessonSeat();
+  pageFoot();
   relaxDayStarts();
   mkRestore();
   mkDaysBuild(); mkOpenToday();
@@ -3112,7 +3161,6 @@ async function render(){
   vtasks=tasks;
   document.body.classList.toggle("noverses",!versesOn);
   if(versesOn && tasks.length) await fillVerses(my);
-  fsoReland();
   linkStamp(); linkLand();
 }
 
