@@ -1,5 +1,5 @@
 /* SBL Edition 2.1 — cache once, then instant (and offline). */
-const SHELL = "sbl-shell-v7";
+const SHELL = "sbl-shell-v8";
 const DATA  = "sbl-data-v1";
 /* The faces are shell, not data: without them the sheet is set in a fallback
    face offline and the PDF breaks its pages somewhere else. */

@@ -1144,6 +1144,10 @@ mark.wave{background-size:auto .42em;background-repeat:repeat-x}
    meets it again here. The letter itself is set in the serif of the commentary — it
    is read, not studied — and the writer signs at the foot, as the booklet prints it. */
 .fso{margin:52px 0 0;padding-top:26px;border-top:1px solid var(--hair)}
+/* the foreword has no date and no second title: it is the quarter speaking, and on the
+   title page it sits between the rule and the list rather than closing a lesson */
+.fso-plain{margin:30px 0 34px;padding-top:0;border-top:none}
+.fso-plain .fso-head{margin-bottom:12px}
 .fso-head{display:flex;align-items:baseline;gap:9px;margin-bottom:14px}
 .fso-mark{color:var(--gray-dk);font-size:15px;line-height:1}
 .fso-kind{font-weight:700;font-size:11.5px;letter-spacing:.2em;text-transform:uppercase;color:var(--gray-dk)}
@@ -2828,23 +2832,56 @@ function renderLesson(les,tasks,lg){
    six-day week. The writer signs it, as in the booklet. Its paragraphs take mark
    keys of their own (`f0`, `f1`, …) so the pencil works on them like anywhere
    else, and the keys cannot collide with a day's (`d0n1`) or a question's. */
-function fsoHtml(les){
-  const f=les&&les.fso; if(!f) return "";
-  const title=strip(f.title||""), sub=strip(f.subtitle||"");
-  const when=strip(f.displayDate||f.dateLong||"");
+function fsoHtml(les){ return letterHtml(les&&les.fso,
+  {mark:"&#9829;",sub:true,key:"f",when:les&&les.dateLong}); }
+/* The quarter opens with a foreword and three of its Sabbaths carry an offering, and the
+   two are the same thing on the page: a title, a few paragraphs, a name at the end. One
+   setting serves both — the offering wears the heart the lists give it and dates itself,
+   the foreword needs neither. */
+function letterHtml(f,o){
+  if(!f) return "";
+  o=o||{};
+  const title=strip(f.title||"");
   const who=strip(f.writer||"");
-  const paras=(f.paragraph||[]).map(x=>strip((x&&x.text)||"")).filter(Boolean);
-  if(!title&&!paras.length) return "";
-  let o='<section class="fso">';
-  o+='<div class="fso-head"><span class="fso-mark">&#9829;</span>'
+  let paras=(f.paragraph||[]).map(x=>strip((x&&x.text)||"")).filter(Boolean);
+  /* One quarter came from the publisher with its fields shifted: the Portuguese
+     offering carries a whole paragraph where the date belongs and a second one
+     where the heading belongs, and the same block set in German has exactly
+     those two paragraphs in their proper place. A date is a short line and a
+     heading is a short line — measured across all twenty-two editions no real
+     one comes near these lengths — so anything this long is prose that landed
+     in the wrong field. It is not thrown away and it is not set as a heading:
+     it opens the block as the paragraph it is, and the date falls back to the
+     one the lesson itself carries, which is right in every language. */
+  let sub="", when="", lead=[];
+  if(o.sub){
+    const s1=strip(f.subtitle||""), d1=strip(f.displayDate||"");
+    if(d1.length>60) lead.push(["d",d1]); else when=d1;
+    if(s1.length>120) lead.push(["s",s1]); else sub=s1;
+    if(!when) when=strip(o.when||"");
+  }
+  if(!title&&!paras.length&&!lead.length) return "";
+  const k=o.key||"f";
+  let out='<section class="fso'+(o.sub?"":" fso-plain")+'">';
+  out+='<div class="fso-head">'+(o.mark?'<span class="fso-mark">'+o.mark+'</span>':"")
     +'<span class="fso-kind">'+esc(title)+'</span>'
     +(when?'<span class="fso-when">'+esc(when)+'</span>':'')+'</div>';
-  if(sub) o+='<h2 class="fso-title" data-k="ft">'+esc(sub)+'</h2>';
+  if(sub) out+='<h2 class="fso-title" data-k="'+k+'t">'+esc(sub)+'</h2>';
+  /* the strays keep keys of their own so that the numbering of the real
+     paragraphs — and any mark a reader has already left on one — does not move */
+  lead.forEach(function(x){
+    out+='<div class="fso-p" data-k="'+k+x[0]+'">'+mkGlue(keepEm(esc(typo(x[1]))))+'</div>'; });
   paras.forEach(function(t,i){
-    o+='<div class="fso-p" data-k="f'+i+'">'+mkGlue(keepEm(esc(typo(t))))+'</div>'; });
-  if(who) o+='<div class="fso-sign">'+esc(who)+'</div>';
-  return o+'</section>';
+    out+='<div class="fso-p" data-k="'+k+i+'">'+mkGlue(keepEm(esc(typo(t))))+'</div>'; });
+  if(who) out+='<div class="fso-sign">'+esc(who)+'</div>';
+  return out+'</section>';
 }
+/* The two lists that name the letter date it by the same measure the letter is
+   set by: a line this long is not a date but a paragraph that landed in the
+   wrong field, and the lesson's own line — right in every language — stands in
+   its place. See `letterHtml`. */
+function fsoWhen(l){ const d=strip(((l&&l.fso)||{}).displayDate||"");
+  return d&&d.length<=60?d:strip((l&&l.dateLong)||""); }
 /* the publisher italicises a title inside the running text — a magazine, a book.
    Everything else is escaped; only that one pair is let back through. */
 function keepEm(t){ return t.replace(/&lt;(\/?)em&gt;/g,"<$1em>"); }
@@ -2962,7 +2999,7 @@ async function render(){
     lessons.forEach(function(l){
       if(l.fso) rows+='<div class="qrow gift"><span class="qno">♥</span>'
         +'<span class="qt">'+esc(strip(l.fso.title||""))+'</span>'
-        +'<span class="qd">'+esc(strip(l.fso.dateLong||l.dateLong||""))+'</span></div>';
+        +'<span class="qd">'+esc(fsoWhen(l))+'</span></div>';
       rows+='<div class="qrow"><span class="qno">'+esc(l.no)+'</span>'
         +'<span class="qt">'+esc(strip(l.title||""))+'</span>'
         +'<span class="qd">'+esc(strip(l.dateLong||""))+'</span></div>';
@@ -2971,6 +3008,10 @@ async function render(){
       +'<div class="qsub">'+esc(strip(data.publicationDateLong||""))+'</div>'
       +'<h1 class="qtitle">'+esc(strip(data.title||""))+'</h1>'
       +'<div class="qrule"></div>'
+      /* the publisher opens the quarter with a word about it before he lists what is
+         in it, and so does the printed booklet — the list is what you turn to, the
+         foreword is what you meet */
+      +letterHtml(data.foreward,{key:"fw"})
       +'<div class="qcap">'+esc(T("contents"))+'</div>'
       +'<div class="qlist">'+rows+'</div></div>';
     rlang=was;
@@ -3015,6 +3056,7 @@ async function render(){
   vtasks=tasks;
   document.body.classList.toggle("noverses",!versesOn);
   if(versesOn && tasks.length) await fillVerses(my);
+  fsoReland();
   linkStamp(); linkLand();
 }
 
@@ -5121,19 +5163,54 @@ let mkAnchors=[];
    Changing the language or turning the verses on is not opening a lesson, and
    leaves the reader where he was. */
 let mkLastLes=null, mkKeepY=0;
+/* ——— the letter, asked for by name ———
+   The contents give the offering a line of its own, under the heart, and a
+   press on that line means the letter — not the lesson it is bound into and
+   not today inside it. The Sabbath it stands on is left here by the press and
+   waits until the sheet is built; then it is the landing, and the reader opens
+   on the letter he pressed. */
+let fsoWant=null;
+/* ——— and it keeps the place while the passages come in ———
+   The landing is made as soon as the sheet has stopped growing, and that is
+   before the Bible has arrived: every passage box on the sheet is still empty,
+   and each of them grows when its passage is set. The letter is at the foot of
+   the lesson, so it is pushed down by all of them at once — the reader presses
+   the heart, sees the letter, and a second later is looking at Friday.
+   So the letter is landed on again once the passages are in. The reader who
+   has meanwhile taken the page somewhere himself is left where he put it —
+   the same three inputs that call off a jump call this off too. */
+let fsoLandEl=null;
+function fsoLandOff(){ fsoLandEl=null; }
+function fsoReland(){
+  const el=fsoLandEl; if(!el) return;
+  fsoLandEl=null;
+  if(!el.isConnected) return;                    /* another sheet is on the page */
+  mkAfterLayout(function(){ mkBarH(); mkLand(el); mkDaysMark(); });
+}
 function mkOpenToday(){
   const root=mkDaysRoot();
   const pg=root.querySelector(".page[data-les]");
   const id=scope+"/"+(pg?pg.dataset.les:"");
   const same=mkLastLes===id;
   mkLastLes=id;
+  /* a quarter puts thirteen sheets on the page, three of them with a letter at
+     the end: the one wanted is the one on that sheet */
+  const letter=fsoWant?(root.querySelector('.page[data-les="'+fsoWant+'"] .fso')
+                        ||root.querySelector(".fso")):null;
+  fsoWant=null; fsoLandEl=null;
   /* `mkGoTo` takes both columns there, so today opens on today in each of them
      instead of leaving the second one standing at the title */
   const sec=!same&&scope==="week"&&pg?root.querySelector('.sec[data-d="'+ymd(new Date())+'"]'):null;
   /* wait for the sheet to finish laying itself out: a place measured while the
      text is still flowing puts the reader — and the mark — on the wrong day */
   mkAfterLayout(function(){
-    if(same) window.scrollTo(0,mkKeepY);          /* same lesson, other language — stay put */
+    if(letter){
+      mkGoTo(letter,false);                       /* the letter was pressed, open on it */
+      fsoLandEl=letter;
+      ["touchstart","wheel","keydown"].forEach(function(ev){
+        window.addEventListener(ev,fsoLandOff,{passive:true,once:true}); });
+    }
+    else if(same) window.scrollTo(0,mkKeepY);     /* same lesson, other language — stay put */
     else if(sec) mkGoTo(sec,false);
     else window.scrollTo(0,0);
     mkDaysMark(); requestAnimationFrame(mkDaysMark);   /* now, and again once the frame lands */
@@ -5590,9 +5667,9 @@ async function outBuild(){
   const here=ymd(current);
   let h="";
   les.forEach(function(l){
-    if(l.fso) h+='<div class="oitem gift" data-d="'+l.date+'"><div class="ono">'+heart+'</div>'
+    if(l.fso) h+='<div class="oitem gift" data-d="'+l.date+'" data-fso="1"><div class="ono">'+heart+'</div>'
       +'<div><div class="otitle">'+esc(strip(l.fso.title||""))+'</div>'
-      +'<div class="odate">'+esc(strip(l.fso.dateLong||l.dateLong||""))+'</div></div></div>';
+      +'<div class="odate">'+esc(fsoWhen(l))+'</div></div></div>';
     /* the row lights up for the whole week it covers, not the Sabbath alone */
     const days=l.dailyLessons||[], start=days.length?days[0].date:l.date;
     const on=(here>=start&&here<=l.date)?" on":"";
@@ -5603,6 +5680,9 @@ async function outBuild(){
   list.innerHTML=h;
   list.querySelectorAll("[data-d]").forEach(function(el){ el.onclick=function(){
     current=ymdToDate(el.dataset.d); outQ=null;      /* follow the lesson home */
+    /* the heart and the lesson under it stand on the same Sabbath, so the date
+       alone cannot say which of the two was pressed: the row says so itself */
+    fsoWant=el.dataset.fso?el.dataset.d:null;
     if(!matchMedia("(min-width:1561px)").matches) outSet(false);
     render(); }; });
   const cur=list.querySelector(".oitem.on"); if(cur) cur.scrollIntoView({block:"nearest"});
