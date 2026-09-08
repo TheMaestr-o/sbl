@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>First Sabbath Offering</title>
+    <style>
+        body {
+            background-color: #f0f0f0;
+            display: flex;
+            justify-content: center;
+            font-family: Arial, Helvetica, system-ui, sans-serif;
+            margin: 0;
+            padding: 40px 20px;
+        }
+
+        .document {
+            width: 800px;
+            max-width: 100%;
+            background-color: white;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            position: relative;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+        }
+
+        .header-text {
+            padding: 50px 40px 20px 40px;
+        }
+
+        .header-text h1 {
+            font-size: 32px;
+            margin: 0;
+            font-weight: bold;
+        }
+
+        .header-text h2 {
+            font-size: 20px;
+            margin: 5px 0 0;
+            font-weight: bold;
+        }
+
+        .header-image {
+            width: 280px;
+            height: 180px;
+            background-color: #555;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #d1d3d4;
+            font-size: 14px;
+        }
+
+        .separator {
+            background-color: #d1d3d4;
+            height: 50px;
+            width: 100%;
+            margin-top: -20px;
+            /* the slope falls to the right: high at the left edge, low at the right */
+            clip-path: polygon(0 0, 100% 20px, 100% 45px, 0 25px);
+        }
+
+        .content {
+            padding: 30px 40px;
+        }
+
+        .content h3 {
+            font-size: 22px;
+            margin-top: 0;
+            margin-bottom: 20px;
+        }
+
+        .content p {
+            text-align: justify;
+            line-height: 1.5;
+            font-size: 16px;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+
+        .signature {
+            text-align: right !important;
+            font-style: italic;
+            margin-top: 30px !important;
+            margin-bottom: 0 !important;
+        }
+
+        .footer {
+            display: flex;
+            justify-content: space-between;
+            padding: 20px 40px 40px 40px;
+            font-size: 14px;
+        }
+
+        .footer .left {
+            font-weight: bold;
+        }
+
+        .footer .right {
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="document">
+        <div class="header">
+            <div class="header-text">
+                <h1>First Sabbath Offering</h1>
+                <h2>Sabbath, January 2, 2027</h2>
+            </div>
+            <div class="header-image">
+                [Church Image Placeholder]
+            </div>
+        </div>
+        
+        <div class="separator"></div>
+
+        <div class="content">
+            <h3>For the Church in Charlotte (Concord), North Carolina</h3>
+            
+            <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.</p>
+            
+            <p>Curabitur pretium tincidunt lacus. Nulla gravida orci a odio. Nullam varius, turpis et commodo pharetra, est eros bibendum elit, nec luctus magna felis sollicitudin mauris. Integer in mauris eu nibh euismod gravida. Duis ac tellus et risus vulputate vehicula. Donec lobortis risus a elit. Etiam tempor. Ut ullamcorper, ligula eu tempor congue, eros est euismod turpis, id tincidunt sapien risus a quam. Maecenas fermentum consequat mi. Donec fermentum. Pellentesque malesuada nulla a mi. Duis sapien sem, aliquet nec, commodo eget, consequat quis, neque.</p>
+            
+            <p>Aliquam faucibus, elit ut dictum aliquet, felis nisl adipiscing sapien, sed malesuada diam lacus eget erat. Cras mollis scelerisque nunc. Nullam arcu. Aliquam consequat. Curabitur augue lorem, dapibus quis, laoreet et, pretium ac, nisi. Aenean magna nisl, mollis quis, molestie eu, feugiat in, nisi. Aenean bibendum elit vitae pede. Morbi velit. Nulla pulvinar id est et tempor. Nam luctus sit amet felis dignissim aliquet. Praesent id tempor nulla, eu semper odio.</p>
+            
+            <p>Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Nullam at nulla felis. Phasellus eu ante tincidunt, egestas sem eget, rutrum lorem. In congue tempor ex, ac cursus massa posuere eget. Morbi aliquam fermentum dui, nec facilisis orci blandit non. Proin efficitur nisi non ipsum gravida sagittis. Integer sollicitudin turpis non dolor varius, id pharetra tellus consequat.</p>
+            
+            <p>Mauris id enim id purus ornare tincidunt. Aenean vel consequat risus. Proin viverra nisi at nisl imperdiet auctor. Pellentesque habitant morbi tristique senectus et netus et malesuada fames ac turpis egestas. Suspendisse potenti. Nunc euismod, nisi a scelerisque luctus, enim libero hendrerit nisi, at varius tortor odio non neque. Cras id mi nec quam interdum tincidunt sed at risus. Vivamus ut lorem in dolor sodales gravida ac id urna.</p>
+            
+            <p class="signature">Your brethren from the Charlotte Church</p>
+        </div>
+
+        <div class="footer">
+            <div class="left">4</div>
+            <div class="right">Sabbath Bible Lessons, January–March 2027</div>
+        </div>
+    </div>
+</body>
+</html>
