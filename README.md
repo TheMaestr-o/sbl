@@ -24,7 +24,7 @@
 
 <br><br>
 
-### [**▶&nbsp; Open the live page**](https://themaestr-o.github.io/sbl/)
+<a href="https://themaestr-o.github.io/sbl/"><img height="52" alt="Open the live page" src="https://img.shields.io/badge/%E2%96%B6-Open%20the%20live%20page-2b2b2b?style=for-the-badge&labelColor=c6a15b"></a>
 
 </div>
 
@@ -48,7 +48,7 @@ One language at a time — the booklet is published in **twenty-two**, and the p
 
 Press **Verses** to print the full Bible text under every reference, then **≡** to choose how it is set:
 
-<div align="center"><img src="screenshots/verse-layouts.png" alt="The same passage as running text and as one verse per line"></div>
+<div align="center"><img src="screenshots/verse-layouts.png" alt="Psalm 19:1-6 set twice: above as running text with small raised numbers, below with each verse on its own line and its number hanging in the margin"></div>
 
 | | |
 |---|---|
@@ -89,7 +89,7 @@ Keys do the same without reaching for the rail: **1 – 4** the strokes, **N** a
 
 ## It all prints
 
-<div align="center"><img src="screenshots/pencil-pdf.png" width="620" alt="The same lesson saved as PDF: the highlighter, the hand-drawn line and the reader's own note all printed"></div>
+<div align="center"><img src="screenshots/pencil-pdf.png" width="620" alt="The first page of the saved PDF: the yellow highlighter on the memory verse, a blue stroke over the quotation, a red line under the suggested reading and the reader's own note, all printed"></div>
 
 The ink is the background of the line itself, not an overlay pinned to the screen — so it flows with the text, breaks across pages with it, and arrives in the PDF exactly as it looked. At the foot of the sheet a line states that the blue is the reader's own and not part of the lesson.
 
@@ -124,7 +124,7 @@ Where the pointer is a finger the tools grow to match, and the rail lies down al
 
 ## Twenty-two languages
 
-<div align="center"><img src="screenshots/languages.png" alt="The same lesson set in German, English and Russian"></div>
+<div align="center"><img src="screenshots/languages.png" alt="The same week set in German, English and Russian, side by side: the title, the memory verse, the quotation, the first section band and its passages in each"></div>
 
 The booklet is read from Bulgarian to Zulu, and the picker names each language in its own words. Where a language has a Bible edition of its own the verses come in it — **Luther 1912**, **King James**, the **Синодальный перевод**, Reina-Valera, Almeida, Bible kralická, Louis Segond, Cornilescu; where it has none the reader says once, in ⚙, which edition he would rather read the passages in. Quotes from the Spirit of Prophecy carry their source, book title in italics, in whichever language the lesson is set.
 
@@ -142,7 +142,10 @@ Five presets — grey, the quarterly's cover navy, wine, forest, gold — or any
 
 ## The controls
 
-<div align="center"><img src="screenshots/settings.png" width="330" alt="The settings panel: language, verse layout, Bible edition, type size, repetition, second translation and marking; then appearance — theme, colour, paper; then the PDF group — period, with marks, with notes; then the version and the shortcuts; and the row that erases this lesson"></div> <img src="screenshots/settings-dark.png" width="330" alt="The same panel on the dark sheet">
+<div align="center">
+<img src="screenshots/settings.png" width="326" alt="The settings panel: language, verse layout, Bible edition, type size, repetition, second translation and marking; then appearance — theme, colour, paper; then the PDF group — period, with marks, with notes; then the version and the shortcuts; and the row that erases this lesson">
+<img src="screenshots/settings-dark.png" width="326" alt="The same panel on the dark sheet">
+</div>
 
 <br>
 
