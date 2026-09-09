@@ -20,7 +20,7 @@
 
 <br>
 
-<img src="screenshots/cover.png" alt="SBL Edition — the weekly Sabbath Bible Lesson of the Seventh Day Adventist Reform Movement in the original printed booklet layout, in German, English and Russian, ready to save as PDF">
+<img src="screenshots/cover.png" alt="SBL Edition on three screens: the English lesson on a laptop in the printed booklet layout, the German lesson marked up on a tablet, and the Russian settings panel on a phone in the dark theme">
 
 <br><br>
 
@@ -61,7 +61,9 @@ The reference above the passage, the verse number and the first word of the ques
 
 ## A hand on the sheet
 
-<div align="center"><img src="screenshots/pencil.png" alt="A lesson with the memory verse under a yellow highlighter, a hand-drawn red line under the question, a blue stroke over the commentary, the reader's own note and an insertion in the line — and the tool rail standing to the left of the sheet"></div>
+<div align="center"><img src="screenshots/pencil.png" alt="A lesson with the memory verse under a yellow highlighter, a red line drawn under the question, a blue stroke over the quotation and the reader's own note beneath it — and the tool rail standing to the left of the sheet"></div>
+
+<div align="center"><img src="screenshots/pencil-dark.png" alt="The same marked-up lesson on the dark sheet: the same yellow, red and blue, and the same note, cut for dark stock"></div>
 
 The lesson opens as a lesson: the text selects and copies like anywhere else. Turn **Marker and notes** on in ⚙ and a rail comes out beside the sheet — from then on it works the way a desk does: **take a tool, mark away, put it back.** Nothing pops up to be found and nothing closes after a click, so a whole lesson can be gone through phrase by phrase.
 
@@ -130,7 +132,9 @@ The booklet is read from Bulgarian to Zulu, and the picker names each language i
 
 ## Colour the bands
 
-<div align="center"><img src="screenshots/colours.png" width="700" alt="The colour popover and one section band in five themes"></div>
+<div align="center"><img src="screenshots/colours.png" width="620" alt="The Aussehen group of the settings: the three themes as pills with a sun, a moon and a half circle; the row of six colours with the chosen one ringed in itself and the colour wheel last; the three papers as pills"></div>
+
+<div align="center"><img src="screenshots/colours-dark.png" width="620" alt="The same group on the dark sheet: the card, the pills and the six colours all cut for dark stock"></div>
 
 Five presets — grey, the quarterly's cover navy, wine, forest, gold — or any colour of your own from the wheel. The tint carries through the bands, the day tags, the verse rules and the colophon, and it is remembered.
 
@@ -138,7 +142,7 @@ Five presets — grey, the quarterly's cover navy, wine, forest, gold — or any
 
 ## The controls
 
-<div align="center"><img src="screenshots/settings.png" width="330" alt="The settings panel: language, verses, Bible edition, type size, theme, colour, paper, marking and the two PDF buttons"></div>
+<div align="center"><img src="screenshots/settings.png" width="330" alt="The settings panel: language, verse layout, Bible edition, type size, repetition, second translation and marking; then appearance — theme, colour, paper; then the PDF group — period, with marks, with notes; then the version and the shortcuts; and the row that erases this lesson"></div> <img src="screenshots/settings-dark.png" width="330" alt="The same panel on the dark sheet">
 
 <br>
 
