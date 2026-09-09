@@ -24,3 +24,6 @@ __pycache__/
 # записи живут на своём сервере, не в коде — см. AUD_BASE в index.html
 audio/
 *.mp3
+
+# личные настройки Claude Code для этой машины — не для репозитория
+.claude/settings.local.json
